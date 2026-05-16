@@ -2027,3 +2027,104 @@ footer {
         grid-template-columns: 1fr;
     }
 }
+
+/* ===============================
+   SELLER PANEL
+================================ */
+
+.vendedor-page .admin-shell {
+    grid-template-columns: 230px minmax(0, 1fr);
+}
+
+.vendedor-panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 22px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #eadfd7;
+}
+
+.vendedor-panel-header span,
+.venta-resumen span {
+    display: block;
+    margin-bottom: 8px;
+    color: #954053;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.vendedor-panel-header h2 {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.vendedor-panel-header p {
+    max-width: 360px;
+    color: #544245;
+}
+
+.venta-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 310px;
+    gap: 22px;
+    align-items: start;
+}
+
+.venta-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.venta-form .campo:first-child,
+.venta-form button,
+.venta-form .mensaje-compra {
+    grid-column: 1 / -1;
+}
+
+.venta-resumen {
+    min-height: 250px;
+    padding: 24px;
+    border: 1px solid #d9c1c3;
+    background: #fff1ea;
+}
+
+.venta-resumen h3 {
+    margin-bottom: 12px;
+    color: #211a15;
+    font-size: 24px;
+}
+
+.venta-resumen p {
+    margin: 8px 0;
+    color: #544245;
+}
+
+.venta-resumen strong {
+    display: block;
+    margin-top: 26px;
+    color: #954053;
+    font-family: "Libre Caslon Text", Georgia, serif;
+    font-size: 40px;
+    font-weight: 400;
+}
+
+@media (max-width: 900px) {
+    .venta-layout,
+    .venta-form {
+        grid-template-columns: 1fr;
+    }
+
+    .vendedor-panel-header {
+        display: block;
+    }
+
+    .vendedor-panel-header p {
+        max-width: none;
+    }
+}

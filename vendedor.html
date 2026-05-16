@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendedor - Isa Boutique</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="admin-page vendedor-page" data-panel="vendedor">
+
+    <div id="loginBox">
+        <div class="login-content">
+            <h2>Panel Vendedor</h2>
+
+            <input type="email" id="correo" placeholder="Correo">
+            <input type="password" id="clave" placeholder="Contrasena">
+
+            <button id="btnEntrar">Ingresar</button>
+
+            <p id="mensaje"></p>
+        </div>
+    </div>
+
+    <div id="contenido" style="display: none;">
+        <header class="admin-topbar">
+            <div>
+                <a class="admin-brand" href="vendedor.html">Isa Boutique</a>
+                <p>Panel de ventas</p>
+            </div>
+
+            <div class="admin-userbar">
+                <span><strong id="nombreUsuario"></strong> <small id="rolUsuario"></small></span>
+                <a href="index.html">Ver tienda</a>
+                <button id="btnCerrar">Cerrar sesion</button>
+            </div>
+        </header>
+
+        <div class="admin-shell vendedor-shell">
+            <aside class="admin-tabs">
+                <div class="admin-tabs-title">Ventas</div>
+                <button class="admin-tab activo" data-panel-target="panel-venta">Registrar venta</button>
+                <button class="admin-tab" data-panel-target="panel-inventario">Inventario</button>
+                <button class="admin-tab" data-panel-target="panel-historial">Historial</button>
+                <button class="admin-tab" data-panel-target="panel-reportes">Resumen</button>
+            </aside>
+
+            <main class="admin-content">
+                <section id="panel-venta" class="admin-panel activo">
+                    <div class="vendedor-panel-header">
+                        <div>
+                            <span>Operacion</span>
+                            <h2>Registrar venta</h2>
+                        </div>
+                        <p>Selecciona un producto disponible y registra los datos del comprador.</p>
+                    </div>
+
+                    <div class="venta-layout">
+                        <form id="formVenta" class="venta-form">
+                            <div class="campo">
+                                <label>Producto</label>
+                                <select id="ventaProducto" required>
+                                    <option value="">Seleccionar producto</option>
+                                </select>
+                            </div>
+
+                            <div class="campo">
+                                <label>Cliente</label>
+                                <input id="ventaCliente" placeholder="Nombre del cliente" required>
+                            </div>
+
+                            <div class="campo">
+                                <label>Telefono</label>
+                                <input id="ventaTelefono" placeholder="Telefono o WhatsApp" required>
+                            </div>
+
+                            <div class="campo">
+                                <label>Cantidad</label>
+                                <input id="ventaCantidad" type="number" min="1" value="1" required>
+                            </div>
+
+                            <div class="campo">
+                                <label>Medio de pago</label>
+                                <select id="ventaMedioPago" required>
+                                    <option value="efectivo">Efectivo</option>
+                                    <option value="transferencia">Transferencia</option>
+                                    <option value="tarjeta_debito">Tarjeta debito</option>
+                                    <option value="tarjeta_credito">Tarjeta credito</option>
+                                </select>
+                            </div>
+
+                            <button class="btn btn-agregar" type="submit">Guardar venta</button>
+                            <p id="mensajeVenta" class="mensaje-compra"></p>
+                        </form>
+
+                        <aside class="venta-resumen">
+                            <span>Detalle</span>
+                            <h3 id="ventaNombreProducto">Sin producto seleccionado</h3>
+                            <p id="ventaCodigoProducto">Codigo: -</p>
+                            <p id="ventaStockProducto">Stock: -</p>
+                            <strong id="ventaTotal">$0</strong>
+                        </aside>
+                    </div>
+                </section>
+
+                <section id="panel-inventario" class="admin-panel">
+                    <h2>Inventario disponible</h2>
+
+                    <div class="filtros">
+                        <input type="text" id="buscadorVendedor" placeholder="Buscar producto, codigo, marca o categoria...">
+                    </div>
+
+                    <table class="tabla-inventario">
+                        <thead>
+                            <tr>
+                                <th>Codigo</th>
+                                <th>Producto</th>
+                                <th>Marca</th>
+                                <th>Categoria</th>
+                                <th>Precio</th>
+                                <th>Cantidad</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaInventarioVendedor"></tbody>
+                    </table>
+                </section>
+
+                <section id="panel-historial" class="admin-panel">
+                    <h2>Ventas y devoluciones</h2>
+
+                    <table class="tabla-inventario">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Telefono</th>
+                                <th>Tipo</th>
+                                <th>Codigo</th>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Total</th>
+                                <th>Medio de pago</th>
+                                <th>Fecha</th>
+                                <th>Accion</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaHistorialVendedor"></tbody>
+                    </table>
+                </section>
+
+                <section id="panel-reportes" class="admin-panel">
+                    <h2>Resumen de ventas</h2>
+
+                    <div class="reportes">
+                        <div class="reporte-card">
+                            <h4>Ventas de hoy</h4>
+                            <p id="ventasHoy">$0</p>
+                        </div>
+
+                        <div class="reporte-card">
+                            <h4>Devoluciones de hoy</h4>
+                            <p id="devolucionesHoy">$0</p>
+                        </div>
+
+                        <div class="reporte-card">
+                            <h4>Neto de hoy</h4>
+                            <p id="netoHoy">$0</p>
+                        </div>
+
+                        <div class="reporte-card">
+                            <h4>Ventas del mes</h4>
+                            <p id="ventasMes">$0</p>
+                        </div>
+
+                        <div class="reporte-card">
+                            <h4>Neto del mes</h4>
+                            <p id="netoMes">$0</p>
+                        </div>
+
+                        <div class="reporte-card">
+                            <h4>Producto mas vendido</h4>
+                            <p id="productoTop">-</p>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script type="module" src="js/script.js"></script>
+    <script src="js/vendedor.js"></script>
+</body>
+</html>

@@ -12,6 +12,36 @@ function mostrarContenido(loginBox, contenido) {
     contenido.style.display = "block";
 }
 
+function panelPorRol(rol) {
+    if (rol === "admin") {
+        return "admin.html";
+    }
+
+    if (rol === "vendedor") {
+        return "vendedor.html";
+    }
+
+    return "";
+}
+
+function redirigirSiCorresponde(usuario) {
+    if (!usuario) return false;
+
+    const panelActual = document.body.dataset.panel || "";
+    const destino = panelPorRol(usuario.rol);
+
+    if (!panelActual || !destino) return false;
+
+    const archivoActual = window.location.pathname.split("/").pop() || "index.html";
+
+    if (archivoActual !== destino) {
+        window.location.href = destino;
+        return true;
+    }
+
+    return false;
+}
+
 export function aplicarRol(usuario) {
     const rol = usuario ? usuario.rol : "";
     const nombreUsuario = document.getElementById("nombreUsuario");
@@ -44,6 +74,9 @@ export async function verificarSesion(loginBox, contenido) {
         if (sesion.autenticado) {
             mostrarContenido(loginBox, contenido);
             aplicarRol(sesion.usuario);
+
+            if (redirigirSiCorresponde(sesion.usuario)) return;
+
             window.dispatchEvent(new CustomEvent("sesion-lista", {
                 detail: sesion.usuario
             }));
@@ -79,6 +112,9 @@ export async function iniciarSesion(correo, contrasena, loginBox, contenido, men
         mensaje.textContent = "";
         mostrarContenido(loginBox, contenido);
         aplicarRol(resultado.usuario);
+
+        if (redirigirSiCorresponde(resultado.usuario)) return;
+
         window.dispatchEvent(new CustomEvent("sesion-lista", {
             detail: resultado.usuario
         }));
