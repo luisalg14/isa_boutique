@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categoría - Isa Boutique</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+    <header class="encabezado">
+        <img src="img/logo.png.png" alt="Logo Isa Boutique" class="logo">
+        <h1 id="tituloCategoria">Categoría</h1>
+        <p>Nuestra colección disponible desde PostgreSQL</p>
+    </header>
+
+    <nav class="menu">
+        <a href="index.html">Inicio</a>
+        <a href="Producto.html">Productos</a>
+        <a href="index.html#contacto">Contacto</a>
+        <a href="admin.html">Acceso Admin</a>
+    </nav>
+
+    <section class="galeria">
+        <div id="contenedor" class="contenedor-productos"></div>
+    </section>
+
+    <script>
+        function formatoPrecio(valor) {
+            return "$" + Number(valor).toLocaleString("es-CO");
+        }
+
+        function obtenerCategoriaDesdeURL() {
+            const parametros = new URLSearchParams(window.location.search);
+            return parametros.get("tipo");
+        }
+
+        function formatearNombreCategoria(categoria) {
+            const nombres = {
+                vestidos: "Vestidos",
+                blusas: "Blusas",
+                conjuntos: "Conjuntos",
+                shorts: "Shorts",
+                jeans: "Jeans",
+                bodys: "Bodys",
+                faldas: "Faldas",
+                accesorios: "Accesorios"
+            };
+
+            return nombres[categoria] || "Categoría";
+        }
+
+        async function cargarCategoria() {
+            const tipoCategoria = obtenerCategoriaDesdeURL();
+            const contenedor = document.getElementById("contenedor");
+            const titulo = document.getElementById("tituloCategoria");
+
+            contenedor.innerHTML = "";
+
+            if (!tipoCategoria) {
+                titulo.innerText = "Categoría no encontrada";
+                contenedor.innerHTML = '<p style="text-align:center;">No se seleccionó una categoría.</p>';
+                return;
+            }
+
+            titulo.innerText = formatearNombreCategoria(tipoCategoria);
+
+            try {
+                const respuesta = await fetch("php/productos_listar.php");
+                const productos = await respuesta.json();
+
+                if (productos.error) {
+                    contenedor.innerHTML = "<p>Error: " + productos.mensaje + "</p>";
+                    return;
+                }
+
+                const productosCategoria = productos.filter(function(producto) {
+                    return producto.categoria === tipoCategoria && producto.estado !== "inactivo";
+                });
+
+                if (productosCategoria.length === 0) {
+                    contenedor.innerHTML = '<p style="text-align:center;">No hay productos registrados en esta categoría.</p>';
+                    return;
+                }
+
+                productosCategoria.forEach(function(producto) {
+                    let estadoTexto = producto.estado;
+
+                    if (producto.cantidad == 0) {
+                        estadoTexto = "agotado";
+                    }
+
+                    contenedor.innerHTML +=
+                        '<div class="card">' +
+                            '<img src="' + producto.imagen + '" alt="' + producto.nombre + '">' +
+                            '<p><strong>Código:</strong> ' + producto.codigo + '</p>' +
+                            '<h3>' + producto.nombre + '</h3>' +
+                            '<p><strong>Marca:</strong> ' + producto.marca + '</p>' +
+                            '<p>' + formatoPrecio(producto.precio) + '</p>' +
+                            '<p><strong>Disponibles:</strong> ' + producto.cantidad + '</p>' +
+                            '<p><strong>Estado:</strong> ' + estadoTexto + '</p>' +
+                        '</div>';
+                });
+
+            } catch (error) {
+                contenedor.innerHTML = "<p>Error al cargar productos desde la base de datos.</p>";
+                console.error(error);
+            }
+        }
+
+        cargarCategoria();
+    </script>
+
+</body>
+</html>
