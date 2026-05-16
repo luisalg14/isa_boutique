@@ -7,32 +7,35 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
-<body>
+<body class="public-page catalog-page stitch-catalog">
 
-    <header class="encabezado tienda-hero">
-        <img src="img/logo.png.png" alt="Logo Isa Boutique" class="logo">
-        <h1>Catalogo Isa Boutique</h1>
-        <p>Explora prendas disponibles, filtra por categoria y registra tu compra.</p>
-    </header>
-
-    <nav class="menu">
+    <nav class="menu stitch-nav">
+        <a class="brand-link" href="index.html">Isa Boutique</a>
         <a href="index.html">Inicio</a>
-        <a href="Producto.html">Productos</a>
+        <a href="Producto.html">Ver todo</a>
+        <a href="categoria.html?tipo=blusas">Blusas</a>
+        <a href="categoria.html?tipo=vestidos">Vestidos</a>
+        <a href="categoria.html?tipo=conjuntos">Conjuntos</a>
         <a href="index.html#contacto">Contacto</a>
     </nav>
 
     <main class="tienda-layout">
-        <section class="tienda-toolbar">
-            <div>
-                <h2>Productos</h2>
+        <header class="catalog-header">
+            <span>Colecciones</span>
+            <h1>Moda femenina</h1>
+            <p>Descubre prendas disponibles, filtra por categoria y registra tu compra.</p>
+        </header>
+
+        <div class="stitch-catalog-grid">
+            <aside class="stitch-filters">
                 <p id="resumenCatalogo">Cargando catalogo...</p>
-            </div>
 
-            <div class="tienda-controles">
-                <input id="buscarProducto" type="search" placeholder="Buscar por nombre, marca o codigo">
+                <label class="filter-label" for="buscarProducto">Buscar</label>
+                <input id="buscarProducto" type="search" placeholder="Nombre, marca o codigo">
 
+                <label class="filter-label" for="filtroCategoria">Categoria</label>
                 <select id="filtroCategoria">
-                    <option value="">Todas las categorias</option>
+                    <option value="">Todas</option>
                     <option value="vestidos">Vestidos</option>
                     <option value="blusas">Blusas</option>
                     <option value="conjuntos">Conjuntos</option>
@@ -43,6 +46,7 @@
                     <option value="accesorios">Accesorios</option>
                 </select>
 
+                <label class="filter-label" for="ordenProductos">Orden</label>
                 <select id="ordenProductos">
                     <option value="recientes">Orden original</option>
                     <option value="precio_asc">Menor precio</option>
@@ -54,24 +58,24 @@
                     <input id="soloDisponibles" type="checkbox" checked>
                     Solo disponibles
                 </label>
-            </div>
 
-            <div class="categoria-chips" id="categoriaChips">
-                <button class="chip activo" data-categoria="">Todo</button>
-                <button class="chip" data-categoria="vestidos">Vestidos</button>
-                <button class="chip" data-categoria="blusas">Blusas</button>
-                <button class="chip" data-categoria="conjuntos">Conjuntos</button>
-                <button class="chip" data-categoria="shorts">Shorts</button>
-                <button class="chip" data-categoria="jeans">Jeans</button>
-                <button class="chip" data-categoria="bodys">Bodys</button>
-                <button class="chip" data-categoria="faldas">Faldas</button>
-                <button class="chip" data-categoria="accesorios">Accesorios</button>
-            </div>
-        </section>
+                <div class="categoria-chips" id="categoriaChips">
+                    <button class="chip activo" data-categoria="">Todo</button>
+                    <button class="chip" data-categoria="vestidos">Vestidos</button>
+                    <button class="chip" data-categoria="blusas">Blusas</button>
+                    <button class="chip" data-categoria="conjuntos">Conjuntos</button>
+                    <button class="chip" data-categoria="shorts">Shorts</button>
+                    <button class="chip" data-categoria="jeans">Jeans</button>
+                    <button class="chip" data-categoria="bodys">Bodys</button>
+                    <button class="chip" data-categoria="faldas">Faldas</button>
+                    <button class="chip" data-categoria="accesorios">Accesorios</button>
+                </div>
+            </aside>
 
-        <section class="galeria tienda-galeria">
-            <div id="contenedor-productos" class="contenedor-productos"></div>
-        </section>
+            <section class="galeria tienda-galeria">
+                <div id="contenedor-productos" class="contenedor-productos"></div>
+            </section>
+        </div>
     </main>
 
     <div id="modalCompra" class="modal-compra" aria-hidden="true">

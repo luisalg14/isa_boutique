@@ -7,21 +7,25 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
-<body>
+<body class="public-page catalog-page stitch-catalog">
 
-    <header class="encabezado">
-        <img src="img/logo.png.png" alt="Logo Isa Boutique" class="logo">
-        <h1 id="tituloCategoria">Categoría</h1>
-        <p>Productos disponibles desde el inventario</p>
-    </header>
-
-    <nav class="menu">
+    <nav class="menu stitch-nav">
+        <a class="brand-link" href="index.html">Isa Boutique</a>
         <a href="index.html">Inicio</a>
-        <a href="Producto.html">Productos</a>
+        <a href="Producto.html">Ver todo</a>
+        <a href="categoria.html?tipo=blusas">Blusas</a>
+        <a href="categoria.html?tipo=vestidos">Vestidos</a>
+        <a href="categoria.html?tipo=conjuntos">Conjuntos</a>
         <a href="index.html#contacto">Contacto</a>
     </nav>
 
-    <section class="galeria">
+    <section class="galeria categoria-page">
+        <header class="catalog-header">
+            <span>Coleccion</span>
+            <h1 id="tituloCategoria">Categoría</h1>
+            <p>Productos disponibles desde el inventario.</p>
+        </header>
+
         <div id="contenedor" class="contenedor-productos"></div>
     </section>
 
