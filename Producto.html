@@ -9,23 +9,70 @@
 
 <body>
 
-    <header class="encabezado">
+    <header class="encabezado tienda-hero">
         <img src="img/logo.png.png" alt="Logo Isa Boutique" class="logo">
-        <h1>Productos</h1>
-        <p>Prendas disponibles para compra directa</p>
+        <h1>Catalogo Isa Boutique</h1>
+        <p>Explora prendas disponibles, filtra por categoria y registra tu compra.</p>
     </header>
 
     <nav class="menu">
         <a href="index.html">Inicio</a>
         <a href="Producto.html">Productos</a>
         <a href="index.html#contacto">Contacto</a>
-        <a href="admin.html">Acceso interno</a>
     </nav>
 
-    <section class="galeria">
-        <h2>Catálogo</h2>
-        <div id="contenedor-productos" class="contenedor-productos"></div>
-    </section>
+    <main class="tienda-layout">
+        <section class="tienda-toolbar">
+            <div>
+                <h2>Productos</h2>
+                <p id="resumenCatalogo">Cargando catalogo...</p>
+            </div>
+
+            <div class="tienda-controles">
+                <input id="buscarProducto" type="search" placeholder="Buscar por nombre, marca o codigo">
+
+                <select id="filtroCategoria">
+                    <option value="">Todas las categorias</option>
+                    <option value="vestidos">Vestidos</option>
+                    <option value="blusas">Blusas</option>
+                    <option value="conjuntos">Conjuntos</option>
+                    <option value="shorts">Shorts</option>
+                    <option value="jeans">Jeans</option>
+                    <option value="bodys">Bodys</option>
+                    <option value="faldas">Faldas</option>
+                    <option value="accesorios">Accesorios</option>
+                </select>
+
+                <select id="ordenProductos">
+                    <option value="recientes">Orden original</option>
+                    <option value="precio_asc">Menor precio</option>
+                    <option value="precio_desc">Mayor precio</option>
+                    <option value="stock_desc">Mas disponibles</option>
+                </select>
+
+                <label class="check-control">
+                    <input id="soloDisponibles" type="checkbox" checked>
+                    Solo disponibles
+                </label>
+            </div>
+
+            <div class="categoria-chips" id="categoriaChips">
+                <button class="chip activo" data-categoria="">Todo</button>
+                <button class="chip" data-categoria="vestidos">Vestidos</button>
+                <button class="chip" data-categoria="blusas">Blusas</button>
+                <button class="chip" data-categoria="conjuntos">Conjuntos</button>
+                <button class="chip" data-categoria="shorts">Shorts</button>
+                <button class="chip" data-categoria="jeans">Jeans</button>
+                <button class="chip" data-categoria="bodys">Bodys</button>
+                <button class="chip" data-categoria="faldas">Faldas</button>
+                <button class="chip" data-categoria="accesorios">Accesorios</button>
+            </div>
+        </section>
+
+        <section class="galeria tienda-galeria">
+            <div id="contenedor-productos" class="contenedor-productos"></div>
+        </section>
+    </main>
 
     <div id="modalCompra" class="modal-compra" aria-hidden="true">
         <form id="formCompra" class="compra-modal">
@@ -46,7 +93,7 @@
                 </div>
 
                 <div class="campo">
-                    <label for="compraTelefono">Teléfono</label>
+                    <label for="compraTelefono">Telefono</label>
                     <input id="compraTelefono" required>
                 </div>
 
@@ -56,8 +103,8 @@
                         <option value="">Seleccionar</option>
                         <option value="efectivo">Efectivo</option>
                         <option value="transferencia">Transferencia</option>
-                        <option value="tarjeta_debito">Tarjeta débito</option>
-                        <option value="tarjeta_credito">Tarjeta crédito</option>
+                        <option value="tarjeta_debito">Tarjeta debito</option>
+                        <option value="tarjeta_credito">Tarjeta credito</option>
                     </select>
                 </div>
 
@@ -73,14 +120,37 @@
 
     <script>
         let productoSeleccionado = null;
+        let productosCatalogo = [];
+
+        const contenedor = document.getElementById("contenedor-productos");
+        const buscador = document.getElementById("buscarProducto");
+        const filtroCategoria = document.getElementById("filtroCategoria");
+        const ordenProductos = document.getElementById("ordenProductos");
+        const soloDisponibles = document.getElementById("soloDisponibles");
+        const resumenCatalogo = document.getElementById("resumenCatalogo");
 
         function formatoPrecio(valor) {
             return "$" + Number(valor).toLocaleString("es-CO");
         }
 
+        function formatearCategoria(categoria) {
+            const nombres = {
+                vestidos: "Vestidos",
+                blusas: "Blusas",
+                conjuntos: "Conjuntos",
+                shorts: "Shorts",
+                jeans: "Jeans",
+                bodys: "Bodys",
+                faldas: "Faldas",
+                accesorios: "Accesorios"
+            };
+
+            return nombres[categoria] || categoria || "Sin categoria";
+        }
+
         function abrirModalCompra(producto) {
             if (Number(producto.cantidad) <= 0 || producto.estado === "agotado") {
-                alert("Este producto está agotado.");
+                alert("Este producto esta agotado.");
                 return;
             }
 
@@ -118,7 +188,7 @@
             const mensaje = document.getElementById("mensajeCompra");
 
             if (isNaN(cantidad) || cantidad <= 0) {
-                mensaje.textContent = "Ingresa una cantidad válida.";
+                mensaje.textContent = "Ingresa una cantidad valida.";
                 return;
             }
 
@@ -161,53 +231,93 @@
             }
         }
 
+        function obtenerProductosFiltrados() {
+            const texto = buscador.value.trim().toLowerCase();
+            const categoria = filtroCategoria.value;
+            const soloStock = soloDisponibles.checked;
+
+            let productos = productosCatalogo.filter(function(producto) {
+                const activo = producto.estado !== "inactivo";
+                const disponible = Number(producto.cantidad) > 0 && producto.estado !== "agotado";
+                const coincideTexto = (
+                    (producto.nombre || "").toLowerCase().includes(texto) ||
+                    (producto.marca || "").toLowerCase().includes(texto) ||
+                    (producto.codigo || "").toLowerCase().includes(texto)
+                );
+                const coincideCategoria = !categoria || producto.categoria === categoria;
+
+                return activo && coincideTexto && coincideCategoria && (!soloStock || disponible);
+            });
+
+            if (ordenProductos.value === "precio_asc") {
+                productos.sort(function(a, b) { return Number(a.precio) - Number(b.precio); });
+            } else if (ordenProductos.value === "precio_desc") {
+                productos.sort(function(a, b) { return Number(b.precio) - Number(a.precio); });
+            } else if (ordenProductos.value === "stock_desc") {
+                productos.sort(function(a, b) { return Number(b.cantidad) - Number(a.cantidad); });
+            }
+
+            return productos;
+        }
+
+        function renderizarProductos() {
+            const productos = obtenerProductosFiltrados();
+            const totalVisibles = productosCatalogo.filter(function(producto) {
+                return producto.estado !== "inactivo";
+            }).length;
+
+            contenedor.innerHTML = "";
+            resumenCatalogo.textContent = productos.length + " de " + totalVisibles + " productos visibles";
+
+            if (productos.length === 0) {
+                contenedor.innerHTML = '<div class="estado-vacio">No encontramos productos con esos filtros.</div>';
+                return;
+            }
+
+            productos.forEach(function(producto) {
+                const agotado = Number(producto.cantidad) <= 0 || producto.estado === "agotado";
+                const estadoTexto = agotado ? "Agotado" : "Disponible";
+                const card = document.createElement("article");
+
+                card.className = "card producto-card";
+                card.innerHTML =
+                    '<div class="producto-imagen-wrap">' +
+                        '<img src="' + producto.imagen + '" alt="' + producto.nombre + '">' +
+                        '<span class="producto-badge ' + (agotado ? "agotado" : "disponible") + '">' + estadoTexto + '</span>' +
+                    '</div>' +
+                    '<div class="producto-card-body">' +
+                        '<p class="producto-codigo">Codigo: ' + producto.codigo + '</p>' +
+                        '<h3>' + producto.nombre + '</h3>' +
+                        '<p class="producto-meta">' + producto.marca + ' · ' + formatearCategoria(producto.categoria) + '</p>' +
+                        '<p class="producto-precio">' + formatoPrecio(producto.precio) + '</p>' +
+                        '<p class="producto-stock">' + producto.cantidad + ' unidades disponibles</p>' +
+                        '<button class="boton-comprar" ' + (agotado ? "disabled" : "") + '>' +
+                            (agotado ? "Agotado" : "Comprar") +
+                        '</button>' +
+                    '</div>';
+
+                card.querySelector("button").addEventListener("click", function() {
+                    abrirModalCompra(producto);
+                });
+
+                contenedor.appendChild(card);
+            });
+        }
+
         async function cargarProductos() {
-            const contenedor = document.getElementById("contenedor-productos");
+            contenedor.innerHTML = '<div class="estado-vacio">Cargando productos...</div>';
 
             try {
                 const respuesta = await fetch("php/productos_listar.php");
                 const productos = await respuesta.json();
-
-                contenedor.innerHTML = "";
 
                 if (productos.error) {
                     contenedor.innerHTML = "<p>Error: " + productos.mensaje + "</p>";
                     return;
                 }
 
-                const productosVisibles = productos.filter(function(producto) {
-                    return producto.estado !== "inactivo";
-                });
-
-                if (productosVisibles.length === 0) {
-                    contenedor.innerHTML = '<p style="text-align:center;">No hay productos registrados todavía.</p>';
-                    return;
-                }
-
-                productosVisibles.forEach(function(producto) {
-                    const agotado = Number(producto.cantidad) <= 0 || producto.estado === "agotado";
-                    const estadoTexto = agotado ? "agotado" : producto.estado;
-                    const card = document.createElement("div");
-
-                    card.className = "card";
-                    card.innerHTML =
-                        '<img src="' + producto.imagen + '" alt="' + producto.nombre + '">' +
-                        '<p class="producto-codigo">Código: ' + producto.codigo + '</p>' +
-                        '<h3>' + producto.nombre + '</h3>' +
-                        '<p class="producto-meta">' + producto.marca + ' · ' + producto.categoria + '</p>' +
-                        '<p class="producto-precio">' + formatoPrecio(producto.precio) + '</p>' +
-                        '<p class="producto-stock">' + producto.cantidad + ' disponibles · ' + estadoTexto + '</p>' +
-                        '<button class="boton-comprar" ' + (agotado ? "disabled" : "") + '>' +
-                            (agotado ? "Agotado" : "Comprar") +
-                        '</button>';
-
-                    card.querySelector("button").addEventListener("click", function() {
-                        abrirModalCompra(producto);
-                    });
-
-                    contenedor.appendChild(card);
-                });
-
+                productosCatalogo = productos;
+                renderizarProductos();
             } catch (error) {
                 contenedor.innerHTML = "<p>Error al cargar productos desde la base de datos.</p>";
                 console.error(error);
@@ -220,6 +330,27 @@
             if (evento.target.id === "modalCompra") {
                 cerrarModalCompra();
             }
+        });
+
+        buscador.addEventListener("input", renderizarProductos);
+        filtroCategoria.addEventListener("change", function() {
+            document.querySelectorAll(".chip").forEach(function(chip) {
+                chip.classList.toggle("activo", chip.dataset.categoria === filtroCategoria.value);
+            });
+            renderizarProductos();
+        });
+        ordenProductos.addEventListener("change", renderizarProductos);
+        soloDisponibles.addEventListener("change", renderizarProductos);
+
+        document.querySelectorAll(".chip").forEach(function(chip) {
+            chip.addEventListener("click", function() {
+                filtroCategoria.value = chip.dataset.categoria;
+                document.querySelectorAll(".chip").forEach(function(item) {
+                    item.classList.remove("activo");
+                });
+                chip.classList.add("activo");
+                renderizarProductos();
+            });
         });
 
         cargarProductos();

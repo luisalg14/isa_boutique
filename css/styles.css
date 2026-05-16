@@ -333,6 +333,144 @@ h2 {
     font-size: 13px !important;
 }
 
+.tienda-layout {
+    width: min(1180px, calc(100% - 32px));
+    margin: 0 auto 46px;
+}
+
+.tienda-hero {
+    min-height: 360px;
+}
+
+.tienda-toolbar {
+    width: 100%;
+    margin-top: 28px;
+    padding: 22px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 24px rgba(76, 54, 42, 0.08);
+}
+
+.tienda-toolbar h2 {
+    margin-bottom: 4px;
+}
+
+.tienda-toolbar p {
+    color: var(--muted);
+}
+
+.tienda-controles {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.5fr) minmax(170px, 0.8fr) minmax(160px, 0.8fr) auto;
+    gap: 12px;
+    align-items: center;
+    margin-top: 18px;
+}
+
+.tienda-controles input,
+.tienda-controles select {
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: #fff;
+    color: var(--text);
+    outline: none;
+}
+
+.check-control {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: #fffdfb;
+    color: var(--text);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.check-control input {
+    width: auto;
+}
+
+.categoria-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.chip {
+    min-height: 36px;
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--text);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.chip:hover,
+.chip.activo {
+    background: var(--brand-dark);
+    color: #fff;
+    border-color: var(--brand-dark);
+}
+
+.tienda-galeria {
+    width: 100%;
+    padding-top: 22px;
+}
+
+.producto-card {
+    position: relative;
+}
+
+.producto-imagen-wrap {
+    position: relative;
+    background: var(--surface-soft);
+}
+
+.producto-badge {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.producto-badge.disponible {
+    background: var(--success);
+}
+
+.producto-badge.agotado {
+    background: #7d746e;
+}
+
+.producto-card-body {
+    padding: 0 0 2px;
+}
+
+.estado-vacio {
+    grid-column: 1 / -1;
+    padding: 34px;
+    background: var(--surface);
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+    color: var(--muted);
+    text-align: center;
+    font-weight: 700;
+}
+
 .boton-comprar {
     display: inline-flex;
     align-items: center;
@@ -522,6 +660,14 @@ h2 {
 
 .tabla-inventario button:hover {
     background: var(--brand-dark);
+}
+
+.tabla-inventario .btn-eliminar {
+    background: var(--danger);
+}
+
+.tabla-inventario .btn-eliminar:hover {
+    background: #922b38;
 }
 
 /* ===============================
@@ -758,6 +904,10 @@ footer {
 }
 
 @media (max-width: 900px) {
+    .tienda-controles {
+        grid-template-columns: 1fr 1fr;
+    }
+
     .admin-shell {
         grid-template-columns: 1fr;
     }
@@ -808,6 +958,14 @@ footer {
 }
 
 @media (max-width: 520px) {
+    .tienda-layout {
+        width: min(100% - 24px, 1180px);
+    }
+
+    .tienda-controles {
+        grid-template-columns: 1fr;
+    }
+
     .admin-tabs {
         grid-template-columns: 1fr;
     }

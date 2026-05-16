@@ -522,6 +522,118 @@
         }
     }
 
+    async function eliminarProductoBD(idProducto, nombreProducto, forzar = false) {
+        if (!exigirAdminFrontend()) return;
+
+        if (!forzar) {
+            const confirmar = confirm(
+                "¿Deseas eliminar definitivamente este producto?\n\n" +
+                nombreProducto + "\n\n" +
+                "Si tiene ventas o devoluciones, el sistema no lo eliminará y deberás desactivarlo."
+            );
+
+            if (!confirmar) return;
+        } else {
+            const confirmarPrueba = confirm(
+                "BORRADO DE PRUEBA\n\n" +
+                "Esto eliminará el producto y también sus ventas/devoluciones relacionadas.\n" +
+                "Úsalo solo para limpiar datos de prueba.\n\n" +
+                "Producto: " + nombreProducto
+            );
+
+            if (!confirmarPrueba) return;
+        }
+
+        const confirmarFinal = confirm("Esta acción no se puede deshacer. ¿Confirmas la eliminación?");
+
+        if (!confirmarFinal) return;
+
+        const datos = new FormData();
+        datos.append("id_producto", idProducto);
+
+        if (forzar) {
+            datos.append("forzar", "1");
+        }
+
+        try {
+            const respuesta = await fetch("php/producto_eliminar.php", {
+                method: "POST",
+                body: datos
+            });
+
+            const resultado = await respuesta.json();
+
+            if (resultado.error) {
+                if (
+                    !forzar &&
+                    resultado.mensaje.includes("ventas o devoluciones") &&
+                    confirm(resultado.mensaje + "\n\n¿Quieres hacer un borrado de prueba y limpiar también ese historial relacionado?")
+                ) {
+                    eliminarProductoBD(idProducto, nombreProducto, true);
+                    return;
+                }
+
+                alert(resultado.mensaje);
+                return;
+            }
+
+            alert(resultado.mensaje);
+            cargarInventarioBD();
+            cargarReportesBD();
+            cargarMovimientosBD();
+            cargarCambiosPrecioBD();
+
+        } catch (error) {
+            alert("Error al eliminar el producto.");
+            console.error(error);
+        }
+    }
+
+    async function limpiarHistorialAntiguo() {
+        if (!exigirAdminFrontend()) return;
+
+        const confirmar = confirm(
+            "¿Deseas eliminar todo el historial de ventas y devoluciones?\n\n" +
+            "Esto limpiará los registros de ventas/devoluciones de prueba y no se puede deshacer."
+        );
+
+        if (!confirmar) return;
+
+        const texto = prompt('Para confirmar escribe exactamente: ELIMINAR HISTORIAL');
+
+        if (texto !== "ELIMINAR HISTORIAL") {
+            alert("No se eliminó el historial porque la confirmación no coincide.");
+            return;
+        }
+
+        const datos = new FormData();
+        datos.append("confirmacion", texto);
+
+        try {
+            const respuesta = await fetch("php/historial_eliminar.php", {
+                method: "POST",
+                body: datos
+            });
+
+            const resultado = await respuesta.json();
+
+            if (resultado.error) {
+                alert(resultado.mensaje);
+                return;
+            }
+
+            alert(resultado.mensaje);
+            cargarHistorialVentasBD();
+            cargarReportesBD();
+            cargarInventarioBD();
+            cargarMovimientosBD();
+
+        } catch (error) {
+            alert("Error al eliminar el historial.");
+            console.error(error);
+        }
+    }
+
     async function cargarHistorialVentasBD() {
         const tabla = document.getElementById("tablaHistorial");
         
@@ -714,11 +826,13 @@
             
             productosFiltrados.forEach(function(producto) {
                 let claseEstado = "stock-alto";
+                const nombreSeguro = String(producto.nombre || "").replace(/'/g, "\\'");
                 const accionesAdmin = usuarioEsAdmin()
                     ? `
                         <button onclick="editarProductoBD(${producto.id_producto})">Editar</button>
                         <button onclick="cambiarEstadoProductoBD(${producto.id_producto}, '${producto.estado}')">
                             ${producto.estado === "inactivo" ? "Activar" : "Desactivar"}</button>
+                        <button class="btn-eliminar" onclick="eliminarProductoBD(${producto.id_producto}, '${nombreSeguro}')">Eliminar</button>
                     `
                     : `<span>Solo lectura</span>`;
                 
