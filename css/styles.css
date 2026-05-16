@@ -1768,3 +1768,262 @@ footer {
         grid-template-columns: 1fr;
     }
 }
+
+/* ===============================
+   ADMIN REDESIGN
+================================ */
+
+.admin-page {
+    background:
+        radial-gradient(circle at top left, rgba(255, 208, 138, 0.18), transparent 34%),
+        #fff8f5;
+    color: #211a15;
+    font-family: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
+}
+
+.admin-page #loginBox {
+    background:
+        radial-gradient(circle at 50% 18%, rgba(255, 208, 138, 0.20), transparent 30%),
+        linear-gradient(135deg, #fff8f5 0%, #fff1ea 100%);
+}
+
+.admin-page .login-content {
+    max-width: 420px;
+    border-color: #d9c1c3;
+    border-radius: 14px;
+}
+
+.admin-page .login-content h2,
+.admin-brand {
+    color: #954053;
+    font-family: "Libre Caslon Text", Georgia, serif;
+    font-weight: 400;
+}
+
+.admin-page .login-content h2 {
+    font-size: 34px;
+}
+
+.admin-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    min-height: 74px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 14px clamp(18px, 5vw, 64px);
+    background: rgba(255, 248, 245, 0.90);
+    border-bottom: 1px solid rgba(217, 193, 195, 0.72);
+    backdrop-filter: blur(14px);
+}
+
+.admin-brand {
+    display: inline-block;
+    margin-bottom: 3px;
+    font-size: clamp(26px, 3vw, 36px);
+    text-decoration: none;
+}
+
+.admin-topbar p {
+    color: #544245;
+    font-size: 13px;
+}
+
+.admin-userbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.admin-userbar span {
+    color: #211a15;
+    font-size: 14px;
+}
+
+.admin-userbar small {
+    margin-left: 8px;
+}
+
+.admin-userbar a,
+.admin-userbar button {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 13px;
+    border-radius: 0;
+    border: 1px solid #d9c1c3;
+    background: #ffffff;
+    color: #954053;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.admin-userbar button {
+    border-color: #954053;
+    background: #954053;
+    color: #fff;
+}
+
+.admin-userbar a:hover,
+.admin-userbar button:hover {
+    filter: brightness(0.95);
+}
+
+.admin-page .admin-shell {
+    width: min(1320px, calc(100% - 32px));
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 22px;
+    margin-top: 28px;
+}
+
+.admin-page .admin-tabs {
+    top: 94px;
+    padding: 18px;
+    border-color: #d9c1c3;
+    background: rgba(255, 255, 255, 0.84);
+    box-shadow: 0 18px 44px rgba(48, 40, 35, 0.07);
+}
+
+.admin-tabs-title {
+    margin-bottom: 8px;
+    color: #954053;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.admin-page .admin-tab {
+    min-height: 44px;
+    border-radius: 0;
+    color: #544245;
+    font-size: 14px;
+}
+
+.admin-page .admin-tab:hover {
+    background: #fff1ea;
+    color: #954053;
+}
+
+.admin-page .admin-tab.activo {
+    background: #954053;
+    color: #fff;
+    box-shadow: none;
+}
+
+.admin-page .admin-panel {
+    padding: 26px;
+    border-color: #d9c1c3;
+    border-radius: 0;
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 18px 44px rgba(48, 40, 35, 0.07);
+}
+
+.admin-page .admin-panel h2 {
+    color: #954053;
+    font-family: "Libre Caslon Text", Georgia, serif;
+    font-size: clamp(30px, 4vw, 44px);
+    font-weight: 400;
+    border-color: #eadfd7;
+}
+
+.admin-page .form-admin {
+    box-shadow: none;
+}
+
+.admin-page .campo label {
+    color: #954053;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.admin-page .campo input,
+.admin-page .campo select,
+.admin-page .filtros input,
+.admin-page .filtros select {
+    border-radius: 0;
+    border-color: #d9c1c3;
+    background: rgba(255, 255, 255, 0.88);
+}
+
+.admin-page .btn,
+.admin-page .btn-agregar,
+.admin-page .tabla-inventario button {
+    border-radius: 0;
+    background: #954053;
+    letter-spacing: 0.05em;
+}
+
+.admin-page .btn:hover,
+.admin-page .btn-agregar:hover,
+.admin-page .tabla-inventario button:hover {
+    background: #7a2b3e;
+}
+
+.admin-page .reportes {
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.admin-page .reporte-card {
+    min-height: 128px;
+    border-color: #d9c1c3;
+    border-radius: 0;
+    background: linear-gradient(180deg, #fff, #fff8f5);
+    box-shadow: none;
+}
+
+.admin-page .reporte-card h4 {
+    color: #544245;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.admin-page .reporte-card p {
+    color: #954053;
+    font-family: "Libre Caslon Text", Georgia, serif;
+    font-size: 28px;
+    font-weight: 400;
+}
+
+.admin-page .tabla-inventario {
+    border-color: #d9c1c3;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.admin-page .tabla-inventario thead {
+    background: #372f2a;
+}
+
+.admin-page .tabla-inventario th {
+    font-size: 12px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.admin-page .tabla-inventario tbody tr:hover {
+    background: #fff1ea;
+}
+
+@media (max-width: 900px) {
+    .admin-topbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .admin-userbar {
+        justify-content: flex-start;
+    }
+
+    .admin-page .admin-shell {
+        grid-template-columns: 1fr;
+    }
+}

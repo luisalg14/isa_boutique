@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
-<body>
+<body class="admin-page">
     
     <!-- LOGIN DEL ADMINISTRADOR -->
      <div id="loginBox">
@@ -27,26 +27,22 @@
     <!-- CONTENIDO DEL ADMINISTRADOR -->
     <div id="contenido" style="display: none;">
 
-        <header class="encabezado">
-            <img src="img/logo.png.png" alt="Logo Isa Boutique" class="logo">
-            <h1>Panel Interno</h1>
-            <p>Gestión de productos, inventario y ventas</p>
-            <p><strong id="nombreUsuario"></strong> <span id="rolUsuario"></span></p>
+        <header class="admin-topbar">
+            <div>
+                <a class="admin-brand" href="admin.html">Isa Boutique</a>
+                <p>Panel interno de gestión</p>
+            </div>
+
+            <div class="admin-userbar">
+                <span><strong id="nombreUsuario"></strong> <small id="rolUsuario"></small></span>
+                <a href="index.html">Ver tienda</a>
+                <button id="btnCerrar">Cerrar sesión</button>
+            </div>
         </header>
-
-        <nav class="menu">
-            <a href="index.html">Inicio</a>
-            <a href="Producto.html">Productos</a>
-            <a href="index.html#contacto">Contacto</a>
-            <a href="admin.html">Acceso interno</a>
-        </nav>
-
-        <div class="cerrar-sesion">
-            <button id="btnCerrar">Cerrar sesión</button>
-        </div>
 
         <div class="admin-shell">
             <aside class="admin-tabs">
+                <div class="admin-tabs-title">Gestión</div>
                 <button class="admin-tab activo" data-panel-target="panel-inventario">Inventario</button>
                 <button class="admin-tab" data-admin-only data-panel-target="panel-agregar">Agregar producto</button>
                 <button class="admin-tab" data-panel-target="panel-reportes">Reportes</button>
