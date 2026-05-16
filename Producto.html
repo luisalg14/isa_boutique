@@ -12,108 +12,156 @@
     <header class="encabezado">
         <img src="img/logo.png.png" alt="Logo Isa Boutique" class="logo">
         <h1>Productos</h1>
-        <p>Nuestra colección disponible desde PostgreSQL</p>
+        <p>Prendas disponibles para compra directa</p>
     </header>
 
     <nav class="menu">
         <a href="index.html">Inicio</a>
         <a href="Producto.html">Productos</a>
         <a href="index.html#contacto">Contacto</a>
-        <a href="admin.html">Acceso Admin</a>
+        <a href="admin.html">Acceso interno</a>
     </nav>
 
     <section class="galeria">
+        <h2>Catálogo</h2>
         <div id="contenedor-productos" class="contenedor-productos"></div>
     </section>
 
+    <div id="modalCompra" class="modal-compra" aria-hidden="true">
+        <form id="formCompra" class="compra-modal">
+            <div class="modal-header">
+                <h2>Confirmar compra</h2>
+                <p id="resumenProducto">Selecciona un producto</p>
+            </div>
+
+            <div class="modal-body">
+                <div class="campo">
+                    <label for="compraCantidad">Cantidad</label>
+                    <input id="compraCantidad" type="number" min="1" required>
+                </div>
+
+                <div class="campo">
+                    <label for="compraCliente">Nombre del cliente</label>
+                    <input id="compraCliente" required>
+                </div>
+
+                <div class="campo">
+                    <label for="compraTelefono">Teléfono</label>
+                    <input id="compraTelefono" required>
+                </div>
+
+                <div class="campo">
+                    <label for="compraMedioPago">Medio de pago</label>
+                    <select id="compraMedioPago" required>
+                        <option value="">Seleccionar</option>
+                        <option value="efectivo">Efectivo</option>
+                        <option value="transferencia">Transferencia</option>
+                        <option value="tarjeta_debito">Tarjeta débito</option>
+                        <option value="tarjeta_credito">Tarjeta crédito</option>
+                    </select>
+                </div>
+
+                <p id="mensajeCompra" class="mensaje-compra"></p>
+            </div>
+
+            <div class="modal-acciones">
+                <button type="button" class="btn-cancelar" id="btnCancelarCompra">Cancelar</button>
+                <button type="submit" class="btn-confirmar">Registrar compra</button>
+            </div>
+        </form>
+    </div>
+
     <script>
+        let productoSeleccionado = null;
+
         function formatoPrecio(valor) {
             return "$" + Number(valor).toLocaleString("es-CO");
         }
 
-        async function comprarProductoBD(idProducto) {
-            const cantidadTexto = prompt("¿Cuántas unidades desea comprar?");
-            
-            if (cantidadTexto === null) return;
-            
-            const cantidad = parseInt(cantidadTexto);
-            
+        function abrirModalCompra(producto) {
+            if (Number(producto.cantidad) <= 0 || producto.estado === "agotado") {
+                alert("Este producto está agotado.");
+                return;
+            }
+
+            productoSeleccionado = producto;
+            document.getElementById("resumenProducto").textContent =
+                producto.nombre + " - " + formatoPrecio(producto.precio) + " | Disponibles: " + producto.cantidad;
+            document.getElementById("compraCantidad").value = "1";
+            document.getElementById("compraCantidad").max = producto.cantidad;
+            document.getElementById("compraCliente").value = "";
+            document.getElementById("compraTelefono").value = "";
+            document.getElementById("compraMedioPago").value = "";
+            document.getElementById("mensajeCompra").textContent = "";
+
+            const modal = document.getElementById("modalCompra");
+            modal.classList.add("activo");
+            modal.setAttribute("aria-hidden", "false");
+        }
+
+        function cerrarModalCompra() {
+            const modal = document.getElementById("modalCompra");
+            modal.classList.remove("activo");
+            modal.setAttribute("aria-hidden", "true");
+            productoSeleccionado = null;
+        }
+
+        async function registrarCompra(evento) {
+            evento.preventDefault();
+
+            if (!productoSeleccionado) return;
+
+            const cantidad = parseInt(document.getElementById("compraCantidad").value);
+            const cliente = document.getElementById("compraCliente").value.trim();
+            const telefono = document.getElementById("compraTelefono").value.trim();
+            const medioPago = document.getElementById("compraMedioPago").value;
+            const mensaje = document.getElementById("mensajeCompra");
+
             if (isNaN(cantidad) || cantidad <= 0) {
-                alert("Ingresa una cantidad válida.");
+                mensaje.textContent = "Ingresa una cantidad válida.";
                 return;
             }
-            
-            const cliente = prompt("Nombre del cliente:");
-            
-            if (cliente === null || cliente.trim() === "") {
-                alert("Debes ingresar el nombre del cliente.");
+
+            if (cantidad > Number(productoSeleccionado.cantidad)) {
+                mensaje.textContent = "Solo hay " + productoSeleccionado.cantidad + " unidades disponibles.";
                 return;
             }
-            
-            const telefono = prompt("Teléfono del cliente:");
-            
-            if (telefono === null || telefono.trim() === "") {
-                alert("Debes ingresar el teléfono del cliente.");
+
+            if (!cliente || !telefono || !medioPago) {
+                mensaje.textContent = "Completa todos los campos.";
                 return;
             }
-            
-            const medioPago = prompt(
-                "Selecciona medio de pago:\n" +
-                "1. Efectivo\n" +
-                "2. Transferencia\n" +
-                "3. Tarjeta débito\n" +
-                "4. Tarjeta crédito"
-            );
-            
-            if (medioPago === null) return;
-            
-            let medioTexto = "";
-            
-            if (medioPago === "1") {
-                medioTexto = "efectivo";
-            } else if (medioPago === "2") {
-                medioTexto = "transferencia";
-            } else if (medioPago === "3") {
-                medioTexto = "tarjeta_debito";
-            } else if (medioPago === "4") {
-                medioTexto = "tarjeta_credito";
-            } else {
-                alert("Medio de pago no válido.");
-                return;
-            }
-            
+
             const datos = new FormData();
-            
-            datos.append("id_producto", idProducto);
+            datos.append("id_producto", productoSeleccionado.id_producto);
             datos.append("cantidad", cantidad);
-            datos.append("cliente", cliente.trim());
-            datos.append("telefono", telefono.trim());
-            datos.append("medio_pago", medioTexto);
-            
+            datos.append("cliente", cliente);
+            datos.append("telefono", telefono);
+            datos.append("medio_pago", medioPago);
+
             try {
                 const respuesta = await fetch("php/venta_registrar.php", {
                     method: "POST",
                     body: datos
                 });
 
-            const resultado = await respuesta.json();
-            
-            if (resultado.error) {
-                alert(resultado.mensaje);
-                return;
+                const resultado = await respuesta.json();
+
+                if (resultado.error) {
+                    mensaje.textContent = resultado.mensaje;
+                    return;
+                }
+
+                alert(resultado.mensaje + "\nTotal: " + formatoPrecio(resultado.total));
+                cerrarModalCompra();
+                cargarProductos();
+            } catch (error) {
+                mensaje.textContent = "Error al registrar la compra.";
+                console.error(error);
             }
-            
-            alert(resultado.mensaje + "\nTotal: " + formatoPrecio(resultado.total));
-            
-            cargarProductos();
-        
-        } catch (error) {
-            alert("Error al registrar la venta.");
-            console.error(error);
         }
-    }
-    
-    async function cargarProductos() {
+
+        async function cargarProductos() {
             const contenedor = document.getElementById("contenedor-productos");
 
             try {
@@ -137,24 +185,27 @@
                 }
 
                 productosVisibles.forEach(function(producto) {
-                    let estadoTexto = producto.estado;
+                    const agotado = Number(producto.cantidad) <= 0 || producto.estado === "agotado";
+                    const estadoTexto = agotado ? "agotado" : producto.estado;
+                    const card = document.createElement("div");
 
-                    if (producto.cantidad == 0) {
-                        estadoTexto = "agotado";
-                    }
+                    card.className = "card";
+                    card.innerHTML =
+                        '<img src="' + producto.imagen + '" alt="' + producto.nombre + '">' +
+                        '<p class="producto-codigo">Código: ' + producto.codigo + '</p>' +
+                        '<h3>' + producto.nombre + '</h3>' +
+                        '<p class="producto-meta">' + producto.marca + ' · ' + producto.categoria + '</p>' +
+                        '<p class="producto-precio">' + formatoPrecio(producto.precio) + '</p>' +
+                        '<p class="producto-stock">' + producto.cantidad + ' disponibles · ' + estadoTexto + '</p>' +
+                        '<button class="boton-comprar" ' + (agotado ? "disabled" : "") + '>' +
+                            (agotado ? "Agotado" : "Comprar") +
+                        '</button>';
 
-                    contenedor.innerHTML +=
-                        '<div class="card">' +
-                            '<img src="' + producto.imagen + '" alt="' + producto.nombre + '">' +
-                            '<p><strong>Código:</strong> ' + producto.codigo + '</p>' +
-                            '<h3>' + producto.nombre + '</h3>' +
-                            '<p><strong>Marca:</strong> ' + producto.marca + '</p>' +
-                            '<p><strong>Categoría:</strong> ' + producto.categoria + '</p>' +
-                            '<p>' + formatoPrecio(producto.precio) + '</p>' +
-                            '<p><strong>Disponibles:</strong> ' + producto.cantidad + '</p>' +
-                            '<p><strong>Estado:</strong> ' + estadoTexto + '</p>' +
-                            '<button class="boton-comprar" onclick="comprarProductoBD(' + producto.id_producto + ')">Comprar</button>' +
-                            '</div>';
+                    card.querySelector("button").addEventListener("click", function() {
+                        abrirModalCompra(producto);
+                    });
+
+                    contenedor.appendChild(card);
                 });
 
             } catch (error) {
@@ -162,6 +213,14 @@
                 console.error(error);
             }
         }
+
+        document.getElementById("formCompra").addEventListener("submit", registrarCompra);
+        document.getElementById("btnCancelarCompra").addEventListener("click", cerrarModalCompra);
+        document.getElementById("modalCompra").addEventListener("click", function(evento) {
+            if (evento.target.id === "modalCompra") {
+                cerrarModalCompra();
+            }
+        });
 
         cargarProductos();
     </script>

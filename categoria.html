@@ -12,14 +12,14 @@
     <header class="encabezado">
         <img src="img/logo.png.png" alt="Logo Isa Boutique" class="logo">
         <h1 id="tituloCategoria">Categoría</h1>
-        <p>Nuestra colección disponible desde PostgreSQL</p>
+        <p>Productos disponibles desde el inventario</p>
     </header>
 
     <nav class="menu">
         <a href="index.html">Inicio</a>
         <a href="Producto.html">Productos</a>
         <a href="index.html#contacto">Contacto</a>
-        <a href="admin.html">Acceso Admin</a>
+        <a href="admin.html">Acceso interno</a>
     </nav>
 
     <section class="galeria">
@@ -85,21 +85,16 @@
                 }
 
                 productosCategoria.forEach(function(producto) {
-                    let estadoTexto = producto.estado;
-
-                    if (producto.cantidad == 0) {
-                        estadoTexto = "agotado";
-                    }
+                    const estadoTexto = Number(producto.cantidad) === 0 ? "agotado" : producto.estado;
 
                     contenedor.innerHTML +=
                         '<div class="card">' +
                             '<img src="' + producto.imagen + '" alt="' + producto.nombre + '">' +
-                            '<p><strong>Código:</strong> ' + producto.codigo + '</p>' +
+                            '<p class="producto-codigo">Código: ' + producto.codigo + '</p>' +
                             '<h3>' + producto.nombre + '</h3>' +
-                            '<p><strong>Marca:</strong> ' + producto.marca + '</p>' +
-                            '<p>' + formatoPrecio(producto.precio) + '</p>' +
-                            '<p><strong>Disponibles:</strong> ' + producto.cantidad + '</p>' +
-                            '<p><strong>Estado:</strong> ' + estadoTexto + '</p>' +
+                            '<p class="producto-meta">' + producto.marca + '</p>' +
+                            '<p class="producto-precio">' + formatoPrecio(producto.precio) + '</p>' +
+                            '<p class="producto-stock">' + producto.cantidad + ' disponibles · ' + estadoTexto + '</p>' +
                         '</div>';
                 });
 

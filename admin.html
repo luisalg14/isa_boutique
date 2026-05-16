@@ -12,8 +12,9 @@
     <!-- LOGIN DEL ADMINISTRADOR -->
      <div id="loginBox">
         <div class="login-content">
-            <h2>Panel Administrador</h2>
+            <h2>Panel Interno</h2>
 
+            <input type="email" id="correo" placeholder="Correo">
             <input type="password" id="clave" placeholder="Contraseña">
 
             <button id="btnEntrar">Ingresar</button>
@@ -28,24 +29,36 @@
 
         <header class="encabezado">
             <img src="img/logo.png.png" alt="Logo Isa Boutique" class="logo">
-            <h1>Administrador</h1>
+            <h1>Panel Interno</h1>
             <p>Gestión de productos, inventario y ventas</p>
+            <p><strong id="nombreUsuario"></strong> <span id="rolUsuario"></span></p>
         </header>
 
         <nav class="menu">
             <a href="index.html">Inicio</a>
             <a href="Producto.html">Productos</a>
             <a href="index.html#contacto">Contacto</a>
-            <a href="admin.html">Acceso Admin</a>
+            <a href="admin.html">Acceso interno</a>
         </nav>
 
         <div class="cerrar-sesion">
             <button id="btnCerrar">Cerrar sesión</button>
         </div>
 
+        <div class="admin-shell">
+            <aside class="admin-tabs">
+                <button class="admin-tab activo" data-panel-target="panel-inventario">Inventario</button>
+                <button class="admin-tab" data-admin-only data-panel-target="panel-agregar">Agregar producto</button>
+                <button class="admin-tab" data-panel-target="panel-reportes">Reportes</button>
+                <button class="admin-tab" data-panel-target="panel-historial">Ventas y devoluciones</button>
+                <button class="admin-tab" data-panel-target="panel-movimientos">Movimientos</button>
+                <button class="admin-tab" data-admin-only data-panel-target="panel-precios">Cambios de precio</button>
+            </aside>
+
+            <main class="admin-content">
 
         <!-- FORMULARIO PARA AGREGAR PRODUCTOS -->
-        <section class="form-admin">
+        <section id="panel-agregar" class="form-admin admin-panel" data-admin-only>
 
             <h2>Agregar Producto</h2>
 
@@ -104,7 +117,7 @@
 
 
         <!-- TABLA DE INVENTARIO -->
-        <section>
+        <section id="panel-inventario" class="admin-panel activo">
             <h2>Inventario</h2>
 
             <div class="filtros">
@@ -131,8 +144,8 @@
 
 
         <!-- HISTORIAL DE VENTAS -->
-        <section>
-            <h2>Historial</h2>
+        <section id="panel-reportes" class="admin-panel">
+            <h2>Reportes</h2>
 
             <div class="reportes">
     <div class="reporte-card">
@@ -180,12 +193,16 @@
         <p id="menorRotacion">-</p>
     </div>
 </div>
+        </section>
+
+        <section id="panel-historial" class="admin-panel">
+            <h2>Ventas y devoluciones</h2>
 
             <table class="tabla-inventario">
                 <thead>
                     <tr>
                         <th>Cliente</th>
-                        <th>Telefono</th>
+                        <th>Teléfono</th>
                         <th>Tipo</th>
                         <th>Código</th>
                         <th>Producto</th>
@@ -202,14 +219,14 @@
                 <tbody id="tablaHistorial"></tbody>
             </table>
 
-            <button onclick="limpiarHistorialAntiguo()">
+            <button data-admin-only onclick="limpiarHistorialAntiguo()">
                 Limpiar historial antiguo
             </button>
         </section>
 
 
         <!-- HISTORIAL DE MOVIMIENTOS DEL INVENTARIO -->
-<section>
+<section id="panel-movimientos" class="admin-panel">
     <h2>Movimientos de Inventario</h2>
     
     <table class="tabla-inventario">
@@ -231,18 +248,18 @@
     <div class="filtros">
         <input type="date" id="fechaMovimientoEliminar">
         
-        <button onclick="eliminarMovimientosPorFecha()">
+        <button data-admin-only onclick="eliminarMovimientosPorFecha()">
             Eliminar movimientos de esa fecha
         </button>
 
-        <button onclick="limpiarMovimientosAntiguos()">
+        <button data-admin-only onclick="limpiarMovimientosAntiguos()">
             Eliminar movimientos antiguos
         </button>
     </div>
 </section>
 
         <!-- HISTORIAL DE CAMBIOS DE PRECIO -->
-         <section>
+         <section id="panel-precios" class="admin-panel" data-admin-only>
             <h2>Cambios de Precio</h2>
             
             <table class="tabla-inventario">
@@ -261,6 +278,8 @@
                 <tbody id="tablaCambiosPrecio"></tbody>
             </table>
         </section>
+            </main>
+        </div>
     </div>
 
 
@@ -269,7 +288,42 @@
 
 
 <script>
+    function activarPanelAdmin(idPanel) {
+        document.querySelectorAll(".admin-panel").forEach(function(panel) {
+            panel.classList.toggle("activo", panel.id === idPanel);
+        });
+
+        document.querySelectorAll(".admin-tab").forEach(function(tab) {
+            tab.classList.toggle("activo", tab.dataset.panelTarget === idPanel);
+        });
+    }
+
+    document.querySelectorAll(".admin-tab").forEach(function(tab) {
+        tab.addEventListener("click", function() {
+            activarPanelAdmin(tab.dataset.panelTarget);
+        });
+    });
+
+    function usuarioEsAdmin() {
+        return window.usuarioActual && window.usuarioActual.rol === "admin";
+    }
+
+    function usuarioEsVendedor() {
+        return window.usuarioActual && window.usuarioActual.rol === "vendedor";
+    }
+
+    function exigirAdminFrontend() {
+        if (!usuarioEsAdmin()) {
+            alert("Solo el administrador puede realizar esta acción.");
+            return false;
+        }
+
+        return true;
+    }
+
     async function agregarProductoBD() {
+        if (!exigirAdminFrontend()) return;
+
         const codigo = document.getElementById("inp-codigo").value.trim().toUpperCase();
         const nombre = document.getElementById("inp-nombre").value.trim();
         const marca = document.getElementById("inp-marca").value.trim();
@@ -336,6 +390,8 @@
     }
     
     async function cambiarEstadoProductoBD(idProducto, estadoActual) {
+        if (!exigirAdminFrontend()) return;
+
         let nuevoEstado = "";
         
         if (estadoActual === "inactivo") {
@@ -379,6 +435,7 @@
     }
 
     async function editarProductoBD(idProducto) {
+        if (!exigirAdminFrontend()) return;
 
         try {
             const respuestaProductos = await fetch("php/productos_listar.php");
@@ -657,6 +714,13 @@
             
             productosFiltrados.forEach(function(producto) {
                 let claseEstado = "stock-alto";
+                const accionesAdmin = usuarioEsAdmin()
+                    ? `
+                        <button onclick="editarProductoBD(${producto.id_producto})">Editar</button>
+                        <button onclick="cambiarEstadoProductoBD(${producto.id_producto}, '${producto.estado}')">
+                            ${producto.estado === "inactivo" ? "Activar" : "Desactivar"}</button>
+                    `
+                    : `<span>Solo lectura</span>`;
                 
                 if (producto.estado === "inactivo" || producto.estado === "agotado") {
                     claseEstado = "stock-bajo";
@@ -675,11 +739,7 @@
                     <td>${formatoPrecioBD(producto.precio)}</td>
                     <td>${producto.cantidad}</td>
                     <td class="${claseEstado}">${producto.estado}</td>
-                    <td>
-                        <button onclick="editarProductoBD(${producto.id_producto})">Editar</button>
-                        <button onclick="cambiarEstadoProductoBD(${producto.id_producto}, '${producto.estado}')">
-                            ${producto.estado === "inactivo" ? "Activar" : "Desactivar"}</button>
-                    </td>
+                    <td>${accionesAdmin}</td>
                 </tr>
                 `;
             });
@@ -749,11 +809,18 @@
         }
     }
     
-    cargarInventarioBD();
-    cargarHistorialVentasBD();
-    cargarReportesBD();
-    cargarMovimientosBD();
-    cargarCambiosPrecioBD();
+    function iniciarPanelBD() {
+        cargarInventarioBD();
+        cargarHistorialVentasBD();
+        cargarReportesBD();
+        cargarMovimientosBD();
+
+        if (usuarioEsAdmin()) {
+            cargarCambiosPrecioBD();
+        }
+    }
+
+    window.addEventListener("sesion-lista", iniciarPanelBD);
     
     const buscadorBD = document.getElementById("buscador");
     

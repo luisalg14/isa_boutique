@@ -1,6 +1,7 @@
 <?php
 
 require_once "conexion.php";
+require_once "auth_guard.php";
 
 header("Content-Type: application/json; charset=UTF-8");
 
@@ -120,8 +121,8 @@ try {
         $idCliente = $consultaInsertCliente->fetch()["id_cliente"];
     }
 
-    // Por ahora usamos el usuario administrador de prueba
-    $idUsuario = 1;
+    $usuarioActual = usuario_actual();
+    $idUsuario = $usuarioActual ? intval($usuarioActual["id_usuario"]) : 1;
 
     // Registrar venta
     $sqlVenta = "

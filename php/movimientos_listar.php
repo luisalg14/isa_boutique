@@ -1,10 +1,13 @@
 <?php
 
 require_once "conexion.php";
+require_once "auth_guard.php";
 
 header("Content-Type: application/json; charset=UTF-8");
 
 try {
+    exigir_roles(["admin", "vendedor"]);
+
     $sql = "
         SELECT
             mi.id_movimiento,
