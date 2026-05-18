@@ -770,8 +770,8 @@ $$;
 -- Usuarios
 INSERT INTO usuario_sistema (nombre, correo, contrasena, rol)
 VALUES 
-('Administrador Isa Boutique', 'admin@isaboutique.com', '123456', 'admin'),
-('Vendedora Principal', 'vendedora@isaboutique.com', '123456', 'vendedor');
+('Administrador Isa Boutique', 'admin@isaboutique.com', '$2y$10$HmR7pPGkUHD.X9tPVgdo2OQfKQdZZsQV2PIFZ03QuIGWBDkenEAOG', 'admin'),
+('Vendedora Principal', 'vendedora@isaboutique.com', '$2y$10$E3k6Q4/e43fy3o.w6oUhMONgNXxBvgq/YJUAre3QlNHqFfUEFFnYm', 'vendedor');
 
 
 -- Categorías

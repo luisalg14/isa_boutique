@@ -37,6 +37,40 @@ try {
         LEFT JOIN usuario_sistema u
             ON i.id_usuario = u.id_usuario
 
+        UNION ALL
+
+        SELECT
+            'Pago trabajador' AS clase,
+            p.id_pago_trabajador AS id_movimiento,
+            p.tipo_pago AS tipo,
+            t.nombre || ' - ' || t.cargo AS concepto,
+            -p.valor AS valor,
+            p.fecha,
+            p.detalle,
+            u.nombre AS usuario
+        FROM pago_trabajador p
+        INNER JOIN trabajador t
+            ON p.id_trabajador = t.id_trabajador
+        LEFT JOIN usuario_sistema u
+            ON p.id_usuario = u.id_usuario
+
+        UNION ALL
+
+        SELECT
+            'Compra mercancia' AS clase,
+            c.id_compra AS id_movimiento,
+            'mercancia' AS tipo,
+            COALESCE(pr.nombre, 'Sin proveedor') AS concepto,
+            -c.total_compra AS valor,
+            c.fecha,
+            c.detalle,
+            u.nombre AS usuario
+        FROM compra_mercancia c
+        LEFT JOIN proveedor pr
+            ON c.id_proveedor = pr.id_proveedor
+        LEFT JOIN usuario_sistema u
+            ON c.id_usuario = u.id_usuario
+
         ORDER BY fecha DESC, id_movimiento DESC
     ";
 

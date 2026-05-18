@@ -102,6 +102,7 @@
     <script>
         let productoSeleccionado = null;
         let productosCategoriaActual = [];
+        let categoriasDisponibles = [];
         let carrito = JSON.parse(localStorage.getItem("isa_carrito")) || [];
 
         function formatoPrecio(valor) {
@@ -266,19 +267,34 @@
             return parametros.get("tipo");
         }
 
-        function formatearNombreCategoria(categoria) {
-            const nombres = {
-                vestidos: "Vestidos",
-                blusas: "Blusas",
-                conjuntos: "Conjuntos",
-                shorts: "Shorts",
-                jeans: "Jeans",
-                bodys: "Bodys",
-                faldas: "Faldas",
-                accesorios: "Accesorios"
-            };
+        function etiquetaCategoria(nombre) {
+            return String(nombre || "")
+                .replace(/_/g, " ")
+                .replace(/\b\w/g, function(letra) {
+                    return letra.toUpperCase();
+                });
+        }
 
-            return nombres[categoria] || "Categoría";
+        async function cargarCategoriasDisponibles() {
+            try {
+                const respuesta = await fetch("php/categorias_listar.php?solo_activas=1");
+                const datos = await respuesta.json();
+
+                if (Array.isArray(datos)) {
+                    categoriasDisponibles = datos;
+                }
+            } catch (error) {
+                categoriasDisponibles = [];
+                console.error("No se pudieron cargar las categorias", error);
+            }
+        }
+
+        function formatearNombreCategoria(categoria) {
+            const categoriaBD = categoriasDisponibles.find(function(item) {
+                return item.nombre === categoria;
+            });
+
+            return categoriaBD ? etiquetaCategoria(categoriaBD.nombre) : etiquetaCategoria(categoria || "Categoria");
         }
 
         async function cargarCategoria() {
@@ -295,6 +311,18 @@
             }
 
             titulo.innerText = formatearNombreCategoria(tipoCategoria);
+
+            if (categoriasDisponibles.length > 0) {
+                const existeCategoria = categoriasDisponibles.some(function(item) {
+                    return item.nombre === tipoCategoria;
+                });
+
+                if (!existeCategoria) {
+                    titulo.innerText = "Categoría no disponible";
+                    contenedor.innerHTML = '<p style="text-align:center;">Esta categoría no está activa en el inventario.</p>';
+                    return;
+                }
+            }
 
             try {
                 const respuesta = await fetch("php/productos_listar.php");
@@ -327,7 +355,7 @@
                         '<h3>' + producto.nombre + '</h3>' +
                         '<p class="producto-meta">' + producto.marca + '</p>' +
                         '<p class="producto-precio">' + formatoPrecio(producto.precio) + '</p>' +
-                        '<p class="producto-stock">' + producto.cantidad + ' disponibles - ' + estadoTexto + '</p>' +
+                        '<p class="producto-stock">' + estadoTexto + '</p>' +
                         '<p class="producto-stock">' + textoTallas(producto.tallas) + '</p>' +
                         '<button class="boton-comprar" ' + (agotado ? "disabled" : "") + '>' +
                             (agotado ? "Agotado" : "Comprar") +
@@ -470,7 +498,7 @@
         });
 
         actualizarContadorCarrito();
-        cargarCategoria();
+        cargarCategoriasDisponibles().then(cargarCategoria);
     </script>
 
 </body>

@@ -9,7 +9,7 @@ try {
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
         echo json_encode([
             "error" => true,
-            "mensaje" => "Método no permitido"
+            "mensaje" => "Metodo no permitido"
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -20,7 +20,7 @@ try {
     if ($correo === "" || $contrasena === "") {
         echo json_encode([
             "error" => true,
-            "mensaje" => "Ingresa correo y contraseña"
+            "mensaje" => "Ingresa correo y contrasena"
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -33,23 +33,13 @@ try {
     ";
 
     $consulta = $conexion->prepare($sql);
-    $consulta->execute([
-        ":correo" => $correo
-    ]);
-
+    $consulta->execute([":correo" => $correo]);
     $usuario = $consulta->fetch();
 
-    $contrasenaCorrecta = false;
-
-    if ($usuario) {
-        $hashGuardado = $usuario["contrasena"];
-        $contrasenaCorrecta = password_verify($contrasena, $hashGuardado) || hash_equals($hashGuardado, $contrasena);
-    }
-
-    if (!$usuario || !$contrasenaCorrecta) {
+    if (!$usuario || !password_verify($contrasena, $usuario["contrasena"])) {
         echo json_encode([
             "error" => true,
-            "mensaje" => "Correo o contraseña incorrectos"
+            "mensaje" => "Correo o contrasena incorrectos"
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -57,10 +47,12 @@ try {
     if (!$usuario["estado"]) {
         echo json_encode([
             "error" => true,
-            "mensaje" => "Este usuario está inactivo"
+            "mensaje" => "Este usuario esta inactivo"
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
+
+    session_regenerate_id(true);
 
     $_SESSION["usuario"] = [
         "id_usuario" => intval($usuario["id_usuario"]),
@@ -71,14 +63,15 @@ try {
 
     echo json_encode([
         "error" => false,
-        "mensaje" => "Sesión iniciada correctamente",
+        "mensaje" => "Sesion iniciada correctamente",
         "usuario" => $_SESSION["usuario"]
     ], JSON_UNESCAPED_UNICODE);
 
 } catch (PDOException $e) {
+    error_log("Error en login: " . $e->getMessage());
     echo json_encode([
         "error" => true,
-        "mensaje" => $e->getMessage()
+        "mensaje" => "No se pudo iniciar sesion en este momento"
     ], JSON_UNESCAPED_UNICODE);
 }
 

@@ -54,9 +54,10 @@ try {
 
 } catch (PDOException $e) {
     header("Content-Type: application/json; charset=UTF-8");
+    error_log("Error productos_listar: " . $e->getMessage());
     echo json_encode([
         "error" => true,
-        "mensaje" => $e->getMessage()
+        "mensaje" => "No se pudieron cargar los productos"
     ]);
 }
 

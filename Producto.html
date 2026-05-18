@@ -38,14 +38,6 @@
                 <label class="filter-label" for="filtroCategoria">Categoria</label>
                 <select id="filtroCategoria">
                     <option value="">Todas</option>
-                    <option value="vestidos">Vestidos</option>
-                    <option value="blusas">Blusas</option>
-                    <option value="conjuntos">Conjuntos</option>
-                    <option value="shorts">Shorts</option>
-                    <option value="jeans">Jeans</option>
-                    <option value="bodys">Bodys</option>
-                    <option value="faldas">Faldas</option>
-                    <option value="accesorios">Accesorios</option>
                 </select>
 
                 <label class="filter-label" for="ordenProductos">Orden</label>
@@ -63,14 +55,6 @@
 
                 <div class="categoria-chips" id="categoriaChips">
                     <button class="chip activo" data-categoria="">Todo</button>
-                    <button class="chip" data-categoria="vestidos">Vestidos</button>
-                    <button class="chip" data-categoria="blusas">Blusas</button>
-                    <button class="chip" data-categoria="conjuntos">Conjuntos</button>
-                    <button class="chip" data-categoria="shorts">Shorts</button>
-                    <button class="chip" data-categoria="jeans">Jeans</button>
-                    <button class="chip" data-categoria="bodys">Bodys</button>
-                    <button class="chip" data-categoria="faldas">Faldas</button>
-                    <button class="chip" data-categoria="accesorios">Accesorios</button>
                 </div>
             </aside>
 
@@ -153,6 +137,7 @@
     <script>
         let productoSeleccionado = null;
         let productosCatalogo = [];
+        let categoriasCatalogo = [];
         let carrito = JSON.parse(localStorage.getItem("isa_carrito")) || [];
 
         const contenedor = document.getElementById("contenedor-productos");
@@ -167,18 +152,17 @@
         }
 
         function formatearCategoria(categoria) {
-            const nombres = {
-                vestidos: "Vestidos",
-                blusas: "Blusas",
-                conjuntos: "Conjuntos",
-                shorts: "Shorts",
-                jeans: "Jeans",
-                bodys: "Bodys",
-                faldas: "Faldas",
-                accesorios: "Accesorios"
-            };
+            const encontrada = categoriasCatalogo.find(function(item) {
+                return item.nombre === categoria;
+            });
 
-            return nombres[categoria] || categoria || "Sin categoria";
+            if (encontrada) {
+                return encontrada.nombre.replaceAll("-", " ").replace(/\b\w/g, function(letra) {
+                    return letra.toUpperCase();
+                });
+            }
+
+            return categoria ? categoria.replaceAll("-", " ") : "Sin categoria";
         }
 
         function leerTallas(tallas) {
@@ -479,6 +463,54 @@
             return productos;
         }
 
+        async function cargarCategoriasCatalogo() {
+            try {
+                const respuesta = await fetch("php/categorias_listar.php?solo_activas=1");
+                const categorias = await respuesta.json();
+
+                if (categorias.error) {
+                    console.error(categorias.mensaje);
+                    return;
+                }
+
+                categoriasCatalogo = categorias;
+                filtroCategoria.innerHTML = '<option value="">Todas</option>';
+                document.getElementById("categoriaChips").innerHTML = '<button class="chip activo" data-categoria="">Todo</button>';
+
+                categorias.forEach(function(categoria) {
+                    const texto = formatearCategoria(categoria.nombre);
+                    const opcion = document.createElement("option");
+                    opcion.value = categoria.nombre;
+                    opcion.textContent = texto;
+                    filtroCategoria.appendChild(opcion);
+
+                    const chip = document.createElement("button");
+                    chip.className = "chip";
+                    chip.dataset.categoria = categoria.nombre;
+                    chip.textContent = texto;
+                    chip.addEventListener("click", function() {
+                        filtroCategoria.value = chip.dataset.categoria;
+                        document.querySelectorAll(".chip").forEach(function(item) {
+                            item.classList.remove("activo");
+                        });
+                        chip.classList.add("activo");
+                        renderizarProductos();
+                    });
+                    document.getElementById("categoriaChips").appendChild(chip);
+                });
+
+                document.querySelector('.chip[data-categoria=""]')?.addEventListener("click", function() {
+                    filtroCategoria.value = "";
+                    document.querySelectorAll(".chip").forEach(function(item) {
+                        item.classList.toggle("activo", item.dataset.categoria === "");
+                    });
+                    renderizarProductos();
+                });
+            } catch (error) {
+                console.error("Error al cargar categorias", error);
+            }
+        }
+
         function renderizarProductos() {
             const productos = obtenerProductosFiltrados();
             const totalVisibles = productosCatalogo.filter(function(producto) {
@@ -509,7 +541,7 @@
                         '<h3>' + producto.nombre + '</h3>' +
                         '<p class="producto-meta">' + producto.marca + ' · ' + formatearCategoria(producto.categoria) + '</p>' +
                         '<p class="producto-precio">' + formatoPrecio(producto.precio) + '</p>' +
-                        '<p class="producto-stock">' + producto.cantidad + ' unidades disponibles</p>' +
+                        '<p class="producto-stock">' + estadoTexto + '</p>' +
                         '<p class="producto-stock">' + textoTallas(producto.tallas) + '</p>' +
                         '<button class="boton-comprar" ' + (agotado ? "disabled" : "") + '>' +
                             (agotado ? "Agotado" : "Comprar") +
@@ -575,19 +607,8 @@
         ordenProductos.addEventListener("change", renderizarProductos);
         soloDisponibles.addEventListener("change", renderizarProductos);
 
-        document.querySelectorAll(".chip").forEach(function(chip) {
-            chip.addEventListener("click", function() {
-                filtroCategoria.value = chip.dataset.categoria;
-                document.querySelectorAll(".chip").forEach(function(item) {
-                    item.classList.remove("activo");
-                });
-                chip.classList.add("activo");
-                renderizarProductos();
-            });
-        });
-
         actualizarContadorCarrito();
-        cargarProductos();
+        cargarCategoriasCatalogo().then(cargarProductos);
     </script>
 
 </body>

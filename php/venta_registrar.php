@@ -266,9 +266,10 @@ try {
         $conexion->rollBack();
     }
 
+    error_log("Error venta_registrar: " . $e->getMessage());
     echo json_encode([
         "error" => true,
-        "mensaje" => $e->getMessage()
+        "mensaje" => "No se pudo registrar la venta"
     ]);
 }
 

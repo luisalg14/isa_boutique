@@ -43,9 +43,10 @@ try {
         $conexion->rollBack();
     }
 
+    error_log("Error historial_eliminar: " . $e->getMessage());
     echo json_encode([
         "error" => true,
-        "mensaje" => $e->getMessage()
+        "mensaje" => "No se pudo eliminar el historial"
     ], JSON_UNESCAPED_UNICODE);
 }
 

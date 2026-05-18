@@ -174,9 +174,10 @@ try {
         $conexion->rollBack();
     }
 
+    error_log("Error producto_eliminar: " . $e->getMessage());
     echo json_encode([
         "error" => true,
-        "mensaje" => $e->getMessage()
+        "mensaje" => "No se pudo eliminar el producto"
     ], JSON_UNESCAPED_UNICODE);
 }
 

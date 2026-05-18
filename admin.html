@@ -45,11 +45,15 @@
                 <div class="admin-tabs-title">Gestión</div>
                 <button class="admin-tab activo" data-panel-target="panel-inventario">Inventario</button>
                 <button class="admin-tab" data-admin-only data-panel-target="panel-agregar">Agregar producto</button>
+                <button class="admin-tab" data-admin-only data-panel-target="panel-categorias">Categorias</button>
                 <button class="admin-tab" data-panel-target="panel-reportes">Reportes</button>
                 <button class="admin-tab" data-panel-target="panel-historial">Ventas y devoluciones</button>
                 <button class="admin-tab" data-panel-target="panel-movimientos">Movimientos</button>
                 <button class="admin-tab" data-admin-only data-panel-target="panel-finanzas">Finanzas</button>
+                <button class="admin-tab" data-admin-only data-panel-target="panel-proveedores">Proveedores y compras</button>
+                <button class="admin-tab" data-admin-only data-panel-target="panel-trabajadores">Trabajadores</button>
                 <button class="admin-tab" data-admin-only data-panel-target="panel-precios">Cambios de precio</button>
+                <button class="admin-tab" data-panel-target="panel-seguridad">Seguridad</button>
             </aside>
 
             <main class="admin-content">
@@ -78,14 +82,6 @@
                 <label>Categoría</label>
                 <select id="inp-tipo">
                     <option value="">Seleccionar</option>
-                    <option value="vestidos">Vestidos</option>
-                    <option value="blusas">Blusas</option>
-                    <option value="conjuntos">Conjuntos</option>
-                    <option value="shorts">Shorts</option>
-                    <option value="jeans">Jeans</option>
-                    <option value="bodys">Bodys</option>
-                    <option value="faldas">Faldas</option>
-                    <option value="accesorios">Accesorios</option>
                 </select>
             </div>
 
@@ -135,6 +131,41 @@
 
         </section>
 
+        <section id="panel-categorias" class="admin-panel" data-admin-only>
+            <h2>Categorias</h2>
+
+            <div class="finance-grid">
+                <form id="formCategoria" class="finance-form">
+                    <h3>Crear categoria</h3>
+
+                    <div class="campo">
+                        <label>Nombre</label>
+                        <input id="categoriaNombre" placeholder="Ej: enterizos">
+                    </div>
+
+                    <div class="campo">
+                        <label>Descripcion</label>
+                        <input id="categoriaDescripcion" placeholder="Ej: Enterizos y prendas completas">
+                    </div>
+
+                    <button class="btn btn-agregar" type="submit">Guardar categoria</button>
+                </form>
+            </div>
+
+            <table class="tabla-inventario">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Descripcion</th>
+                        <th>Productos</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaCategorias"></tbody>
+            </table>
+        </section>
+
 
         <!-- TABLA DE INVENTARIO -->
         <section id="panel-inventario" class="admin-panel activo">
@@ -170,7 +201,33 @@
         <section id="panel-reportes" class="admin-panel">
             <h2>Reportes</h2>
 
-            <div class="reportes">
+            <div class="admin-section-menu" data-submenu="panel-reportes">
+                <button type="button" class="activo" data-subsection-target="reportes-resumen">Resumen</button>
+                <button type="button" data-subsection-target="reportes-financiero">Rango financiero</button>
+                <button type="button" data-subsection-target="reportes-productos">Productos</button>
+                <button type="button" data-subsection-target="reportes-dias-pagos">Dias y pagos</button>
+            </div>
+
+            <form id="formReporteFechas" class="finance-form report-filter-form">
+                <h3>Consultar por rango de fechas</h3>
+
+                <div class="finance-grid">
+                    <div class="campo">
+                        <label>Fecha inicial</label>
+                        <input id="reporteFechaInicio" type="date">
+                    </div>
+
+                    <div class="campo">
+                        <label>Fecha final</label>
+                        <input id="reporteFechaFin" type="date">
+                    </div>
+                </div>
+
+                <button class="btn btn-agregar" type="submit">Actualizar reporte</button>
+            </form>
+
+            <div class="admin-subsection activo" data-subsection="reportes-resumen">
+            <div class="reportes reportes-generales">
     <div class="reporte-card">
         <h4>Total neto vendido</h4>
         <p id="totalVentas">$0</p>
@@ -216,6 +273,117 @@
         <p id="menorRotacion">-</p>
     </div>
 </div>
+            </div>
+
+            <div class="admin-subsection" data-subsection="reportes-financiero">
+            <h3 class="finance-subtitle">Resultado del rango seleccionado</h3>
+
+            <div class="reportes reportes-rango">
+                <div class="reporte-card">
+                    <h4>Ventas netas</h4>
+                    <p id="rangoVentasNetas">$0</p>
+                </div>
+
+                <div class="reporte-card">
+                    <h4>Costo mercancia</h4>
+                    <p id="rangoCostoMercancia">$0</p>
+                </div>
+
+                <div class="reporte-card">
+                    <h4>Utilidad bruta</h4>
+                    <p id="rangoUtilidadBruta">$0</p>
+                </div>
+
+                <div class="reporte-card">
+                    <h4>Gastos operativos</h4>
+                    <p id="rangoGastosOperativos">$0</p>
+                </div>
+
+                <div class="reporte-card">
+                    <h4>Compras mercancia</h4>
+                    <p id="rangoComprasMercancia">$0</p>
+                </div>
+
+                <div class="reporte-card">
+                    <h4>Utilidad neta</h4>
+                    <p id="rangoUtilidadNeta">$0</p>
+                </div>
+
+                <div class="reporte-card">
+                    <h4>Margen</h4>
+                    <p id="rangoMargen">0%</p>
+                </div>
+
+                <div class="reporte-card">
+                    <h4>Caja estimada</h4>
+                    <p id="rangoCaja">$0</p>
+                </div>
+            </div>
+
+            <div class="finance-breakdown" id="rangoDetalleFinanciero"></div>
+            </div>
+
+            <div class="admin-subsection" data-subsection="reportes-productos">
+            <div class="finance-grid reportes-productos-grid">
+                <div>
+                    <h3 class="finance-subtitle">Productos mas vendidos</h3>
+                    <table class="tabla-inventario">
+                        <thead>
+                            <tr>
+                                <th>Codigo</th>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Ventas</th>
+                                <th>Utilidad</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaProductosTop"></tbody>
+                    </table>
+                </div>
+
+                <div>
+                    <h3 class="finance-subtitle">Menor rotacion</h3>
+                    <table class="tabla-inventario">
+                        <thead>
+                            <tr>
+                                <th>Codigo</th>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Ventas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaMenorRotacion"></tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+
+            <div class="admin-subsection" data-subsection="reportes-dias-pagos">
+            <h3 class="finance-subtitle reportes-dia-title">Ventas por dia</h3>
+            <table class="tabla-inventario reportes-dia-table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Ventas</th>
+                        <th>Devoluciones</th>
+                        <th>Neto</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaVentasPorDia"></tbody>
+            </table>
+
+            <h3 class="finance-subtitle reportes-medios-title">Medios de pago</h3>
+            <table class="tabla-inventario reportes-medios-table">
+                <thead>
+                    <tr>
+                        <th>Medio</th>
+                        <th>Ventas</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaMediosPago"></tbody>
+            </table>
+            </div>
         </section>
 
         <section id="panel-historial" class="admin-panel">
@@ -285,7 +453,14 @@
         <section id="panel-finanzas" class="admin-panel" data-admin-only>
             <h2>Finanzas del negocio</h2>
 
-            <div class="reportes">
+            <div class="admin-section-menu" data-submenu="panel-finanzas">
+                <button type="button" class="activo" data-subsection-target="finanzas-resumen">Resumen</button>
+                <button type="button" data-subsection-target="finanzas-registrar">Registrar</button>
+                <button type="button" data-subsection-target="finanzas-movimientos">Movimientos</button>
+            </div>
+
+            <div class="admin-subsection activo" data-subsection="finanzas-resumen">
+            <div class="reportes finanzas-resumen">
                 <div class="reporte-card">
                     <h4>Ventas netas</h4>
                     <p id="finVentasNetas">$0</p>
@@ -312,6 +487,11 @@
                 </div>
 
                 <div class="reporte-card">
+                    <h4>Compras de mercancia</h4>
+                    <p id="finComprasMercancia">$0</p>
+                </div>
+
+                <div class="reporte-card">
                     <h4>Utilidad neta</h4>
                     <p id="finUtilidad">$0</p>
                 </div>
@@ -327,9 +507,11 @@
                 </div>
             </div>
 
-            <div class="finance-breakdown" id="finGastosDetalle"></div>
+            <div class="finance-breakdown finanzas-detalle" id="finGastosDetalle"></div>
+            </div>
 
-            <div class="finance-grid">
+            <div class="admin-subsection" data-subsection="finanzas-registrar">
+            <div class="finance-grid finanzas-registros">
                 <form id="formGasto" class="finance-form">
                     <h3>Registrar gasto</h3>
 
@@ -409,9 +591,11 @@
                     <button class="btn btn-agregar" type="submit">Guardar inversion</button>
                 </form>
             </div>
+            </div>
 
-            <h3 class="finance-subtitle">Movimientos financieros</h3>
-            <table class="tabla-inventario">
+            <div class="admin-subsection" data-subsection="finanzas-movimientos">
+            <h3 class="finance-subtitle finanzas-movimientos-title">Movimientos financieros</h3>
+            <table class="tabla-inventario finanzas-movimientos-table">
                 <thead>
                     <tr>
                         <th>Fecha</th>
@@ -425,6 +609,296 @@
                 </thead>
                 <tbody id="tablaFinanzas"></tbody>
             </table>
+            </div>
+        </section>
+
+        <section id="panel-proveedores" class="admin-panel" data-admin-only>
+            <h2>Proveedores y compras de mercancia</h2>
+
+            <div class="admin-section-menu" data-submenu="panel-proveedores">
+                <button type="button" class="activo" data-subsection-target="proveedores-registrar">Registrar</button>
+                <button type="button" data-subsection-target="proveedores-lista">Proveedores</button>
+                <button type="button" data-subsection-target="proveedores-compras">Compras</button>
+            </div>
+
+            <div class="admin-subsection activo" data-subsection="proveedores-registrar">
+            <div class="finance-grid proveedores-registros">
+                <form id="formProveedor" class="finance-form">
+                    <h3>Registrar proveedor</h3>
+
+                    <div class="campo">
+                        <label>Nombre</label>
+                        <input id="proveedorNombre" placeholder="Ej: Moda Colombia SAS">
+                    </div>
+
+                    <div class="campo">
+                        <label>Telefono</label>
+                        <input id="proveedorTelefono" placeholder="Telefono o WhatsApp">
+                    </div>
+
+                    <div class="campo">
+                        <label>Ciudad</label>
+                        <input id="proveedorCiudad" placeholder="Ej: Medellin">
+                    </div>
+
+                    <div class="campo">
+                        <label>Producto que suministra</label>
+                        <input id="proveedorProducto" placeholder="Ej: vestidos, blusas, accesorios">
+                    </div>
+
+                    <button class="btn btn-agregar" type="submit">Guardar proveedor</button>
+                </form>
+
+                <form id="formCompraMercancia" class="finance-form">
+                    <h3>Registrar compra de mercancia</h3>
+
+                    <div class="campo">
+                        <label>Proveedor</label>
+                        <select id="compraProveedor">
+                            <option value="">Sin proveedor</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Producto</label>
+                        <select id="compraProducto">
+                            <option value="">Seleccionar producto</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Talla</label>
+                        <select id="compraTalla">
+                            <option value="">Sin talla</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Cantidad</label>
+                        <input id="compraCantidad" type="number" min="1" placeholder="0">
+                    </div>
+
+                    <div class="campo">
+                        <label>Costo unitario</label>
+                        <input id="compraCostoUnitario" type="number" min="0" placeholder="0">
+                    </div>
+
+                    <button class="btn btn-agregar" type="button" id="btnAgregarItemCompra">Agregar producto a la compra</button>
+
+                    <div class="purchase-items-box">
+                        <div class="purchase-items-header">
+                            <div>
+                                <span>Detalle de compra</span>
+                                <strong>Productos en esta compra</strong>
+                            </div>
+                            <p id="resumenItemsCompraMercancia">0 productos agregados</p>
+                        </div>
+
+                        <div class="purchase-items-scroll">
+                            <table class="tabla-inventario purchase-items-table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Talla</th>
+                                        <th>Cantidad</th>
+                                        <th>Costo</th>
+                                        <th>Subtotal</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaItemsCompraMercancia">
+                                    <tr>
+                                        <td colspan="6">Agrega productos antes de guardar.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="campo">
+                        <label>Costo de envio o transporte</label>
+                        <input id="compraCostoEnvio" type="number" min="0" placeholder="0">
+                    </div>
+
+                    <div class="campo">
+                        <label>Fecha</label>
+                        <input id="compraFecha" type="date">
+                    </div>
+
+                    <div class="campo">
+                        <label>Detalle</label>
+                        <input id="compraDetalle" placeholder="Ej: Pedido inicial, factura, guia">
+                    </div>
+
+                    <button class="btn btn-agregar" type="submit">Guardar compra</button>
+                </form>
+            </div>
+            </div>
+
+            <div class="admin-subsection" data-subsection="proveedores-lista">
+            <h3 class="finance-subtitle proveedores-lista-title">Lista de proveedores</h3>
+            <table class="tabla-inventario proveedores-lista-table">
+                <thead>
+                    <tr>
+                        <th>Proveedor</th>
+                        <th>Telefono</th>
+                        <th>Ciudad</th>
+                        <th>Suministra</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaProveedores"></tbody>
+            </table>
+            </div>
+
+            <div class="admin-subsection" data-subsection="proveedores-compras">
+            <h3 class="finance-subtitle proveedores-compras-title">Historial de compras de mercancia</h3>
+            <table class="tabla-inventario proveedores-compras-table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Proveedor</th>
+                        <th>Codigo</th>
+                        <th>Producto</th>
+                        <th>Talla</th>
+                        <th>Cantidad</th>
+                        <th>Costo unitario</th>
+                        <th>Subtotal</th>
+                        <th>Envio</th>
+                        <th>Total</th>
+                        <th>Usuario</th>
+                        <th>Detalle</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaComprasMercancia"></tbody>
+            </table>
+            </div>
+        </section>
+
+        <section id="panel-trabajadores" class="admin-panel" data-admin-only>
+            <h2>Trabajadores</h2>
+
+            <div class="admin-section-menu" data-submenu="panel-trabajadores">
+                <button type="button" class="activo" data-subsection-target="trabajadores-registrar">Registrar</button>
+                <button type="button" data-subsection-target="trabajadores-lista">Trabajadores</button>
+                <button type="button" data-subsection-target="trabajadores-pagos">Pagos</button>
+            </div>
+
+            <div class="admin-subsection activo" data-subsection="trabajadores-registrar">
+            <div class="finance-grid trabajadores-registros">
+                <form id="formTrabajador" class="finance-form">
+                    <h3>Registrar trabajador</h3>
+
+                    <div class="campo">
+                        <label>Nombre</label>
+                        <input id="trabajadorNombre" placeholder="Nombre completo">
+                    </div>
+
+                    <div class="campo">
+                        <label>Documento</label>
+                        <input id="trabajadorDocumento" placeholder="Opcional">
+                    </div>
+
+                    <div class="campo">
+                        <label>Telefono</label>
+                        <input id="trabajadorTelefono" placeholder="Telefono o WhatsApp">
+                    </div>
+
+                    <div class="campo">
+                        <label>Cargo</label>
+                        <input id="trabajadorCargo" placeholder="Ej: Asesora de ventas">
+                    </div>
+
+                    <div class="campo">
+                        <label>Salario base</label>
+                        <input id="trabajadorSalario" type="number" min="0" placeholder="0">
+                    </div>
+
+                    <div class="campo">
+                        <label>Fecha de ingreso</label>
+                        <input id="trabajadorFechaIngreso" type="date">
+                    </div>
+
+                    <button class="btn btn-agregar" type="submit">Guardar trabajador</button>
+                </form>
+
+                <form id="formPagoTrabajador" class="finance-form">
+                    <h3>Registrar pago</h3>
+
+                    <div class="campo">
+                        <label>Trabajador</label>
+                        <select id="pagoTrabajadorSelect">
+                            <option value="">Seleccionar trabajador</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Tipo de pago</label>
+                        <select id="pagoTipo">
+                            <option value="salario">Salario</option>
+                            <option value="comision">Comision</option>
+                            <option value="adelanto">Adelanto</option>
+                            <option value="bono">Bono</option>
+                            <option value="deduccion">Deduccion</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Valor</label>
+                        <input id="pagoValor" type="number" min="1" placeholder="0">
+                    </div>
+
+                    <div class="campo">
+                        <label>Fecha</label>
+                        <input id="pagoFecha" type="date">
+                    </div>
+
+                    <div class="campo">
+                        <label>Detalle</label>
+                        <input id="pagoDetalle" placeholder="Opcional">
+                    </div>
+
+                    <button class="btn btn-agregar" type="submit">Guardar pago</button>
+                </form>
+            </div>
+            </div>
+
+            <div class="admin-subsection" data-subsection="trabajadores-lista">
+            <h3 class="finance-subtitle trabajadores-lista-title">Lista de trabajadores</h3>
+            <table class="tabla-inventario trabajadores-lista-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Documento</th>
+                        <th>Telefono</th>
+                        <th>Cargo</th>
+                        <th>Salario base</th>
+                        <th>Fecha ingreso</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaTrabajadores"></tbody>
+            </table>
+            </div>
+
+            <div class="admin-subsection" data-subsection="trabajadores-pagos">
+            <h3 class="finance-subtitle trabajadores-pagos-title">Historial de pagos</h3>
+            <table class="tabla-inventario trabajadores-pagos-table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Trabajador</th>
+                        <th>Cargo</th>
+                        <th>Tipo</th>
+                        <th>Valor</th>
+                        <th>Usuario</th>
+                        <th>Detalle</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaPagosTrabajadores"></tbody>
+            </table>
+            </div>
         </section>
 
         <!-- HISTORIAL DE CAMBIOS DE PRECIO -->
@@ -447,6 +921,56 @@
                 <tbody id="tablaCambiosPrecio"></tbody>
             </table>
         </section>
+
+        <section id="panel-seguridad" class="admin-panel">
+            <h2>Seguridad</h2>
+
+            <div class="finance-grid">
+                <form id="formCambiarPassword" class="finance-form">
+                    <h3>Cambiar mi contrasena</h3>
+
+                    <div class="campo">
+                        <label>Contrasena actual</label>
+                        <input id="passwordActual" type="password" autocomplete="current-password">
+                    </div>
+
+                    <div class="campo">
+                        <label>Nueva contrasena</label>
+                        <input id="passwordNueva" type="password" autocomplete="new-password">
+                    </div>
+
+                    <div class="campo">
+                        <label>Confirmar nueva contrasena</label>
+                        <input id="passwordConfirmar" type="password" autocomplete="new-password">
+                    </div>
+
+                    <button class="btn btn-agregar" type="submit">Actualizar mi contrasena</button>
+                </form>
+
+                <form id="formRestablecerPassword" class="finance-form" data-admin-only>
+                    <h3>Restablecer contrasena</h3>
+
+                    <div class="campo">
+                        <label>Usuario interno</label>
+                        <select id="passwordUsuarioSelect">
+                            <option value="">Seleccionar usuario</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Nueva contrasena</label>
+                        <input id="passwordResetNueva" type="password" autocomplete="new-password">
+                    </div>
+
+                    <div class="campo">
+                        <label>Confirmar nueva contrasena</label>
+                        <input id="passwordResetConfirmar" type="password" autocomplete="new-password">
+                    </div>
+
+                    <button class="btn btn-agregar" type="submit">Restablecer contrasena</button>
+                </form>
+            </div>
+        </section>
             </main>
         </div>
     </div>
@@ -466,6 +990,28 @@
             tab.classList.toggle("activo", tab.dataset.panelTarget === idPanel);
         });
     }
+
+    function activarSubseccionAdmin(menu, idSubseccion) {
+        const panel = menu.closest(".admin-panel");
+
+        if (!panel) return;
+
+        panel.querySelectorAll(".admin-subsection").forEach(function(seccion) {
+            seccion.classList.toggle("activo", seccion.dataset.subsection === idSubseccion);
+        });
+
+        menu.querySelectorAll("button").forEach(function(boton) {
+            boton.classList.toggle("activo", boton.dataset.subsectionTarget === idSubseccion);
+        });
+    }
+
+    document.querySelectorAll(".admin-section-menu").forEach(function(menu) {
+        menu.querySelectorAll("button").forEach(function(boton) {
+            boton.addEventListener("click", function() {
+                activarSubseccionAdmin(menu, boton.dataset.subsectionTarget);
+            });
+        });
+    });
 
     document.querySelectorAll(".admin-tab").forEach(function(tab) {
         tab.addEventListener("click", function() {
@@ -488,6 +1034,9 @@
     let modoTallas = "letras";
     let tallaSeleccionadaAdmin = "";
     let tallasSeleccionadasAdmin = {};
+    let productosCompraMercancia = [];
+    let itemsCompraMercancia = [];
+    let categoriasAdmin = [];
 
     function renderizarOpcionesTallas() {
         const contenedor = document.getElementById("sizeOptions");
@@ -982,9 +1531,135 @@
         }
     }
 
+    function definirFechasReporte() {
+        const inicio = document.getElementById("reporteFechaInicio");
+        const fin = document.getElementById("reporteFechaFin");
+
+        if (!inicio || !fin) return;
+
+        const hoy = new Date();
+        const primerDia = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+        const formato = function(fecha) {
+            return fecha.toISOString().slice(0, 10);
+        };
+
+        if (!inicio.value) {
+            inicio.value = formato(primerDia);
+        }
+
+        if (!fin.value) {
+            fin.value = formato(hoy);
+        }
+    }
+
+    function renderizarTablaProductosTop(productos) {
+        const tabla = document.getElementById("tablaProductosTop");
+
+        if (!tabla) return;
+
+        tabla.innerHTML = "";
+
+        if (!Array.isArray(productos) || productos.length === 0) {
+            tabla.innerHTML = '<tr><td colspan="5">No hay ventas en este rango</td></tr>';
+            return;
+        }
+
+        productos.forEach(function(producto) {
+            tabla.innerHTML += `
+                <tr>
+                    <td>${limpiarTextoBD(producto.codigo || "-")}</td>
+                    <td>${limpiarTextoBD(producto.producto)}</td>
+                    <td>${producto.cantidad}</td>
+                    <td>${formatoPrecioBD(producto.ventas)}</td>
+                    <td>${formatoPrecioBD(producto.utilidad)}</td>
+                </tr>
+            `;
+        });
+    }
+
+    function renderizarTablaMenorRotacion(productos) {
+        const tabla = document.getElementById("tablaMenorRotacion");
+
+        if (!tabla) return;
+
+        tabla.innerHTML = "";
+
+        if (!Array.isArray(productos) || productos.length === 0) {
+            tabla.innerHTML = '<tr><td colspan="4">No hay productos para analizar</td></tr>';
+            return;
+        }
+
+        productos.forEach(function(producto) {
+            tabla.innerHTML += `
+                <tr>
+                    <td>${limpiarTextoBD(producto.codigo || "-")}</td>
+                    <td>${limpiarTextoBD(producto.producto)}</td>
+                    <td>${producto.cantidad}</td>
+                    <td>${formatoPrecioBD(producto.ventas)}</td>
+                </tr>
+            `;
+        });
+    }
+
+    function renderizarTablaVentasPorDia(dias) {
+        const tabla = document.getElementById("tablaVentasPorDia");
+
+        if (!tabla) return;
+
+        tabla.innerHTML = "";
+
+        if (!Array.isArray(dias) || dias.length === 0) {
+            tabla.innerHTML = '<tr><td colspan="4">No hay movimientos en este rango</td></tr>';
+            return;
+        }
+
+        dias.forEach(function(dia) {
+            tabla.innerHTML += `
+                <tr>
+                    <td>${new Date(dia.fecha_dia + "T00:00:00").toLocaleDateString()}</td>
+                    <td>${formatoPrecioBD(dia.ventas)}</td>
+                    <td>${formatoPrecioBD(dia.devoluciones)}</td>
+                    <td>${formatoPrecioBD(dia.neto)}</td>
+                </tr>
+            `;
+        });
+    }
+
+    function renderizarTablaMediosPago(medios) {
+        const tabla = document.getElementById("tablaMediosPago");
+
+        if (!tabla) return;
+
+        tabla.innerHTML = "";
+
+        if (!Array.isArray(medios) || medios.length === 0) {
+            tabla.innerHTML = '<tr><td colspan="3">No hay ventas en este rango</td></tr>';
+            return;
+        }
+
+        medios.forEach(function(medio) {
+            tabla.innerHTML += `
+                <tr>
+                    <td>${limpiarTextoBD(medio.medio_pago)}</td>
+                    <td>${medio.ventas}</td>
+                    <td>${formatoPrecioBD(medio.total)}</td>
+                </tr>
+            `;
+        });
+    }
+
     async function cargarReportesBD() {
         try {
-            const respuesta = await fetch("php/reportes_admin.php");
+            definirFechasReporte();
+
+            const inicio = document.getElementById("reporteFechaInicio")?.value || "";
+            const fin = document.getElementById("reporteFechaFin")?.value || "";
+            const parametros = new URLSearchParams();
+
+            if (inicio) parametros.append("fecha_inicio", inicio);
+            if (fin) parametros.append("fecha_fin", fin);
+
+            const respuesta = await fetch("php/reportes_admin.php?" + parametros.toString());
             const reportes = await respuesta.json();
 
             if (reportes.error) {
@@ -1001,6 +1676,61 @@
             document.getElementById("netoMes").innerText = formatoPrecioBD(reportes.neto_mes);
             document.getElementById("productoTop").innerText = reportes.producto_top;
             document.getElementById("menorRotacion").innerText = reportes.menor_rotacion;
+
+            if (reportes.rango) {
+                const rango = reportes.rango;
+
+                document.getElementById("rangoVentasNetas").innerText = formatoPrecioBD(rango.ventas_netas);
+                document.getElementById("rangoCostoMercancia").innerText = formatoPrecioBD(rango.costo_mercancia);
+                document.getElementById("rangoUtilidadBruta").innerText = formatoPrecioBD(rango.utilidad_bruta);
+                document.getElementById("rangoGastosOperativos").innerText = formatoPrecioBD(rango.gastos_operativos);
+                document.getElementById("rangoComprasMercancia").innerText = formatoPrecioBD(rango.compras_mercancia);
+                document.getElementById("rangoUtilidadNeta").innerText = formatoPrecioBD(rango.utilidad_neta);
+                document.getElementById("rangoMargen").innerText = Number(rango.margen_ganancia || 0).toFixed(2) + "%";
+                document.getElementById("rangoCaja").innerText = formatoPrecioBD(rango.saldo_caja_estimado);
+
+                document.getElementById("rangoDetalleFinanciero").innerHTML = `
+                    <div class="report-detail-header">
+                        <span>Periodo consultado</span>
+                        <strong>${rango.fecha_inicio} al ${rango.fecha_fin}</strong>
+                    </div>
+                    <div class="report-detail-grid">
+                        <div>
+                            <span>Ventas brutas</span>
+                            <strong>${formatoPrecioBD(rango.ventas_brutas)}</strong>
+                        </div>
+                        <div>
+                            <span>Devoluciones</span>
+                            <strong>${formatoPrecioBD(rango.devoluciones)}</strong>
+                        </div>
+                        <div>
+                            <span>Gastos generales</span>
+                            <strong>${formatoPrecioBD(rango.gastos_generales)}</strong>
+                        </div>
+                        <div>
+                            <span>Nomina</span>
+                            <strong>${formatoPrecioBD(rango.nomina)}</strong>
+                        </div>
+                        <div>
+                            <span>Inversiones</span>
+                            <strong>${formatoPrecioBD(rango.inversiones)}</strong>
+                        </div>
+                        <div>
+                            <span>Costo sobre ventas</span>
+                            <strong>${Number(rango.porcentaje_costo || 0).toFixed(2)}%</strong>
+                        </div>
+                        <div>
+                            <span>Gastos sobre ventas</span>
+                            <strong>${Number(rango.porcentaje_gastos || 0).toFixed(2)}%</strong>
+                        </div>
+                    </div>
+                `;
+
+                renderizarTablaProductosTop(rango.productos_top);
+                renderizarTablaMenorRotacion(rango.menor_rotacion_lista);
+                renderizarTablaVentasPorDia(rango.ventas_por_dia);
+                renderizarTablaMediosPago(rango.medios_pago);
+            }
         
         } catch (error) {
             console.error("Error al cargar reportes desde PostgreSQL", error);
@@ -1159,6 +1889,23 @@
         return "$" + Number(valor).toLocaleString("es-CO");
     }
 
+    function limpiarTextoBD(valor) {
+        return String(valor || "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    function etiquetaCategoriaAdmin(nombre) {
+        return String(nombre || "")
+            .replaceAll("-", " ")
+            .replace(/\b\w/g, function(letra) {
+                return letra.toUpperCase();
+            });
+    }
+
     async function guardarGastoBD(evento) {
         evento.preventDefault();
 
@@ -1229,6 +1976,201 @@
         }
     }
 
+    async function guardarCategoriaBD(evento) {
+        evento.preventDefault();
+
+        if (!exigirAdminFrontend()) return;
+
+        const datos = new FormData();
+        datos.append("nombre", document.getElementById("categoriaNombre").value.trim());
+        datos.append("descripcion", document.getElementById("categoriaDescripcion").value.trim());
+
+        try {
+            const respuesta = await fetch("php/categoria_guardar.php", {
+                method: "POST",
+                body: datos
+            });
+            const resultado = await respuesta.json();
+
+            alert(resultado.mensaje);
+
+            if (!resultado.error) {
+                document.getElementById("formCategoria").reset();
+                await cargarCategoriasBD();
+            }
+        } catch (error) {
+            alert("Error al guardar categoria.");
+            console.error(error);
+        }
+    }
+
+    async function cargarCategoriasBD() {
+        const tabla = document.getElementById("tablaCategorias");
+        const selectorProducto = document.getElementById("inp-tipo");
+
+        try {
+            const respuesta = await fetch("php/categorias_listar.php");
+            const categorias = await respuesta.json();
+
+            if (categorias.error) {
+                if (tabla) {
+                    tabla.innerHTML = `<tr><td colspan="5">${categorias.mensaje}</td></tr>`;
+                }
+                return;
+            }
+
+            categoriasAdmin = categorias;
+
+            if (selectorProducto) {
+                const seleccionado = selectorProducto.value;
+                selectorProducto.innerHTML = '<option value="">Seleccionar</option>';
+
+                categorias
+                    .filter(function(categoria) {
+                        return categoria.estado;
+                    })
+                    .forEach(function(categoria) {
+                        const opcion = document.createElement("option");
+                        opcion.value = categoria.nombre;
+                        opcion.textContent = etiquetaCategoriaAdmin(categoria.nombre);
+                        selectorProducto.appendChild(opcion);
+                    });
+
+                selectorProducto.value = seleccionado;
+            }
+
+            if (!tabla) return;
+
+            tabla.innerHTML = "";
+
+            if (categorias.length === 0) {
+                tabla.innerHTML = '<tr><td colspan="5">No hay categorias registradas</td></tr>';
+                return;
+            }
+
+            categorias.forEach(function(categoria) {
+                const nuevoEstado = categoria.estado ? "0" : "1";
+                const textoEstado = categoria.estado ? "Desactivar" : "Activar";
+
+                tabla.innerHTML += `
+                    <tr>
+                        <td>${limpiarTextoBD(etiquetaCategoriaAdmin(categoria.nombre))}</td>
+                        <td>${limpiarTextoBD(categoria.descripcion || "-")}</td>
+                        <td>${categoria.total_productos}</td>
+                        <td class="${categoria.estado ? "stock-alto" : "stock-bajo"}">${categoria.estado ? "Activa" : "Inactiva"}</td>
+                        <td>
+                            <button onclick="editarCategoriaBD(${categoria.id_categoria})">Editar</button>
+                            <button onclick="cambiarEstadoCategoriaBD(${categoria.id_categoria}, '${nuevoEstado}')">${textoEstado}</button>
+                            <button class="btn-eliminar" onclick="eliminarCategoriaBD(${categoria.id_categoria})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            if (tabla) {
+                tabla.innerHTML = '<tr><td colspan="5">Error al cargar categorias</td></tr>';
+            }
+            console.error(error);
+        }
+    }
+
+    async function editarCategoriaBD(idCategoria) {
+        if (!exigirAdminFrontend()) return;
+
+        const categoria = categoriasAdmin.find(function(item) {
+            return Number(item.id_categoria) === Number(idCategoria);
+        });
+
+        if (!categoria) {
+            alert("Categoria no encontrada.");
+            return;
+        }
+
+        const nuevoNombre = prompt("Nombre de la categoria:", categoria.nombre);
+        if (nuevoNombre === null) return;
+
+        const nuevaDescripcion = prompt("Descripcion:", categoria.descripcion || "");
+        if (nuevaDescripcion === null) return;
+
+        const datos = new FormData();
+        datos.append("id_categoria", idCategoria);
+        datos.append("nombre", nuevoNombre.trim());
+        datos.append("descripcion", nuevaDescripcion.trim());
+
+        try {
+            const respuesta = await fetch("php/categoria_editar.php", {
+                method: "POST",
+                body: datos
+            });
+            const resultado = await respuesta.json();
+
+            alert(resultado.mensaje);
+
+            if (!resultado.error) {
+                await cargarCategoriasBD();
+                cargarInventarioBD();
+            }
+        } catch (error) {
+            alert("Error al editar categoria.");
+            console.error(error);
+        }
+    }
+
+    async function cambiarEstadoCategoriaBD(idCategoria, estado) {
+        if (!exigirAdminFrontend()) return;
+
+        const accion = estado === "1" ? "activar" : "desactivar";
+
+        if (!confirm("Deseas " + accion + " esta categoria?")) return;
+
+        const datos = new FormData();
+        datos.append("id_categoria", idCategoria);
+        datos.append("estado", estado);
+
+        try {
+            const respuesta = await fetch("php/categoria_cambiar_estado.php", {
+                method: "POST",
+                body: datos
+            });
+            const resultado = await respuesta.json();
+
+            alert(resultado.mensaje);
+
+            if (!resultado.error) {
+                await cargarCategoriasBD();
+            }
+        } catch (error) {
+            alert("Error al cambiar categoria.");
+            console.error(error);
+        }
+    }
+
+    async function eliminarCategoriaBD(idCategoria) {
+        if (!exigirAdminFrontend()) return;
+
+        if (!confirm("Deseas eliminar esta categoria? Solo se permite si no tiene productos.")) return;
+
+        const datos = new FormData();
+        datos.append("id_categoria", idCategoria);
+
+        try {
+            const respuesta = await fetch("php/categoria_eliminar.php", {
+                method: "POST",
+                body: datos
+            });
+            const resultado = await respuesta.json();
+
+            alert(resultado.mensaje);
+
+            if (!resultado.error) {
+                await cargarCategoriasBD();
+            }
+        } catch (error) {
+            alert("Error al eliminar categoria.");
+            console.error(error);
+        }
+    }
+
     async function cargarFinanzasBD() {
         const tabla = document.getElementById("tablaFinanzas");
 
@@ -1288,12 +2230,589 @@
             document.getElementById("finUtilidadBruta").innerText = formatoPrecioBD(resumen.utilidad_bruta);
             document.getElementById("finGastos").innerText = formatoPrecioBD(resumen.gastos);
             document.getElementById("finInversiones").innerText = formatoPrecioBD(resumen.inversiones);
+            document.getElementById("finComprasMercancia").innerText = formatoPrecioBD(resumen.compras_mercancia || 0);
             document.getElementById("finUtilidad").innerText = formatoPrecioBD(resumen.utilidad_neta);
             document.getElementById("finMargen").innerText = Number(resumen.margen_ganancia).toFixed(2) + "%";
             document.getElementById("finSaldo").innerText = formatoPrecioBD(resumen.saldo_estimado);
             renderizarDetalleGastosFinancieros(resumen);
         } catch (error) {
             console.error("Error al cargar resumen financiero", error);
+        }
+    }
+
+    async function guardarTrabajadorBD(evento) {
+        evento.preventDefault();
+
+        if (!exigirAdminFrontend()) return;
+
+        const datos = new FormData();
+        datos.append("nombre", document.getElementById("trabajadorNombre").value.trim());
+        datos.append("documento", document.getElementById("trabajadorDocumento").value.trim());
+        datos.append("telefono", document.getElementById("trabajadorTelefono").value.trim());
+        datos.append("cargo", document.getElementById("trabajadorCargo").value.trim());
+        datos.append("salario_base", document.getElementById("trabajadorSalario").value);
+        datos.append("fecha_ingreso", document.getElementById("trabajadorFechaIngreso").value);
+
+        try {
+            const respuesta = await fetch("php/trabajador_guardar.php", {
+                method: "POST",
+                body: datos
+            });
+            const resultado = await respuesta.json();
+
+            if (resultado.error) {
+                alert(resultado.mensaje);
+                return;
+            }
+
+            alert(resultado.mensaje);
+            document.getElementById("formTrabajador").reset();
+            definirFechasFinanzas();
+            cargarTrabajadoresBD();
+        } catch (error) {
+            alert("Error al registrar trabajador.");
+            console.error(error);
+        }
+    }
+
+    async function guardarPagoTrabajadorBD(evento) {
+        evento.preventDefault();
+
+        if (!exigirAdminFrontend()) return;
+
+        const datos = new FormData();
+        datos.append("id_trabajador", document.getElementById("pagoTrabajadorSelect").value);
+        datos.append("tipo_pago", document.getElementById("pagoTipo").value);
+        datos.append("valor", document.getElementById("pagoValor").value);
+        datos.append("fecha", document.getElementById("pagoFecha").value);
+        datos.append("detalle", document.getElementById("pagoDetalle").value.trim());
+
+        try {
+            const respuesta = await fetch("php/pago_trabajador_guardar.php", {
+                method: "POST",
+                body: datos
+            });
+            const resultado = await respuesta.json();
+
+            if (resultado.error) {
+                alert(resultado.mensaje);
+                return;
+            }
+
+            alert(resultado.mensaje);
+            document.getElementById("formPagoTrabajador").reset();
+            definirFechasFinanzas();
+            cargarPagosTrabajadoresBD();
+            cargarFinanzasBD();
+            cargarResumenFinancieroBD();
+        } catch (error) {
+            alert("Error al registrar pago.");
+            console.error(error);
+        }
+    }
+
+    async function cargarTrabajadoresBD() {
+        const tabla = document.getElementById("tablaTrabajadores");
+        const selector = document.getElementById("pagoTrabajadorSelect");
+
+        if (!tabla || !selector || !usuarioEsAdmin()) return;
+
+        try {
+            const respuesta = await fetch("php/trabajadores_listar.php");
+            const trabajadores = await respuesta.json();
+
+            tabla.innerHTML = "";
+            selector.innerHTML = '<option value="">Seleccionar trabajador</option>';
+
+            if (trabajadores.error) {
+                tabla.innerHTML = `<tr><td colspan="7">${trabajadores.mensaje}</td></tr>`;
+                return;
+            }
+
+            if (trabajadores.length === 0) {
+                tabla.innerHTML = '<tr><td colspan="7">No hay trabajadores registrados</td></tr>';
+                return;
+            }
+
+            trabajadores.forEach(function(trabajador) {
+                if (trabajador.estado) {
+                    const opcion = document.createElement("option");
+                    opcion.value = trabajador.id_trabajador;
+                    opcion.textContent = trabajador.nombre + " - " + trabajador.cargo;
+                    selector.appendChild(opcion);
+                }
+
+                tabla.innerHTML += `
+                    <tr>
+                        <td>${trabajador.nombre}</td>
+                        <td>${trabajador.documento || "-"}</td>
+                        <td>${trabajador.telefono || "-"}</td>
+                        <td>${trabajador.cargo}</td>
+                        <td>${formatoPrecioBD(trabajador.salario_base)}</td>
+                        <td>${new Date(trabajador.fecha_ingreso + "T00:00:00").toLocaleDateString()}</td>
+                        <td class="${trabajador.estado ? "stock-alto" : "stock-bajo"}">${trabajador.estado ? "Activo" : "Inactivo"}</td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            tabla.innerHTML = '<tr><td colspan="7">Error al cargar trabajadores</td></tr>';
+            console.error(error);
+        }
+    }
+
+    async function cargarPagosTrabajadoresBD() {
+        const tabla = document.getElementById("tablaPagosTrabajadores");
+
+        if (!tabla || !usuarioEsAdmin()) return;
+
+        try {
+            const respuesta = await fetch("php/pagos_trabajador_listar.php");
+            const pagos = await respuesta.json();
+
+            tabla.innerHTML = "";
+
+            if (pagos.error) {
+                tabla.innerHTML = `<tr><td colspan="7">${pagos.mensaje}</td></tr>`;
+                return;
+            }
+
+            if (pagos.length === 0) {
+                tabla.innerHTML = '<tr><td colspan="7">No hay pagos registrados</td></tr>';
+                return;
+            }
+
+            pagos.forEach(function(pago) {
+                tabla.innerHTML += `
+                    <tr>
+                        <td>${new Date(pago.fecha + "T00:00:00").toLocaleDateString()}</td>
+                        <td>${pago.trabajador}</td>
+                        <td>${pago.cargo}</td>
+                        <td>${pago.tipo_pago}</td>
+                        <td class="stock-bajo">${formatoPrecioBD(pago.valor)}</td>
+                        <td>${pago.usuario || "Sin usuario"}</td>
+                        <td>${pago.detalle || "Sin detalle"}</td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            tabla.innerHTML = '<tr><td colspan="7">Error al cargar pagos</td></tr>';
+            console.error(error);
+        }
+    }
+
+    async function guardarProveedorBD(evento) {
+        evento.preventDefault();
+
+        if (!exigirAdminFrontend()) return;
+
+        const datos = new FormData();
+        datos.append("nombre", document.getElementById("proveedorNombre").value.trim());
+        datos.append("telefono", document.getElementById("proveedorTelefono").value.trim());
+        datos.append("ciudad", document.getElementById("proveedorCiudad").value.trim());
+        datos.append("producto_suministra", document.getElementById("proveedorProducto").value.trim());
+
+        try {
+            const respuesta = await fetch("php/proveedor_guardar.php", {
+                method: "POST",
+                body: datos
+            });
+            const resultado = await respuesta.json();
+
+            if (resultado.error) {
+                alert(resultado.mensaje);
+                return;
+            }
+
+            alert(resultado.mensaje);
+            document.getElementById("formProveedor").reset();
+            cargarProveedoresBD();
+        } catch (error) {
+            alert("Error al registrar proveedor.");
+            console.error(error);
+        }
+    }
+
+    async function cargarProveedoresBD() {
+        const tabla = document.getElementById("tablaProveedores");
+        const selector = document.getElementById("compraProveedor");
+
+        if (!tabla || !selector || !usuarioEsAdmin()) return;
+
+        try {
+            const respuesta = await fetch("php/proveedores_listar.php");
+            const proveedores = await respuesta.json();
+
+            tabla.innerHTML = "";
+            selector.innerHTML = '<option value="">Sin proveedor</option>';
+
+            if (proveedores.error) {
+                tabla.innerHTML = `<tr><td colspan="5">${proveedores.mensaje}</td></tr>`;
+                return;
+            }
+
+            if (proveedores.length === 0) {
+                tabla.innerHTML = '<tr><td colspan="5">No hay proveedores registrados</td></tr>';
+                return;
+            }
+
+            proveedores.forEach(function(proveedor) {
+                if (proveedor.estado) {
+                    const opcion = document.createElement("option");
+                    opcion.value = proveedor.id_proveedor;
+                    opcion.textContent = proveedor.nombre;
+                    selector.appendChild(opcion);
+                }
+
+                tabla.innerHTML += `
+                    <tr>
+                        <td>${limpiarTextoBD(proveedor.nombre)}</td>
+                        <td>${limpiarTextoBD(proveedor.telefono || "-")}</td>
+                        <td>${limpiarTextoBD(proveedor.ciudad || "-")}</td>
+                        <td>${limpiarTextoBD(proveedor.producto_suministra || "-")}</td>
+                        <td class="${proveedor.estado ? "stock-alto" : "stock-bajo"}">${proveedor.estado ? "Activo" : "Inactivo"}</td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            tabla.innerHTML = '<tr><td colspan="5">Error al cargar proveedores</td></tr>';
+            console.error(error);
+        }
+    }
+
+    async function cargarProductosCompraMercanciaBD() {
+        const selector = document.getElementById("compraProducto");
+
+        if (!selector || !usuarioEsAdmin()) return;
+
+        try {
+            const respuesta = await fetch("php/productos_listar.php");
+            const productos = await respuesta.json();
+
+            selector.innerHTML = '<option value="">Seleccionar producto</option>';
+
+            if (productos.error) {
+                productosCompraMercancia = [];
+                return;
+            }
+
+            productosCompraMercancia = productos;
+
+            productos.forEach(function(producto) {
+                const opcion = document.createElement("option");
+                opcion.value = producto.id_producto;
+                opcion.textContent = `${producto.codigo} - ${producto.nombre}`;
+                opcion.dataset.costo = producto.costo_unitario || 0;
+                selector.appendChild(opcion);
+            });
+
+            actualizarTallasCompraMercancia();
+        } catch (error) {
+            productosCompraMercancia = [];
+            console.error(error);
+        }
+    }
+
+    function actualizarTallasCompraMercancia() {
+        const selectorProducto = document.getElementById("compraProducto");
+        const selectorTalla = document.getElementById("compraTalla");
+        const inputCosto = document.getElementById("compraCostoUnitario");
+
+        if (!selectorProducto || !selectorTalla) return;
+
+        const producto = productosCompraMercancia.find(function(item) {
+            return Number(item.id_producto) === Number(selectorProducto.value);
+        });
+
+        selectorTalla.innerHTML = '<option value="">Sin talla</option>';
+
+        if (!producto) return;
+
+        if (inputCosto && (!inputCosto.value || Number(inputCosto.value) === 0)) {
+            inputCosto.value = Number(producto.costo_unitario || 0);
+        }
+
+        const tallas = leerTallasBD(producto.tallas);
+        const tallasUnicas = [];
+
+        tallas.forEach(function(item) {
+            if (item.talla && !tallasUnicas.includes(item.talla)) {
+                tallasUnicas.push(item.talla);
+            }
+        });
+
+        tallasLetras.concat(tallasNumeros).forEach(function(talla) {
+            if (!tallasUnicas.includes(talla)) {
+                tallasUnicas.push(talla);
+            }
+        });
+
+        tallasUnicas.forEach(function(talla) {
+            const opcion = document.createElement("option");
+            opcion.value = talla;
+            opcion.textContent = talla;
+            selectorTalla.appendChild(opcion);
+        });
+    }
+
+    function renderizarItemsCompraMercancia() {
+        const tabla = document.getElementById("tablaItemsCompraMercancia");
+        const resumen = document.getElementById("resumenItemsCompraMercancia");
+
+        if (!tabla) return;
+
+        tabla.innerHTML = "";
+
+        if (resumen) {
+            const totalUnidades = itemsCompraMercancia.reduce(function(total, item) {
+                return total + Number(item.cantidad || 0);
+            }, 0);
+            const totalCompra = itemsCompraMercancia.reduce(function(total, item) {
+                return total + (Number(item.cantidad || 0) * Number(item.costo_unitario || 0));
+            }, 0);
+            resumen.textContent = itemsCompraMercancia.length + " productos | " + totalUnidades + " unidades | " + formatoPrecioBD(totalCompra);
+        }
+
+        if (itemsCompraMercancia.length === 0) {
+            tabla.innerHTML = '<tr><td colspan="6">Agrega productos antes de guardar.</td></tr>';
+            if (resumen) {
+                resumen.textContent = "0 productos agregados";
+            }
+            return;
+        }
+
+        itemsCompraMercancia.forEach(function(item, indice) {
+            tabla.innerHTML += `
+                <tr>
+                    <td>${limpiarTextoBD(item.producto_texto)}</td>
+                    <td>${limpiarTextoBD(item.talla || "-")}</td>
+                    <td>${item.cantidad}</td>
+                    <td>${formatoPrecioBD(item.costo_unitario)}</td>
+                    <td>${formatoPrecioBD(item.cantidad * item.costo_unitario)}</td>
+                    <td><button type="button" class="btn-eliminar" onclick="eliminarItemCompraMercancia(${indice})">Quitar</button></td>
+                </tr>
+            `;
+        });
+    }
+
+    function limpiarCamposItemCompraMercancia() {
+        document.getElementById("compraProducto").value = "";
+        document.getElementById("compraTalla").innerHTML = '<option value="">Sin talla</option>';
+        document.getElementById("compraCantidad").value = "";
+        document.getElementById("compraCostoUnitario").value = "";
+    }
+
+    function agregarItemCompraMercancia() {
+        if (!exigirAdminFrontend()) return;
+
+        const selectorProducto = document.getElementById("compraProducto");
+        const idProducto = Number(selectorProducto.value);
+        const producto = productosCompraMercancia.find(function(item) {
+            return Number(item.id_producto) === idProducto;
+        });
+        const talla = document.getElementById("compraTalla").value;
+        const cantidad = parseInt(document.getElementById("compraCantidad").value);
+        const costoUnitario = parseFloat(document.getElementById("compraCostoUnitario").value);
+
+        if (!producto || isNaN(cantidad) || cantidad <= 0 || isNaN(costoUnitario) || costoUnitario < 0) {
+            alert("Selecciona producto, cantidad y costo unitario validos.");
+            return;
+        }
+
+        itemsCompraMercancia.push({
+            id_producto: idProducto,
+            producto_texto: selectorProducto.options[selectorProducto.selectedIndex].textContent,
+            talla: talla,
+            cantidad: cantidad,
+            costo_unitario: costoUnitario
+        });
+
+        renderizarItemsCompraMercancia();
+        limpiarCamposItemCompraMercancia();
+    }
+
+    function eliminarItemCompraMercancia(indice) {
+        itemsCompraMercancia.splice(indice, 1);
+        renderizarItemsCompraMercancia();
+    }
+
+    async function guardarCompraMercanciaBD(evento) {
+        evento.preventDefault();
+
+        if (!exigirAdminFrontend()) return;
+
+        if (itemsCompraMercancia.length === 0) {
+            alert("Agrega al menos un producto a la compra.");
+            return;
+        }
+
+        const datos = new FormData();
+        datos.append("id_proveedor", document.getElementById("compraProveedor").value);
+        datos.append("items", JSON.stringify(itemsCompraMercancia.map(function(item) {
+            return {
+                id_producto: item.id_producto,
+                talla: item.talla,
+                cantidad: item.cantidad,
+                costo_unitario: item.costo_unitario
+            };
+        })));
+        datos.append("costo_envio", document.getElementById("compraCostoEnvio").value || 0);
+        datos.append("fecha", document.getElementById("compraFecha").value);
+        datos.append("detalle", document.getElementById("compraDetalle").value.trim());
+
+        try {
+            const respuesta = await fetch("php/compra_mercancia_guardar.php", {
+                method: "POST",
+                body: datos
+            });
+            const resultado = await respuesta.json();
+
+            if (resultado.error) {
+                alert(resultado.mensaje);
+                return;
+            }
+
+            alert(resultado.mensaje + "\nTotal compra: " + formatoPrecioBD(resultado.total_compra));
+            document.getElementById("formCompraMercancia").reset();
+            itemsCompraMercancia = [];
+            renderizarItemsCompraMercancia();
+            definirFechasFinanzas();
+            cargarProductosCompraMercanciaBD();
+            cargarComprasMercanciaBD();
+            cargarInventarioBD();
+            cargarMovimientosBD();
+            cargarFinanzasBD();
+            cargarResumenFinancieroBD();
+        } catch (error) {
+            alert("Error al registrar compra de mercancia.");
+            console.error(error);
+        }
+    }
+
+    async function cargarComprasMercanciaBD() {
+        const tabla = document.getElementById("tablaComprasMercancia");
+
+        if (!tabla || !usuarioEsAdmin()) return;
+
+        try {
+            const respuesta = await fetch("php/compras_mercancia_listar.php");
+            const compras = await respuesta.json();
+
+            tabla.innerHTML = "";
+
+            if (compras.error) {
+                tabla.innerHTML = `<tr><td colspan="12">${compras.mensaje}</td></tr>`;
+                return;
+            }
+
+            if (compras.length === 0) {
+                tabla.innerHTML = '<tr><td colspan="12">No hay compras de mercancia registradas</td></tr>';
+                return;
+            }
+
+            compras.forEach(function(compra) {
+                tabla.innerHTML += `
+                    <tr>
+                        <td>${new Date(compra.fecha + "T00:00:00").toLocaleDateString()}</td>
+                        <td>${limpiarTextoBD(compra.proveedor)}</td>
+                        <td>${limpiarTextoBD(compra.codigo || "-")}</td>
+                        <td>${limpiarTextoBD(compra.producto)}</td>
+                        <td>${limpiarTextoBD(compra.talla || "-")}</td>
+                        <td>${compra.cantidad}</td>
+                        <td>${formatoPrecioBD(compra.costo_unitario)}</td>
+                        <td>${formatoPrecioBD(compra.subtotal)}</td>
+                        <td>${formatoPrecioBD(compra.costo_envio)}</td>
+                        <td>${formatoPrecioBD(compra.total_compra)}</td>
+                        <td>${limpiarTextoBD(compra.usuario || "Sin usuario")}</td>
+                        <td>${limpiarTextoBD(compra.detalle || "Sin detalle")}</td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            tabla.innerHTML = '<tr><td colspan="12">Error al cargar compras de mercancia</td></tr>';
+            console.error(error);
+        }
+    }
+
+    async function cambiarPasswordPropioBD(evento) {
+        evento.preventDefault();
+
+        const datos = new FormData();
+        datos.append("modo", "propia");
+        datos.append("password_actual", document.getElementById("passwordActual").value);
+        datos.append("password_nueva", document.getElementById("passwordNueva").value);
+        datos.append("password_confirmar", document.getElementById("passwordConfirmar").value);
+
+        try {
+            const respuesta = await fetch("php/password_cambiar.php", {
+                method: "POST",
+                body: datos
+            });
+            const resultado = await respuesta.json();
+
+            alert(resultado.mensaje);
+
+            if (!resultado.error) {
+                document.getElementById("formCambiarPassword").reset();
+            }
+        } catch (error) {
+            alert("Error al cambiar la contrasena.");
+            console.error(error);
+        }
+    }
+
+    async function restablecerPasswordUsuarioBD(evento) {
+        evento.preventDefault();
+
+        if (!exigirAdminFrontend()) return;
+
+        const datos = new FormData();
+        datos.append("modo", "restablecer");
+        datos.append("id_usuario", document.getElementById("passwordUsuarioSelect").value);
+        datos.append("password_nueva", document.getElementById("passwordResetNueva").value);
+        datos.append("password_confirmar", document.getElementById("passwordResetConfirmar").value);
+
+        try {
+            const respuesta = await fetch("php/password_cambiar.php", {
+                method: "POST",
+                body: datos
+            });
+            const resultado = await respuesta.json();
+
+            alert(resultado.mensaje);
+
+            if (!resultado.error) {
+                document.getElementById("formRestablecerPassword").reset();
+            }
+        } catch (error) {
+            alert("Error al restablecer la contrasena.");
+            console.error(error);
+        }
+    }
+
+    async function cargarUsuariosSeguridadBD() {
+        const selector = document.getElementById("passwordUsuarioSelect");
+
+        if (!selector || !usuarioEsAdmin()) return;
+
+        try {
+            const respuesta = await fetch("php/usuarios_listar.php");
+            const usuarios = await respuesta.json();
+
+            selector.innerHTML = '<option value="">Seleccionar usuario</option>';
+
+            if (usuarios.error) {
+                console.error(usuarios.mensaje);
+                return;
+            }
+
+            usuarios.forEach(function(usuario) {
+                const opcion = document.createElement("option");
+                opcion.value = usuario.id_usuario;
+                opcion.textContent = `${usuario.nombre} - ${usuario.rol} - ${usuario.correo}`;
+                selector.appendChild(opcion);
+            });
+        } catch (error) {
+            console.error("Error al cargar usuarios", error);
         }
     }
 
@@ -1331,6 +2850,7 @@
                 <p>Costo mercancia: ${Number(resumen.porcentaje_costo_mercancia || 0).toFixed(2)}%</p>
                 <p>Gastos: ${Number(resumen.porcentaje_gastos || 0).toFixed(2)}%</p>
                 <p>Inversiones registradas: ${Number(resumen.porcentaje_inversiones || 0).toFixed(2)}%</p>
+                <p>Compras de mercancia: ${Number(resumen.porcentaje_compras_mercancia || 0).toFixed(2)}%</p>
             </div>
         `;
 
@@ -1352,6 +2872,7 @@
         const hoy = new Date().toISOString().slice(0, 10);
         const gastoFecha = document.getElementById("gastoFecha");
         const inversionFecha = document.getElementById("inversionFecha");
+        const compraFecha = document.getElementById("compraFecha");
 
         if (gastoFecha && !gastoFecha.value) {
             gastoFecha.value = hoy;
@@ -1359,6 +2880,21 @@
 
         if (inversionFecha && !inversionFecha.value) {
             inversionFecha.value = hoy;
+        }
+
+        if (compraFecha && !compraFecha.value) {
+            compraFecha.value = hoy;
+        }
+
+        const trabajadorFechaIngreso = document.getElementById("trabajadorFechaIngreso");
+        const pagoFecha = document.getElementById("pagoFecha");
+
+        if (trabajadorFechaIngreso && !trabajadorFechaIngreso.value) {
+            trabajadorFechaIngreso.value = hoy;
+        }
+
+        if (pagoFecha && !pagoFecha.value) {
+            pagoFecha.value = hoy;
         }
     }
 
@@ -1440,6 +2976,7 @@
     }
     
     function iniciarPanelBD() {
+        cargarCategoriasBD();
         cargarInventarioBD();
         cargarHistorialVentasBD();
         cargarReportesBD();
@@ -1450,6 +2987,12 @@
             cargarCambiosPrecioBD();
             cargarFinanzasBD();
             cargarResumenFinancieroBD();
+            cargarTrabajadoresBD();
+            cargarPagosTrabajadoresBD();
+            cargarProveedoresBD();
+            cargarProductosCompraMercanciaBD();
+            cargarComprasMercanciaBD();
+            cargarUsuariosSeguridadBD();
         }
     }
 
@@ -1463,6 +3006,16 @@
 
     const formGasto = document.getElementById("formGasto");
     const formInversion = document.getElementById("formInversion");
+    const formCategoria = document.getElementById("formCategoria");
+    const formTrabajador = document.getElementById("formTrabajador");
+    const formPagoTrabajador = document.getElementById("formPagoTrabajador");
+    const formProveedor = document.getElementById("formProveedor");
+    const formCompraMercancia = document.getElementById("formCompraMercancia");
+    const compraProducto = document.getElementById("compraProducto");
+    const btnAgregarItemCompra = document.getElementById("btnAgregarItemCompra");
+    const formCambiarPassword = document.getElementById("formCambiarPassword");
+    const formRestablecerPassword = document.getElementById("formRestablecerPassword");
+    const formReporteFechas = document.getElementById("formReporteFechas");
 
     if (formGasto) {
         formGasto.addEventListener("submit", guardarGastoBD);
@@ -1470,6 +3023,49 @@
 
     if (formInversion) {
         formInversion.addEventListener("submit", guardarInversionBD);
+    }
+
+    if (formCategoria) {
+        formCategoria.addEventListener("submit", guardarCategoriaBD);
+    }
+
+    if (formTrabajador) {
+        formTrabajador.addEventListener("submit", guardarTrabajadorBD);
+    }
+
+    if (formPagoTrabajador) {
+        formPagoTrabajador.addEventListener("submit", guardarPagoTrabajadorBD);
+    }
+
+    if (formProveedor) {
+        formProveedor.addEventListener("submit", guardarProveedorBD);
+    }
+
+    if (formCompraMercancia) {
+        formCompraMercancia.addEventListener("submit", guardarCompraMercanciaBD);
+    }
+
+    if (compraProducto) {
+        compraProducto.addEventListener("change", actualizarTallasCompraMercancia);
+    }
+
+    if (btnAgregarItemCompra) {
+        btnAgregarItemCompra.addEventListener("click", agregarItemCompraMercancia);
+    }
+
+    if (formCambiarPassword) {
+        formCambiarPassword.addEventListener("submit", cambiarPasswordPropioBD);
+    }
+
+    if (formRestablecerPassword) {
+        formRestablecerPassword.addEventListener("submit", restablecerPasswordUsuarioBD);
+    }
+
+    if (formReporteFechas) {
+        formReporteFechas.addEventListener("submit", function(evento) {
+            evento.preventDefault();
+            cargarReportesBD();
+        });
     }
 
     async function cargarCambiosPrecioBD() {

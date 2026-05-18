@@ -726,6 +726,71 @@ h2 {
     font-size: 14px;
 }
 
+.purchase-items-box {
+    grid-column: 1 / -1;
+    margin: 10px 0 18px;
+    padding: 16px;
+    border: 1px solid #ead8d2;
+    background: #fff8f5;
+}
+
+.purchase-items-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.purchase-items-header span {
+    display: block;
+    color: #8b7774;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.purchase-items-header strong {
+    display: block;
+    margin-top: 4px;
+    color: #954053;
+    font-family: "Libre Caslon Text", Georgia, serif;
+    font-size: 22px;
+    font-weight: 400;
+}
+
+.purchase-items-header p {
+    margin: 0;
+    color: #544245;
+    font-weight: 700;
+    text-align: right;
+}
+
+.purchase-items-scroll {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #ead8d2;
+    background: #fff;
+}
+
+.purchase-items-table {
+    min-width: 680px;
+    margin: 0;
+    box-shadow: none;
+}
+
+.purchase-items-table th,
+.purchase-items-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+}
+
+.purchase-items-table button {
+    padding: 8px 10px;
+    font-size: 12px;
+}
+
 /* ===============================
    FILTROS Y TABLAS
 ================================ */
@@ -2109,6 +2174,8 @@ button.cart-link {
 
 .admin-page .admin-tabs {
     top: 94px;
+    max-height: calc(100vh - 112px);
+    overflow-y: auto;
     padding: 18px;
     border-color: #d9c1c3;
     background: rgba(255, 255, 255, 0.84);
@@ -2194,6 +2261,108 @@ button.cart-link {
 
 .admin-page .reportes {
     grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.admin-page .report-filter-form {
+    margin-bottom: 24px;
+    max-width: none;
+}
+
+.admin-page .report-filter-form .finance-grid {
+    margin: 0 0 16px;
+}
+
+.admin-section-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    margin: 0 0 24px;
+    padding: 0;
+    border: 1px solid #ead8d2;
+    background: #fff;
+    overflow-x: auto;
+}
+
+.admin-section-menu button {
+    min-height: 44px;
+    padding: 10px 18px;
+    border: 0;
+    border-right: 1px solid #ead8d2;
+    background: transparent;
+    color: #544245;
+    cursor: pointer;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.admin-section-menu button:last-child {
+    border-right: 0;
+}
+
+.admin-section-menu button:hover,
+.admin-section-menu button.activo {
+    background: #954053;
+    color: #fff;
+}
+
+.admin-subsection {
+    display: none;
+}
+
+.admin-subsection.activo {
+    display: block;
+}
+
+.admin-page #rangoDetalleFinanciero {
+    display: block;
+    margin: 22px 0 30px;
+    padding: 22px;
+    border: 1px solid #d9c1c3;
+    background: #fff8f5;
+}
+
+.admin-page .report-detail-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #ead8d2;
+}
+
+.admin-page .report-detail-header span,
+.admin-page .report-detail-grid span {
+    color: #7d6866;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.admin-page .report-detail-header strong {
+    color: #954053;
+    font-family: "Libre Caslon Text", Georgia, serif;
+    font-size: 20px;
+    font-weight: 400;
+}
+
+.admin-page .report-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 14px;
+    padding-top: 16px;
+}
+
+.admin-page .report-detail-grid div {
+    padding: 14px;
+    border: 1px solid #ead8d2;
+    background: #fff;
+}
+
+.admin-page .report-detail-grid strong {
+    display: block;
+    margin-top: 8px;
+    color: #372f2a;
+    font-size: 18px;
 }
 
 .admin-page .reporte-card {

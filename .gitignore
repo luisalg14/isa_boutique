@@ -1,0 +1,7 @@
+php/config.local.php
+database/backups/
+publicacion_isa_boutique*/
+.env
+*.log
+Thumbs.db
+desktop.ini

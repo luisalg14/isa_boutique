@@ -25,6 +25,11 @@ try {
         FROM gasto_negocio
     ")->fetch()["total"];
 
+    $pagosTrabajadores = $conexion->query("
+        SELECT COALESCE(SUM(valor), 0) AS total
+        FROM pago_trabajador
+    ")->fetch()["total"];
+
     $costoMercancia = $conexion->query("
         SELECT COALESCE(SUM(subtotal_costo), 0) AS total
         FROM detalle_venta
@@ -41,6 +46,11 @@ try {
     $inversiones = $conexion->query("
         SELECT COALESCE(SUM(valor), 0) AS total
         FROM inversion_negocio
+    ")->fetch()["total"];
+
+    $comprasMercancia = $conexion->query("
+        SELECT COALESCE(SUM(total_compra), 0) AS total
+        FROM compra_mercancia
     ")->fetch()["total"];
 
     $ventasMes = $conexion->query("
@@ -60,6 +70,12 @@ try {
     $gastosMes = $conexion->query("
         SELECT COALESCE(SUM(valor), 0) AS total
         FROM gasto_negocio
+        WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_DATE)
+    ")->fetch()["total"];
+
+    $pagosTrabajadoresMes = $conexion->query("
+        SELECT COALESCE(SUM(valor), 0) AS total
+        FROM pago_trabajador
         WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_DATE)
     ")->fetch()["total"];
 
@@ -86,14 +102,22 @@ try {
         WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_DATE)
     ")->fetch()["total"];
 
+    $comprasMercanciaMes = $conexion->query("
+        SELECT COALESCE(SUM(total_compra), 0) AS total
+        FROM compra_mercancia
+        WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_DATE)
+    ")->fetch()["total"];
+
     $netoVentas = floatval($ventas) - floatval($devoluciones);
     $netoVentasMes = floatval($ventasMes) - floatval($devolucionesMes);
     $costoNetoMercancia = floatval($costoMercancia) - floatval($costoDevuelto);
     $costoNetoMercanciaMes = floatval($costoMercanciaMes) - floatval($costoDevueltoMes);
     $utilidadBruta = $netoVentas - $costoNetoMercancia;
     $utilidadBrutaMes = $netoVentasMes - $costoNetoMercanciaMes;
-    $utilidadNeta = $utilidadBruta - floatval($gastos);
-    $utilidadNetaMes = $utilidadBrutaMes - floatval($gastosMes);
+    $totalGastosOperativos = floatval($gastos) + floatval($pagosTrabajadores);
+    $totalGastosOperativosMes = floatval($gastosMes) + floatval($pagosTrabajadoresMes);
+    $utilidadNeta = $utilidadBruta - $totalGastosOperativos;
+    $utilidadNetaMes = $utilidadBrutaMes - $totalGastosOperativosMes;
 
     $consultaGastosTipo = $conexion->query("
         SELECT tipo, COALESCE(SUM(valor), 0) AS total
@@ -106,6 +130,10 @@ try {
 
     foreach ($consultaGastosTipo->fetchAll() as $gastoTipo) {
         $gastosPorTipo[$gastoTipo["tipo"]] = floatval($gastoTipo["total"]);
+    }
+
+    if (floatval($pagosTrabajadores) > 0) {
+        $gastosPorTipo["nomina"] = ($gastosPorTipo["nomina"] ?? 0) + floatval($pagosTrabajadores);
     }
 
     function porcentaje_financiero($valor, $base) {
@@ -123,24 +151,33 @@ try {
         "ventas_netas" => $netoVentas,
         "costo_mercancia" => $costoNetoMercancia,
         "utilidad_bruta" => $utilidadBruta,
-        "gastos" => floatval($gastos),
+        "gastos" => $totalGastosOperativos,
+        "gastos_generales" => floatval($gastos),
+        "pagos_trabajadores" => floatval($pagosTrabajadores),
         "inversiones" => floatval($inversiones),
+        "compras_mercancia" => floatval($comprasMercancia),
         "utilidad_estimada" => $utilidadNeta,
         "utilidad_neta" => $utilidadNeta,
         "saldo_estimado" => floatval($inversiones) + $utilidadNeta,
+        "saldo_caja_estimado" => floatval($inversiones) + $netoVentas - $totalGastosOperativos - floatval($comprasMercancia),
         "margen_ganancia" => porcentaje_financiero($utilidadNeta, $netoVentas),
         "porcentaje_costo_mercancia" => porcentaje_financiero($costoNetoMercancia, $netoVentas),
-        "porcentaje_gastos" => porcentaje_financiero($gastos, $netoVentas),
+        "porcentaje_gastos" => porcentaje_financiero($totalGastosOperativos, $netoVentas),
         "porcentaje_inversiones" => porcentaje_financiero($inversiones, $netoVentas),
+        "porcentaje_compras_mercancia" => porcentaje_financiero($comprasMercancia, $netoVentas),
         "gastos_por_tipo" => $gastosPorTipo,
         "ventas_netas_mes" => $netoVentasMes,
         "costo_mercancia_mes" => $costoNetoMercanciaMes,
         "utilidad_bruta_mes" => $utilidadBrutaMes,
-        "gastos_mes" => floatval($gastosMes),
+        "gastos_mes" => $totalGastosOperativosMes,
+        "gastos_generales_mes" => floatval($gastosMes),
+        "pagos_trabajadores_mes" => floatval($pagosTrabajadoresMes),
         "inversiones_mes" => floatval($inversionesMes),
+        "compras_mercancia_mes" => floatval($comprasMercanciaMes),
         "utilidad_estimada_mes" => $utilidadNetaMes,
         "utilidad_neta_mes" => $utilidadNetaMes,
         "saldo_estimado_mes" => floatval($inversionesMes) + $utilidadNetaMes,
+        "saldo_caja_estimado_mes" => floatval($inversionesMes) + $netoVentasMes - $totalGastosOperativosMes - floatval($comprasMercanciaMes),
         "margen_ganancia_mes" => porcentaje_financiero($utilidadNetaMes, $netoVentasMes)
     ], JSON_UNESCAPED_UNICODE);
 
