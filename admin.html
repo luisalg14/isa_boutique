@@ -42,21 +42,222 @@
 
         <div class="admin-shell">
             <aside class="admin-tabs">
-                <div class="admin-tabs-title">Gestión</div>
-                <button class="admin-tab activo" data-panel-target="panel-inventario">Inventario</button>
-                <button class="admin-tab" data-admin-only data-panel-target="panel-agregar">Agregar producto</button>
-                <button class="admin-tab" data-admin-only data-panel-target="panel-categorias">Categorias</button>
-                <button class="admin-tab" data-panel-target="panel-reportes">Reportes</button>
-                <button class="admin-tab" data-panel-target="panel-historial">Ventas y devoluciones</button>
-                <button class="admin-tab" data-panel-target="panel-movimientos">Movimientos</button>
-                <button class="admin-tab" data-admin-only data-panel-target="panel-finanzas">Finanzas</button>
-                <button class="admin-tab" data-admin-only data-panel-target="panel-proveedores">Proveedores y compras</button>
-                <button class="admin-tab" data-admin-only data-panel-target="panel-trabajadores">Trabajadores</button>
-                <button class="admin-tab" data-admin-only data-panel-target="panel-precios">Cambios de precio</button>
-                <button class="admin-tab" data-panel-target="panel-seguridad">Seguridad</button>
+                <div class="admin-tabs-title">Panel</div>
+                <button class="admin-tab activo" data-panel-target="panel-inicio">Inicio</button>
+                <button class="admin-tab" data-panel-target="panel-menu-inventario">Inventario</button>
+                <button class="admin-tab" data-panel-target="panel-menu-ventas">Ventas</button>
+                <button class="admin-tab" data-admin-only data-panel-target="panel-menu-finanzas">Finanzas</button>
+                <button class="admin-tab" data-admin-only data-panel-target="panel-menu-personas">Personas</button>
+                <button class="admin-tab" data-panel-target="panel-menu-configuracion">Configuracion</button>
             </aside>
 
             <main class="admin-content">
+
+        <section id="panel-inicio" class="admin-panel activo">
+            <div class="dashboard-hero">
+                <div>
+                    <span>Resumen general</span>
+                    <h2>Inicio</h2>
+                    <p>Vista rápida del estado de Isa Boutique para tomar decisiones sin entrar a cada módulo.</p>
+                </div>
+                <button class="btn btn-agregar" type="button" onclick="activarPanelAdmin('panel-menu-ventas')">Ver ventas</button>
+            </div>
+
+            <div class="dashboard-cards">
+                <div class="dashboard-card">
+                    <span>Ventas de hoy</span>
+                    <strong id="inicioVentasHoy">$0</strong>
+                </div>
+                <div class="dashboard-card">
+                    <span>Productos activos</span>
+                    <strong id="inicioProductosActivos">0</strong>
+                </div>
+                <div class="dashboard-card">
+                    <span>Bajo stock</span>
+                    <strong id="inicioBajoStock">0</strong>
+                </div>
+                <div class="dashboard-card">
+                    <span>Ganancia del mes</span>
+                    <strong id="inicioGananciaMes">$0</strong>
+                </div>
+            </div>
+
+            <div class="dashboard-panel">
+                <div class="dashboard-panel-header">
+                    <div>
+                        <span>Actividad reciente</span>
+                        <h3>Últimos movimientos</h3>
+                    </div>
+                    <button type="button" onclick="activarPanelAdmin('panel-movimientos')">Ver todo</button>
+                </div>
+                <div id="inicioUltimosMovimientos" class="dashboard-movement-list"></div>
+            </div>
+        </section>
+
+        <section id="panel-menu-inventario" class="admin-panel">
+            <h2>Inventario</h2>
+            <div class="admin-module-grid">
+                <button type="button" onclick="activarPanelAdmin('panel-inventario')">
+                    <span>Productos</span>
+                    <strong>Ver y buscar inventario</strong>
+                </button>
+                <button type="button" data-admin-only onclick="activarPanelAdmin('panel-agregar')">
+                    <span>Agregar producto</span>
+                    <strong>Registrar nuevas prendas</strong>
+                </button>
+                <button type="button" data-admin-only onclick="activarPanelAdmin('panel-categorias')">
+                    <span>Categorías</span>
+                    <strong>Crear y organizar líneas</strong>
+                </button>
+                <button type="button" onclick="activarPanelAdmin('panel-movimientos')">
+                    <span>Movimientos</span>
+                    <strong>Entradas, ventas y ajustes</strong>
+                </button>
+                <button type="button" data-admin-only onclick="activarPanelAdmin('panel-precios')">
+                    <span>Cambios de precio</span>
+                    <strong>Historial de precios</strong>
+                </button>
+            </div>
+        </section>
+
+        <section id="panel-menu-ventas" class="admin-panel">
+            <h2>Ventas</h2>
+            <div class="admin-module-grid">
+                <button type="button" onclick="activarPanelAdmin('panel-venta-interna')">
+                    <span>Registrar venta</span>
+                    <strong>Venta en tienda, WhatsApp o atención directa</strong>
+                </button>
+                <button type="button" onclick="activarPanelAdmin('panel-historial')">
+                    <span>Ventas e historial</span>
+                    <strong>Compras, clientes y devoluciones</strong>
+                </button>
+                <button type="button" onclick="activarPanelAdmin('panel-reportes')">
+                    <span>Reportes de ventas</span>
+                    <strong>Fechas, productos y medios de pago</strong>
+                </button>
+            </div>
+        </section>
+
+        <section id="panel-venta-interna" class="admin-panel">
+            <div class="vendedor-panel-header">
+                <div>
+                    <span>Venta interna</span>
+                    <h2>Registrar venta</h2>
+                </div>
+                <p>Registra compras realizadas en tienda física, WhatsApp o atención directa.</p>
+            </div>
+
+            <div class="venta-layout">
+                <form id="formVentaAdmin" class="venta-form">
+                    <div class="campo">
+                        <label>Producto</label>
+                        <select id="ventaAdminProducto" required>
+                            <option value="">Seleccionar producto</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Talla</label>
+                        <select id="ventaAdminTalla" required>
+                            <option value="">Seleccionar talla</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Cliente</label>
+                        <input id="ventaAdminCliente" placeholder="Nombre del cliente" required>
+                    </div>
+
+                    <div class="campo">
+                        <label>Telefono</label>
+                        <input id="ventaAdminTelefono" placeholder="Telefono o WhatsApp" required>
+                    </div>
+
+                    <div class="campo">
+                        <label>Cantidad</label>
+                        <input id="ventaAdminCantidad" type="number" min="1" value="1" required>
+                    </div>
+
+                    <div class="campo">
+                        <label>Medio de pago</label>
+                        <select id="ventaAdminMedioPago" required>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="transferencia">Transferencia</option>
+                            <option value="tarjeta_debito">Tarjeta debito</option>
+                            <option value="tarjeta_credito">Tarjeta credito</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Canal de venta</label>
+                        <select id="ventaAdminCanal" required>
+                            <option value="tienda_fisica">Tienda fisica</option>
+                            <option value="whatsapp">WhatsApp</option>
+                            <option value="instagram">Instagram</option>
+                            <option value="pagina_web">Pagina web</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-agregar" type="submit">Guardar venta</button>
+                    <p id="mensajeVentaAdmin" class="mensaje-compra"></p>
+                </form>
+
+                <aside class="venta-resumen">
+                    <span>Detalle</span>
+                    <h3 id="ventaAdminNombreProducto">Sin producto seleccionado</h3>
+                    <p id="ventaAdminCodigoProducto">Codigo: -</p>
+                    <p id="ventaAdminTallasProducto">Tallas disponibles: -</p>
+                    <p id="ventaAdminStockProducto">Stock talla: -</p>
+                    <strong id="ventaAdminTotal">$0</strong>
+                </aside>
+            </div>
+        </section>
+
+        <section id="panel-menu-finanzas" class="admin-panel" data-admin-only>
+            <h2>Finanzas</h2>
+            <div class="admin-module-grid">
+                <button type="button" onclick="activarPanelAdmin('panel-finanzas')">
+                    <span>Ingresos, gastos y ganancias</span>
+                    <strong>Resumen financiero del negocio</strong>
+                </button>
+                <button type="button" onclick="activarPanelAdmin('panel-proveedores')">
+                    <span>Compras de mercancía</span>
+                    <strong>Costos, envíos y compras</strong>
+                </button>
+                <button type="button" onclick="activarPanelAdmin('panel-reportes')">
+                    <span>Reporte por fechas</span>
+                    <strong>Utilidad y margen por periodo</strong>
+                </button>
+            </div>
+        </section>
+
+        <section id="panel-menu-personas" class="admin-panel" data-admin-only>
+            <h2>Personas</h2>
+            <div class="admin-module-grid">
+                <button type="button" onclick="activarPanelAdmin('panel-trabajadores')">
+                    <span>Trabajadores</span>
+                    <strong>Registro y pagos</strong>
+                </button>
+                <button type="button" onclick="activarPanelAdmin('panel-proveedores')">
+                    <span>Proveedores</span>
+                    <strong>Contactos y compras</strong>
+                </button>
+                <button type="button" onclick="activarPanelAdmin('panel-clientes')">
+                    <span>Clientes</span>
+                    <strong>Compras, contacto y última visita</strong>
+                </button>
+            </div>
+        </section>
+
+        <section id="panel-menu-configuracion" class="admin-panel">
+            <h2>Configuración</h2>
+            <div class="admin-module-grid">
+                <button type="button" onclick="activarPanelAdmin('panel-seguridad')">
+                    <span>Seguridad</span>
+                    <strong>Contraseñas, usuarios y roles</strong>
+                </button>
+            </div>
+        </section>
 
         <!-- FORMULARIO PARA AGREGAR PRODUCTOS -->
         <section id="panel-agregar" class="form-admin admin-panel" data-admin-only>
@@ -168,7 +369,7 @@
 
 
         <!-- TABLA DE INVENTARIO -->
-        <section id="panel-inventario" class="admin-panel activo">
+        <section id="panel-inventario" class="admin-panel">
             <h2>Inventario</h2>
 
             <div class="filtros">
@@ -403,6 +604,7 @@
                         <th>Precio Unitario</th>
                         <th>Total</th>
                         <th>Medio de Pago</th>
+                        <th>Canal</th>
                         <th>Fecha</th>
                         <th>Acciones</th>
                     </tr>
@@ -901,6 +1103,44 @@
             </div>
         </section>
 
+        <section id="panel-clientes" class="admin-panel">
+            <h2>Clientes</h2>
+
+            <div class="filtros">
+                <input type="text" id="buscadorClientes" placeholder="Buscar por nombre, teléfono o correo...">
+            </div>
+
+            <div class="client-summary-grid">
+                <div class="dashboard-card">
+                    <span>Total clientes</span>
+                    <strong id="clientesTotal">0</strong>
+                </div>
+                <div class="dashboard-card">
+                    <span>Clientes con compras</span>
+                    <strong id="clientesConCompras">0</strong>
+                </div>
+                <div class="dashboard-card">
+                    <span>Total comprado</span>
+                    <strong id="clientesTotalComprado">$0</strong>
+                </div>
+            </div>
+
+            <table class="tabla-inventario">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Teléfono</th>
+                        <th>Correo</th>
+                        <th>Compras</th>
+                        <th>Total comprado</th>
+                        <th>Última compra</th>
+                        <th>Contacto</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaClientes"></tbody>
+            </table>
+        </section>
+
         <!-- HISTORIAL DE CAMBIOS DE PRECIO -->
          <section id="panel-precios" class="admin-panel" data-admin-only>
             <h2>Cambios de Precio</h2>
@@ -986,9 +1226,37 @@
             panel.classList.toggle("activo", panel.id === idPanel);
         });
 
+        const panelPrincipal = panelPrincipalAdmin(idPanel);
+
         document.querySelectorAll(".admin-tab").forEach(function(tab) {
-            tab.classList.toggle("activo", tab.dataset.panelTarget === idPanel);
+            tab.classList.toggle("activo", tab.dataset.panelTarget === panelPrincipal);
         });
+    }
+
+    function panelPrincipalAdmin(idPanel) {
+        const mapa = {
+            "panel-inicio": "panel-inicio",
+            "panel-menu-inventario": "panel-menu-inventario",
+            "panel-inventario": "panel-menu-inventario",
+            "panel-agregar": "panel-menu-inventario",
+            "panel-categorias": "panel-menu-inventario",
+            "panel-movimientos": "panel-menu-inventario",
+            "panel-precios": "panel-menu-inventario",
+            "panel-menu-ventas": "panel-menu-ventas",
+            "panel-venta-interna": "panel-menu-ventas",
+            "panel-historial": "panel-menu-ventas",
+            "panel-reportes": "panel-menu-ventas",
+            "panel-menu-finanzas": "panel-menu-finanzas",
+            "panel-finanzas": "panel-menu-finanzas",
+            "panel-menu-personas": "panel-menu-personas",
+            "panel-proveedores": "panel-menu-personas",
+            "panel-trabajadores": "panel-menu-personas",
+            "panel-clientes": "panel-menu-personas",
+            "panel-menu-configuracion": "panel-menu-configuracion",
+            "panel-seguridad": "panel-menu-configuracion"
+        };
+
+        return mapa[idPanel] || idPanel;
     }
 
     function activarSubseccionAdmin(menu, idSubseccion) {
@@ -1037,6 +1305,7 @@
     let productosCompraMercancia = [];
     let itemsCompraMercancia = [];
     let categoriasAdmin = [];
+    let productosVentaAdmin = [];
 
     function renderizarOpcionesTallas() {
         const contenedor = document.getElementById("sizeOptions");
@@ -1509,6 +1778,7 @@
                     <td>${formatoPrecioBD(venta.precio_unitario)}</td>
                     <td>${formatoPrecioBD(venta.subtotal)}</td>
                     <td>${venta.medio_pago}</td>
+                    <td>${etiquetaCanalVenta(venta.canal_venta)}</td>
                     <td>${new Date(venta.fecha).toLocaleString()}</td>
                     <td>
                       ${
@@ -1524,7 +1794,7 @@
         } catch (error) {
             tabla.innerHTML = `
             <tr>
-                <td colspan="13">Error al cargar historial de ventas</td>
+                <td colspan="14">Error al cargar historial de ventas</td>
             </tr>
             `;
             console.error(error);
@@ -1896,6 +2166,80 @@
             .replaceAll(">", "&gt;")
             .replaceAll('"', "&quot;")
             .replaceAll("'", "&#039;");
+    }
+
+    let clientesAdmin = [];
+
+    function normalizarTextoCliente(valor) {
+        return String(valor || "").toLowerCase().trim();
+    }
+
+    function renderizarClientesBD() {
+        const tabla = document.getElementById("tablaClientes");
+        const buscador = normalizarTextoCliente(document.getElementById("buscadorClientes")?.value);
+
+        if (!tabla) return;
+
+        const clientesFiltrados = clientesAdmin.filter(function(cliente) {
+            const texto = [
+                cliente.nombre,
+                cliente.telefono,
+                cliente.correo
+            ].join(" ").toLowerCase();
+
+            return texto.includes(buscador);
+        });
+
+        const totalComprado = clientesAdmin.reduce(function(total, cliente) {
+            return total + Number(cliente.total_comprado || 0);
+        }, 0);
+        const conCompras = clientesAdmin.filter(function(cliente) {
+            return Number(cliente.compras || 0) > 0;
+        }).length;
+
+        document.getElementById("clientesTotal").textContent = clientesAdmin.length;
+        document.getElementById("clientesConCompras").textContent = conCompras;
+        document.getElementById("clientesTotalComprado").textContent = formatoPrecioBD(totalComprado);
+
+        tabla.innerHTML = "";
+
+        if (clientesFiltrados.length === 0) {
+            tabla.innerHTML = '<tr><td colspan="7">No hay clientes para mostrar</td></tr>';
+            return;
+        }
+
+        clientesFiltrados.forEach(function(cliente) {
+            const telefonoLimpio = String(cliente.telefono || "").replace(/\D/g, "");
+            const enlaceWhatsApp = telefonoLimpio ? "https://wa.me/57" + telefonoLimpio.replace(/^57/, "") : "";
+            tabla.innerHTML += `
+                <tr>
+                    <td>${limpiarTextoBD(cliente.nombre)}</td>
+                    <td>${limpiarTextoBD(cliente.telefono)}</td>
+                    <td>${limpiarTextoBD(cliente.correo || "-")}</td>
+                    <td>${cliente.compras}</td>
+                    <td>${formatoPrecioBD(cliente.total_comprado)}</td>
+                    <td>${cliente.ultima_compra ? new Date(cliente.ultima_compra).toLocaleDateString() : "Sin compras"}</td>
+                    <td>${enlaceWhatsApp ? `<a class="table-link" href="${enlaceWhatsApp}" target="_blank">WhatsApp</a>` : "-"}</td>
+                </tr>
+            `;
+        });
+    }
+
+    async function cargarClientesBD() {
+        try {
+            const respuesta = await fetch("php/clientes_listar.php");
+            const clientes = await respuesta.json();
+
+            if (clientes.error) {
+                console.error(clientes.mensaje);
+                return;
+            }
+
+            clientesAdmin = clientes;
+            renderizarClientesBD();
+        } catch (error) {
+            console.error("Error al cargar clientes", error);
+        }
     }
 
     function etiquetaCategoriaAdmin(nombre) {
@@ -2924,6 +3268,148 @@
         }).join(", ");
     }
 
+    function productosVendiblesAdmin() {
+        return productosVentaAdmin.filter(function(producto) {
+            return producto.estado !== "inactivo" && Number(producto.cantidad) > 0;
+        });
+    }
+
+    function llenarSelectorVentaAdmin() {
+        const selector = document.getElementById("ventaAdminProducto");
+
+        if (!selector) return;
+
+        const seleccionado = selector.value;
+        selector.innerHTML = '<option value="">Seleccionar producto</option>';
+
+        productosVendiblesAdmin().forEach(function(producto) {
+            const opcion = document.createElement("option");
+            opcion.value = producto.id_producto;
+            opcion.textContent = producto.codigo + " - " + producto.nombre + " (" + formatoPrecioBD(producto.precio) + ")";
+            selector.appendChild(opcion);
+        });
+
+        selector.value = seleccionado;
+        llenarTallasVentaAdmin();
+    }
+
+    function llenarTallasVentaAdmin() {
+        const idProducto = Number(document.getElementById("ventaAdminProducto")?.value || 0);
+        const selector = document.getElementById("ventaAdminTalla");
+        const producto = productosVentaAdmin.find(function(item) {
+            return Number(item.id_producto) === idProducto;
+        });
+
+        if (!selector) return;
+
+        selector.innerHTML = '<option value="">Seleccionar talla</option>';
+
+        if (!producto) {
+            actualizarResumenVentaAdmin();
+            return;
+        }
+
+        leerTallasBD(producto.tallas)
+            .filter(function(item) {
+                return Number(item.cantidad) > 0;
+            })
+            .forEach(function(item) {
+                const opcion = document.createElement("option");
+                opcion.value = item.talla;
+                opcion.textContent = item.talla + " - " + item.cantidad + " disponibles";
+                selector.appendChild(opcion);
+            });
+
+        if (selector.options.length === 2) {
+            selector.selectedIndex = 1;
+        }
+
+        actualizarResumenVentaAdmin();
+    }
+
+    function actualizarResumenVentaAdmin() {
+        const idProducto = Number(document.getElementById("ventaAdminProducto")?.value || 0);
+        const cantidad = Number(document.getElementById("ventaAdminCantidad")?.value || 0);
+        const talla = document.getElementById("ventaAdminTalla")?.value || "";
+        const producto = productosVentaAdmin.find(function(item) {
+            return Number(item.id_producto) === idProducto;
+        });
+        const tallaSeleccionada = leerTallasBD(producto ? producto.tallas : []).find(function(item) {
+            return item.talla === talla;
+        });
+
+        document.getElementById("ventaAdminNombreProducto").textContent = producto ? producto.nombre : "Sin producto seleccionado";
+        document.getElementById("ventaAdminCodigoProducto").textContent = "Codigo: " + (producto ? producto.codigo : "-");
+        document.getElementById("ventaAdminTallasProducto").textContent = "Tallas disponibles: " + (producto ? textoTallasBD(producto.tallas) : "-");
+        document.getElementById("ventaAdminStockProducto").textContent = "Stock talla: " + (tallaSeleccionada ? tallaSeleccionada.cantidad : "-");
+        document.getElementById("ventaAdminTotal").textContent = formatoPrecioBD(producto ? Number(producto.precio) * cantidad : 0);
+    }
+
+    async function cargarProductosVentaAdmin() {
+        try {
+            const respuesta = await fetch("php/productos_listar.php");
+            const productos = await respuesta.json();
+
+            if (productos.error) {
+                console.error(productos.mensaje);
+                return;
+            }
+
+            productosVentaAdmin = productos;
+            llenarSelectorVentaAdmin();
+        } catch (error) {
+            console.error("Error al cargar productos para venta", error);
+        }
+    }
+
+    async function registrarVentaAdmin(evento) {
+        evento.preventDefault();
+
+        const mensaje = document.getElementById("mensajeVentaAdmin");
+        const datos = new FormData();
+
+        datos.append("id_producto", document.getElementById("ventaAdminProducto").value);
+        datos.append("cliente", document.getElementById("ventaAdminCliente").value.trim());
+        datos.append("telefono", document.getElementById("ventaAdminTelefono").value.trim());
+        datos.append("cantidad", document.getElementById("ventaAdminCantidad").value);
+        datos.append("medio_pago", document.getElementById("ventaAdminMedioPago").value);
+        datos.append("talla", document.getElementById("ventaAdminTalla").value);
+
+        mensaje.textContent = "";
+
+        try {
+            const respuesta = await fetch("php/venta_registrar.php", {
+                method: "POST",
+                body: datos
+            });
+            const resultado = await respuesta.json();
+
+            if (resultado.error) {
+                mensaje.textContent = resultado.mensaje;
+                return;
+            }
+
+            alert(resultado.mensaje + "\nTotal: " + formatoPrecioBD(resultado.total));
+            document.getElementById("formVentaAdmin").reset();
+            document.getElementById("ventaAdminCantidad").value = 1;
+
+            await cargarProductosVentaAdmin();
+            cargarInventarioBD();
+            cargarHistorialVentasBD();
+            cargarClientesBD();
+            cargarReportesBD();
+            cargarMovimientosBD();
+            cargarInicioAdmin();
+            if (usuarioEsAdmin()) {
+                cargarFinanzasBD();
+                cargarResumenFinancieroBD();
+            }
+        } catch (error) {
+            mensaje.textContent = "Error al registrar la venta";
+            console.error(error);
+        }
+    }
+
     async function registrarDevolucionBD(idVenta, idProducto) {
         const cantidadTexto = prompt("¿Cuántas unidades deseas devolver?");
 
@@ -2975,10 +3461,77 @@
         }
     }
     
+    async function cargarInicioAdmin() {
+        try {
+            const solicitudes = [
+                fetch("php/reportes_admin.php"),
+                fetch("php/productos_listar.php"),
+                fetch("php/movimientos_listar.php")
+            ];
+
+            if (usuarioEsAdmin()) {
+                solicitudes.push(fetch("php/finanzas_resumen.php"));
+            }
+
+            const respuestas = await Promise.all(solicitudes);
+            const reportes = await respuestas[0].json();
+            const productos = await respuestas[1].json();
+            const movimientos = await respuestas[2].json();
+            const finanzas = respuestas[3] ? await respuestas[3].json() : null;
+
+            if (!reportes.error) {
+                document.getElementById("inicioVentasHoy").textContent = formatoPrecioBD(reportes.ventas_hoy || 0);
+            }
+
+            if (Array.isArray(productos)) {
+                const activos = productos.filter(function(producto) {
+                    return producto.estado !== "inactivo";
+                });
+                const bajoStock = activos.filter(function(producto) {
+                    return Number(producto.cantidad || 0) <= 3 || producto.estado === "agotado";
+                });
+
+                document.getElementById("inicioProductosActivos").textContent = activos.length;
+                document.getElementById("inicioBajoStock").textContent = bajoStock.length;
+            }
+
+            if (finanzas && !finanzas.error) {
+                document.getElementById("inicioGananciaMes").textContent = formatoPrecioBD(finanzas.utilidad_neta_mes || 0);
+            }
+
+            const contenedor = document.getElementById("inicioUltimosMovimientos");
+            if (contenedor && Array.isArray(movimientos)) {
+                const ultimos = movimientos.slice(0, 5);
+
+                if (ultimos.length === 0) {
+                    contenedor.innerHTML = '<p class="empty-dashboard">Sin movimientos recientes.</p>';
+                } else {
+                    contenedor.innerHTML = "";
+                    ultimos.forEach(function(movimiento) {
+                        contenedor.innerHTML += `
+                            <div class="dashboard-movement">
+                                <div>
+                                    <strong>${limpiarTextoBD(movimiento.producto)}</strong>
+                                    <span>${limpiarTextoBD(movimiento.tipo)} | ${limpiarTextoBD(movimiento.codigo || "Sin codigo")}</span>
+                                </div>
+                                <p>${movimiento.cantidad}</p>
+                            </div>
+                        `;
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("Error al cargar inicio del administrador", error);
+        }
+    }
+
     function iniciarPanelBD() {
+        cargarInicioAdmin();
         cargarCategoriasBD();
         cargarInventarioBD();
+        cargarProductosVentaAdmin();
         cargarHistorialVentasBD();
+        cargarClientesBD();
         cargarReportesBD();
         cargarMovimientosBD();
         definirFechasFinanzas();
@@ -3004,6 +3557,12 @@
         buscadorBD.addEventListener("input", cargarInventarioBD);
     }
 
+    const buscadorClientes = document.getElementById("buscadorClientes");
+
+    if (buscadorClientes) {
+        buscadorClientes.addEventListener("input", renderizarClientesBD);
+    }
+
     const formGasto = document.getElementById("formGasto");
     const formInversion = document.getElementById("formInversion");
     const formCategoria = document.getElementById("formCategoria");
@@ -3016,6 +3575,7 @@
     const formCambiarPassword = document.getElementById("formCambiarPassword");
     const formRestablecerPassword = document.getElementById("formRestablecerPassword");
     const formReporteFechas = document.getElementById("formReporteFechas");
+    const formVentaAdmin = document.getElementById("formVentaAdmin");
 
     if (formGasto) {
         formGasto.addEventListener("submit", guardarGastoBD);
@@ -3067,6 +3627,14 @@
             cargarReportesBD();
         });
     }
+
+    if (formVentaAdmin) {
+        formVentaAdmin.addEventListener("submit", registrarVentaAdmin);
+    }
+
+    document.getElementById("ventaAdminProducto")?.addEventListener("change", llenarTallasVentaAdmin);
+    document.getElementById("ventaAdminTalla")?.addEventListener("change", actualizarResumenVentaAdmin);
+    document.getElementById("ventaAdminCantidad")?.addEventListener("input", actualizarResumenVentaAdmin);
 
     async function cargarCambiosPrecioBD() {
         const tabla = document.getElementById("tablaCambiosPrecio");

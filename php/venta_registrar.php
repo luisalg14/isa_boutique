@@ -20,6 +20,8 @@ try {
     $cantidad = intval($_POST["cantidad"] ?? 0);
     $medio_pago = trim($_POST["medio_pago"] ?? "");
     $talla = strtoupper(trim($_POST["talla"] ?? ""));
+    $usuarioActual = usuario_actual();
+    $canal_venta = trim($_POST["canal_venta"] ?? ($usuarioActual ? "tienda_fisica" : "pagina_web"));
 
     $mediosPermitidos = [
         "efectivo",
@@ -28,12 +30,20 @@ try {
         "tarjeta_credito"
     ];
 
+    $canalesPermitidos = [
+        "tienda_fisica",
+        "pagina_web",
+        "whatsapp",
+        "instagram"
+    ];
+
     if (
         $id_producto <= 0 ||
         $cliente === "" ||
         $telefono === "" ||
         $cantidad <= 0 ||
-        !in_array($medio_pago, $mediosPermitidos)
+        !in_array($medio_pago, $mediosPermitidos) ||
+        !in_array($canal_venta, $canalesPermitidos)
     ) {
         echo json_encode([
             "error" => true,
@@ -167,7 +177,6 @@ try {
         $idCliente = $consultaInsertCliente->fetch()["id_cliente"];
     }
 
-    $usuarioActual = usuario_actual();
     $idUsuario = $usuarioActual ? intval($usuarioActual["id_usuario"]) : 1;
 
     // Registrar venta
@@ -176,6 +185,7 @@ try {
             id_cliente,
             id_usuario,
             medio_pago,
+            canal_venta,
             total,
             estado
         )
@@ -183,6 +193,7 @@ try {
             :id_cliente,
             :id_usuario,
             :medio_pago,
+            :canal_venta,
             :total,
             'pagada'
         )
@@ -194,6 +205,7 @@ try {
         ":id_cliente" => $idCliente,
         ":id_usuario" => $idUsuario,
         ":medio_pago" => $medio_pago,
+        ":canal_venta" => $canal_venta,
         ":total" => $subtotal
     ]);
 

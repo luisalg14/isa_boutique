@@ -23,6 +23,7 @@ try {
             dv.precio_unitario,
             dv.subtotal,
             v.medio_pago,
+            v.canal_venta,
             v.total,
             v.estado
         FROM venta v
