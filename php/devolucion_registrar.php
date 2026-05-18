@@ -42,8 +42,10 @@ try {
             v.id_venta,
             v.id_cliente,
             dv.id_producto,
+            dv.talla,
             dv.cantidad AS cantidad_vendida,
-            dv.precio_unitario
+            dv.precio_unitario,
+            dv.costo_unitario
         FROM venta v
         INNER JOIN detalle_venta dv
             ON v.id_venta = dv.id_venta
@@ -100,7 +102,10 @@ try {
     }
 
     $precioUnitario = floatval($venta["precio_unitario"]);
+    $costoUnitario = floatval($venta["costo_unitario"]);
     $subtotalDevuelto = $precioUnitario * $cantidad;
+    $subtotalCostoDevuelto = $costoUnitario * $cantidad;
+    $talla = $venta["talla"];
 
     // Registrar devolución
     $sqlDevolucion = "
@@ -137,16 +142,22 @@ try {
         INSERT INTO detalle_devolucion (
             id_devolucion,
             id_producto,
+            talla,
             cantidad,
             precio_unitario,
-            subtotal_devuelto
+            costo_unitario,
+            subtotal_devuelto,
+            subtotal_costo_devuelto
         )
         VALUES (
             :id_devolucion,
             :id_producto,
+            :talla,
             :cantidad,
             :precio_unitario,
-            :subtotal_devuelto
+            :costo_unitario,
+            :subtotal_devuelto,
+            :subtotal_costo_devuelto
         )
     ";
 
@@ -154,10 +165,29 @@ try {
     $consultaDetalle->execute([
         ":id_devolucion" => $idDevolucion,
         ":id_producto" => $id_producto,
+        ":talla" => $talla,
         ":cantidad" => $cantidad,
         ":precio_unitario" => $precioUnitario,
-        ":subtotal_devuelto" => $subtotalDevuelto
+        ":costo_unitario" => $costoUnitario,
+        ":subtotal_devuelto" => $subtotalDevuelto,
+        ":subtotal_costo_devuelto" => $subtotalCostoDevuelto
     ]);
+
+    if ($talla !== null && $talla !== "") {
+        $sqlActualizarTalla = "
+            UPDATE producto_talla
+            SET cantidad = cantidad + :cantidad
+            WHERE id_producto = :id_producto
+            AND UPPER(talla) = UPPER(:talla)
+        ";
+
+        $consultaActualizarTalla = $conexion->prepare($sqlActualizarTalla);
+        $consultaActualizarTalla->execute([
+            ":cantidad" => $cantidad,
+            ":id_producto" => $id_producto,
+            ":talla" => $talla
+        ]);
+    }
 
     // Marcar venta como devuelta si se devolvió todo ese producto
     if ($cantidad == $cantidadDisponible) {

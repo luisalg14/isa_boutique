@@ -10,6 +10,7 @@
 <body class="public-page catalog-page stitch-catalog">
 
     <nav class="menu stitch-nav">
+        <a class="nav-home-arrow" href="index.html" title="Volver al inicio">←</a>
         <a class="brand-link" href="index.html">Isa Boutique</a>
         <a href="index.html">Inicio</a>
         <a href="Producto.html">Ver todo</a>
@@ -17,6 +18,7 @@
         <a href="categoria.html?tipo=vestidos">Vestidos</a>
         <a href="categoria.html?tipo=conjuntos">Conjuntos</a>
         <a href="index.html#contacto">Contacto</a>
+        <button class="cart-link" type="button" id="btnAbrirCarrito">Carrito <span id="cartCount">0</span></button>
     </nav>
 
     <main class="tienda-layout">
@@ -87,6 +89,12 @@
 
             <div class="modal-body">
                 <div class="campo">
+                    <label for="compraTalla">Talla</label>
+                    <input id="compraTalla" type="hidden" required>
+                    <div id="compraTallaOpciones" class="size-options public-size-options"></div>
+                </div>
+
+                <div class="campo">
                     <label for="compraCantidad">Cantidad</label>
                     <input id="compraCantidad" type="number" min="1" required>
                 </div>
@@ -117,14 +125,35 @@
 
             <div class="modal-acciones">
                 <button type="button" class="btn-cancelar" id="btnCancelarCompra">Cancelar</button>
+                <button type="button" class="btn-cancelar" id="btnAgregarCarrito">Agregar al carrito</button>
                 <button type="submit" class="btn-confirmar">Registrar compra</button>
             </div>
         </form>
     </div>
 
+    <div id="modalCarrito" class="modal-compra" aria-hidden="true">
+        <div class="compra-modal">
+            <div class="modal-header">
+                <h2>Carrito</h2>
+                <p>Productos seleccionados antes de comprar.</p>
+            </div>
+
+            <div class="modal-body">
+                <div id="listaCarrito" class="cart-list"></div>
+                <p id="totalCarrito" class="producto-precio">$0</p>
+            </div>
+
+            <div class="modal-acciones">
+                <button type="button" class="btn-cancelar" id="btnCerrarCarrito">Cerrar</button>
+                <button type="button" class="btn-confirmar" id="btnVaciarCarrito">Vaciar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let productoSeleccionado = null;
         let productosCatalogo = [];
+        let carrito = JSON.parse(localStorage.getItem("isa_carrito")) || [];
 
         const contenedor = document.getElementById("contenedor-productos");
         const buscador = document.getElementById("buscarProducto");
@@ -152,6 +181,144 @@
             return nombres[categoria] || categoria || "Sin categoria";
         }
 
+        function leerTallas(tallas) {
+            if (Array.isArray(tallas)) return tallas;
+
+            if (typeof tallas === "string" && tallas.trim() !== "") {
+                try {
+                    return JSON.parse(tallas);
+                } catch (error) {
+                    return [];
+                }
+            }
+
+            return [];
+        }
+
+        function textoTallas(tallas) {
+            const lista = leerTallas(tallas);
+
+            if (lista.length === 0) return "Sin tallas disponibles";
+
+            return "Tallas disponibles: " + lista.map(function(item) {
+                const cantidad = Number(item.cantidad);
+
+                if (cantidad <= 0) {
+                    return item.talla + " agotada";
+                }
+
+                if (cantidad < 4) {
+                    return item.talla + " (ultimas " + cantidad + ")";
+                }
+
+                return item.talla;
+            }).join(", ");
+        }
+
+        function actualizarContadorCarrito() {
+            const total = carrito.reduce(function(suma, item) {
+                return suma + Number(item.cantidad);
+            }, 0);
+
+            document.getElementById("cartCount").textContent = total;
+        }
+
+        function guardarCarrito() {
+            localStorage.setItem("isa_carrito", JSON.stringify(carrito));
+            actualizarContadorCarrito();
+        }
+
+        function renderizarCarrito() {
+            const lista = document.getElementById("listaCarrito");
+            const total = carrito.reduce(function(suma, item) {
+                return suma + Number(item.precio) * Number(item.cantidad);
+            }, 0);
+
+            if (carrito.length === 0) {
+                lista.innerHTML = '<p>Tu carrito esta vacio.</p>';
+                document.getElementById("totalCarrito").textContent = "$0";
+                return;
+            }
+
+            lista.innerHTML = "";
+
+            carrito.forEach(function(item, indice) {
+                const fila = document.createElement("div");
+                fila.className = "cart-item";
+                fila.innerHTML =
+                    '<div>' +
+                        '<strong>' + item.nombre + '</strong>' +
+                        '<p>Talla: ' + item.talla + ' | Cantidad: ' + item.cantidad + '</p>' +
+                        '<p>' + formatoPrecio(Number(item.precio) * Number(item.cantidad)) + '</p>' +
+                    '</div>' +
+                    '<button type="button">Quitar</button>';
+
+                fila.querySelector("button").addEventListener("click", function() {
+                    carrito.splice(indice, 1);
+                    guardarCarrito();
+                    renderizarCarrito();
+                });
+
+                lista.appendChild(fila);
+            });
+
+            document.getElementById("totalCarrito").textContent = "Total carrito: " + formatoPrecio(total);
+        }
+
+        function abrirCarrito() {
+            renderizarCarrito();
+            const modal = document.getElementById("modalCarrito");
+            modal.classList.add("activo");
+            modal.setAttribute("aria-hidden", "false");
+        }
+
+        function cerrarCarrito() {
+            const modal = document.getElementById("modalCarrito");
+            modal.classList.remove("activo");
+            modal.setAttribute("aria-hidden", "true");
+        }
+
+        function llenarTallasCompra(producto) {
+            const input = document.getElementById("compraTalla");
+            const contenedor = document.getElementById("compraTallaOpciones");
+            input.value = "";
+            contenedor.innerHTML = "";
+
+            leerTallas(producto.tallas)
+                .forEach(function(item) {
+                    const cantidad = Number(item.cantidad);
+                    const boton = document.createElement("button");
+                    boton.type = "button";
+                    boton.className = "size-option";
+                    boton.dataset.talla = item.talla;
+                    boton.dataset.cantidad = item.cantidad;
+                    boton.disabled = cantidad <= 0;
+                    boton.textContent = cantidad > 0 && cantidad < 4
+                        ? item.talla + " - ultimas " + cantidad
+                        : item.talla;
+
+                    if (cantidad <= 0) {
+                        boton.classList.add("agotada");
+                        boton.title = "Talla agotada";
+                    }
+
+                    boton.addEventListener("click", function() {
+                        if (boton.disabled) return;
+                        input.value = item.talla;
+                        document.getElementById("compraCantidad").max = item.cantidad;
+                        contenedor.querySelectorAll(".size-option").forEach(function(opcion) {
+                            opcion.classList.toggle("activo", opcion === boton);
+                        });
+                    });
+                    contenedor.appendChild(boton);
+                });
+
+            const primera = contenedor.querySelector(".size-option:not(:disabled)");
+            if (primera) {
+                primera.click();
+            }
+        }
+
         function abrirModalCompra(producto) {
             if (Number(producto.cantidad) <= 0 || producto.estado === "agotado") {
                 alert("Este producto esta agotado.");
@@ -163,6 +330,7 @@
                 producto.nombre + " - " + formatoPrecio(producto.precio) + " | Disponibles: " + producto.cantidad;
             document.getElementById("compraCantidad").value = "1";
             document.getElementById("compraCantidad").max = producto.cantidad;
+            llenarTallasCompra(producto);
             document.getElementById("compraCliente").value = "";
             document.getElementById("compraTelefono").value = "";
             document.getElementById("compraMedioPago").value = "";
@@ -186,6 +354,7 @@
             if (!productoSeleccionado) return;
 
             const cantidad = parseInt(document.getElementById("compraCantidad").value);
+            const talla = document.getElementById("compraTalla").value;
             const cliente = document.getElementById("compraCliente").value.trim();
             const telefono = document.getElementById("compraTelefono").value.trim();
             const medioPago = document.getElementById("compraMedioPago").value;
@@ -196,8 +365,17 @@
                 return;
             }
 
-            if (cantidad > Number(productoSeleccionado.cantidad)) {
-                mensaje.textContent = "Solo hay " + productoSeleccionado.cantidad + " unidades disponibles.";
+            if (!talla) {
+                mensaje.textContent = "Selecciona una talla.";
+                return;
+            }
+
+            const tallaSeleccionada = leerTallas(productoSeleccionado.tallas).find(function(item) {
+                return item.talla === talla;
+            });
+
+            if (!tallaSeleccionada || cantidad > Number(tallaSeleccionada.cantidad)) {
+                mensaje.textContent = "No hay suficientes unidades en esa talla.";
                 return;
             }
 
@@ -208,6 +386,7 @@
 
             const datos = new FormData();
             datos.append("id_producto", productoSeleccionado.id_producto);
+            datos.append("talla", talla);
             datos.append("cantidad", cantidad);
             datos.append("cliente", cliente);
             datos.append("telefono", telefono);
@@ -226,13 +405,49 @@
                     return;
                 }
 
+                const idProductoComprado = productoSeleccionado.id_producto;
                 alert(resultado.mensaje + "\nTotal: " + formatoPrecio(resultado.total));
+                carrito = carrito.filter(function(item) {
+                    return !(Number(item.id_producto) === Number(idProductoComprado) && item.talla === talla);
+                });
+                guardarCarrito();
                 cerrarModalCompra();
                 cargarProductos();
             } catch (error) {
                 mensaje.textContent = "Error al registrar la compra.";
                 console.error(error);
             }
+        }
+
+        function agregarProductoAlCarrito() {
+            if (!productoSeleccionado) return;
+
+            const cantidad = parseInt(document.getElementById("compraCantidad").value);
+            const talla = document.getElementById("compraTalla").value;
+            const mensaje = document.getElementById("mensajeCompra");
+
+            if (!talla) {
+                mensaje.textContent = "Selecciona una talla.";
+                return;
+            }
+
+            if (isNaN(cantidad) || cantidad <= 0) {
+                mensaje.textContent = "Ingresa una cantidad valida.";
+                return;
+            }
+
+            carrito.push({
+                id_producto: productoSeleccionado.id_producto,
+                codigo: productoSeleccionado.codigo,
+                nombre: productoSeleccionado.nombre,
+                precio: productoSeleccionado.precio,
+                talla: talla,
+                cantidad: cantidad
+            });
+
+            guardarCarrito();
+            cerrarModalCompra();
+            abrirCarrito();
         }
 
         function obtenerProductosFiltrados() {
@@ -295,6 +510,7 @@
                         '<p class="producto-meta">' + producto.marca + ' · ' + formatearCategoria(producto.categoria) + '</p>' +
                         '<p class="producto-precio">' + formatoPrecio(producto.precio) + '</p>' +
                         '<p class="producto-stock">' + producto.cantidad + ' unidades disponibles</p>' +
+                        '<p class="producto-stock">' + textoTallas(producto.tallas) + '</p>' +
                         '<button class="boton-comprar" ' + (agotado ? "disabled" : "") + '>' +
                             (agotado ? "Agotado" : "Comprar") +
                         '</button>' +
@@ -330,9 +546,22 @@
 
         document.getElementById("formCompra").addEventListener("submit", registrarCompra);
         document.getElementById("btnCancelarCompra").addEventListener("click", cerrarModalCompra);
+        document.getElementById("btnAgregarCarrito").addEventListener("click", agregarProductoAlCarrito);
+        document.getElementById("btnAbrirCarrito").addEventListener("click", abrirCarrito);
+        document.getElementById("btnCerrarCarrito").addEventListener("click", cerrarCarrito);
+        document.getElementById("btnVaciarCarrito").addEventListener("click", function() {
+            carrito = [];
+            guardarCarrito();
+            renderizarCarrito();
+        });
         document.getElementById("modalCompra").addEventListener("click", function(evento) {
             if (evento.target.id === "modalCompra") {
                 cerrarModalCompra();
+            }
+        });
+        document.getElementById("modalCarrito").addEventListener("click", function(evento) {
+            if (evento.target.id === "modalCarrito") {
+                cerrarCarrito();
             }
         });
 
@@ -357,6 +586,7 @@
             });
         });
 
+        actualizarContadorCarrito();
         cargarProductos();
     </script>
 

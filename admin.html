@@ -48,6 +48,7 @@
                 <button class="admin-tab" data-panel-target="panel-reportes">Reportes</button>
                 <button class="admin-tab" data-panel-target="panel-historial">Ventas y devoluciones</button>
                 <button class="admin-tab" data-panel-target="panel-movimientos">Movimientos</button>
+                <button class="admin-tab" data-admin-only data-panel-target="panel-finanzas">Finanzas</button>
                 <button class="admin-tab" data-admin-only data-panel-target="panel-precios">Cambios de precio</button>
             </aside>
 
@@ -94,8 +95,31 @@
             </div>
 
             <div class="campo">
+                <label>Tallas y cantidades</label>
+                <input id="inp-tallas" type="hidden">
+                <div class="size-builder">
+                    <div class="size-mode">
+                        <button type="button" class="size-mode-btn activo" data-size-mode="letras">Letras</button>
+                        <button type="button" class="size-mode-btn" data-size-mode="numeros">Numeros</button>
+                    </div>
+                    <div id="sizeOptions" class="size-options"></div>
+                    <div class="size-quantity-row">
+                        <span id="selectedSizeLabel">Selecciona una talla</span>
+                        <input id="selectedSizeQty" type="number" min="0" placeholder="Cantidad">
+                        <button type="button" onclick="agregarTallaSeleccionada()">Agregar talla</button>
+                    </div>
+                    <div id="selectedSizesList" class="selected-sizes-list"></div>
+                </div>
+            </div>
+
+            <div class="campo">
                 <label>Precio</label>
                 <input id="inp-precio" type="number" placeholder="0">
+            </div>
+
+            <div class="campo">
+                <label>Costo de compra</label>
+                <input id="inp-costo" type="number" placeholder="0">
             </div>
 
             <div class="campo">
@@ -128,7 +152,10 @@
                         <th>Marca</th>
                         <th>Tipo</th>
                         <th>Precio</th>
+                        <th>Costo</th>
+                        <th>Ganancia unidad</th>
                         <th>Cantidad</th>
+                        <th>Tallas</th>
                         <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
@@ -203,6 +230,7 @@
                         <th>Código</th>
                         <th>Producto</th>
                         <th>Marca</th>
+                        <th>Talla</th>
                         <th>Cantidad</th>
                         <th>Precio Unitario</th>
                         <th>Total</th>
@@ -253,6 +281,151 @@
         </button>
     </div>
 </section>
+
+        <section id="panel-finanzas" class="admin-panel" data-admin-only>
+            <h2>Finanzas del negocio</h2>
+
+            <div class="reportes">
+                <div class="reporte-card">
+                    <h4>Ventas netas</h4>
+                    <p id="finVentasNetas">$0</p>
+                </div>
+
+                <div class="reporte-card">
+                    <h4>Costo mercancia vendida</h4>
+                    <p id="finCostoMercancia">$0</p>
+                </div>
+
+                <div class="reporte-card">
+                    <h4>Utilidad bruta</h4>
+                    <p id="finUtilidadBruta">$0</p>
+                </div>
+
+                <div class="reporte-card">
+                    <h4>Gastos registrados</h4>
+                    <p id="finGastos">$0</p>
+                </div>
+
+                <div class="reporte-card">
+                    <h4>Inversiones</h4>
+                    <p id="finInversiones">$0</p>
+                </div>
+
+                <div class="reporte-card">
+                    <h4>Utilidad neta</h4>
+                    <p id="finUtilidad">$0</p>
+                </div>
+
+                <div class="reporte-card">
+                    <h4>Margen de ganancia</h4>
+                    <p id="finMargen">0%</p>
+                </div>
+
+                <div class="reporte-card">
+                    <h4>Capital + utilidad neta</h4>
+                    <p id="finSaldo">$0</p>
+                </div>
+            </div>
+
+            <div class="finance-breakdown" id="finGastosDetalle"></div>
+
+            <div class="finance-grid">
+                <form id="formGasto" class="finance-form">
+                    <h3>Registrar gasto</h3>
+
+                    <div class="campo">
+                        <label>Tipo de gasto</label>
+                        <select id="gastoTipo">
+                            <option value="primario">Primario</option>
+                            <option value="secundario">Secundario</option>
+                            <option value="servicio">Servicio</option>
+                            <option value="nomina">Nomina</option>
+                            <option value="transporte">Transporte</option>
+                            <option value="publicidad">Publicidad</option>
+                            <option value="empaque">Empaque</option>
+                            <option value="mantenimiento">Mantenimiento</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Concepto</label>
+                        <input id="gastoConcepto" placeholder="Ej: Servicio de energia">
+                    </div>
+
+                    <div class="campo">
+                        <label>Valor</label>
+                        <input id="gastoValor" type="number" min="1" placeholder="0">
+                    </div>
+
+                    <div class="campo">
+                        <label>Fecha</label>
+                        <input id="gastoFecha" type="date">
+                    </div>
+
+                    <div class="campo">
+                        <label>Detalle</label>
+                        <input id="gastoDetalle" placeholder="Opcional">
+                    </div>
+
+                    <button class="btn btn-agregar" type="submit">Guardar gasto</button>
+                </form>
+
+                <form id="formInversion" class="finance-form">
+                    <h3>Registrar inversion</h3>
+
+                    <div class="campo">
+                        <label>Tipo de inversion</label>
+                        <select id="inversionTipo">
+                            <option value="capital">Capital</option>
+                            <option value="mercancia">Mercancia</option>
+                            <option value="adecuacion">Adecuacion</option>
+                            <option value="publicidad">Publicidad</option>
+                            <option value="tecnologia">Tecnologia</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Concepto</label>
+                        <input id="inversionConcepto" placeholder="Ej: Compra de nueva mercancia">
+                    </div>
+
+                    <div class="campo">
+                        <label>Valor</label>
+                        <input id="inversionValor" type="number" min="1" placeholder="0">
+                    </div>
+
+                    <div class="campo">
+                        <label>Fecha</label>
+                        <input id="inversionFecha" type="date">
+                    </div>
+
+                    <div class="campo">
+                        <label>Detalle</label>
+                        <input id="inversionDetalle" placeholder="Opcional">
+                    </div>
+
+                    <button class="btn btn-agregar" type="submit">Guardar inversion</button>
+                </form>
+            </div>
+
+            <h3 class="finance-subtitle">Movimientos financieros</h3>
+            <table class="tabla-inventario">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Clase</th>
+                        <th>Tipo</th>
+                        <th>Concepto</th>
+                        <th>Valor</th>
+                        <th>Usuario</th>
+                        <th>Detalle</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaFinanzas"></tbody>
+            </table>
+        </section>
 
         <!-- HISTORIAL DE CAMBIOS DE PRECIO -->
          <section id="panel-precios" class="admin-panel" data-admin-only>
@@ -308,6 +481,102 @@
         return window.usuarioActual && window.usuarioActual.rol === "vendedor";
     }
 
+    const tallasLetras = ["XS", "S", "M", "L", "XL", "XXL"];
+    const tallasNumeros = Array.from({ length: 51 }, function(_, indice) {
+        return String(indice);
+    });
+    let modoTallas = "letras";
+    let tallaSeleccionadaAdmin = "";
+    let tallasSeleccionadasAdmin = {};
+
+    function renderizarOpcionesTallas() {
+        const contenedor = document.getElementById("sizeOptions");
+        if (!contenedor) return;
+
+        const tallas = modoTallas === "letras" ? tallasLetras : tallasNumeros;
+        contenedor.innerHTML = "";
+
+        tallas.forEach(function(talla) {
+            const boton = document.createElement("button");
+            boton.type = "button";
+            boton.className = "size-option";
+            boton.textContent = talla;
+            boton.classList.toggle("activo", tallaSeleccionadaAdmin === talla);
+            boton.addEventListener("click", function() {
+                tallaSeleccionadaAdmin = talla;
+                document.getElementById("selectedSizeLabel").textContent = "Talla " + talla;
+                renderizarOpcionesTallas();
+            });
+            contenedor.appendChild(boton);
+        });
+    }
+
+    function actualizarCampoTallasAdmin() {
+        const input = document.getElementById("inp-tallas");
+        if (!input) return;
+
+        input.value = Object.keys(tallasSeleccionadasAdmin).map(function(talla) {
+            return talla + ":" + tallasSeleccionadasAdmin[talla];
+        }).join(", ");
+    }
+
+    function renderizarTallasSeleccionadasAdmin() {
+        const lista = document.getElementById("selectedSizesList");
+        if (!lista) return;
+
+        lista.innerHTML = "";
+
+        Object.keys(tallasSeleccionadasAdmin).forEach(function(talla) {
+            const item = document.createElement("span");
+            item.className = "selected-size-pill";
+            item.innerHTML = talla + ": " + tallasSeleccionadasAdmin[talla] + '<button type="button">x</button>';
+            item.querySelector("button").addEventListener("click", function() {
+                delete tallasSeleccionadasAdmin[talla];
+                actualizarCampoTallasAdmin();
+                renderizarTallasSeleccionadasAdmin();
+            });
+            lista.appendChild(item);
+        });
+
+        if (Object.keys(tallasSeleccionadasAdmin).length === 0) {
+            lista.innerHTML = "<small>No hay tallas agregadas.</small>";
+        }
+    }
+
+    function agregarTallaSeleccionada() {
+        const cantidad = parseInt(document.getElementById("selectedSizeQty").value);
+
+        if (!tallaSeleccionadaAdmin) {
+            alert("Selecciona una talla.");
+            return;
+        }
+
+        if (isNaN(cantidad) || cantidad < 0) {
+            alert("Ingresa una cantidad valida.");
+            return;
+        }
+
+        tallasSeleccionadasAdmin[tallaSeleccionadaAdmin] = cantidad;
+        document.getElementById("selectedSizeQty").value = "";
+        actualizarCampoTallasAdmin();
+        renderizarTallasSeleccionadasAdmin();
+    }
+
+    document.querySelectorAll(".size-mode-btn").forEach(function(boton) {
+        boton.addEventListener("click", function() {
+            modoTallas = boton.dataset.sizeMode;
+            tallaSeleccionadaAdmin = "";
+            document.getElementById("selectedSizeLabel").textContent = "Selecciona una talla";
+            document.querySelectorAll(".size-mode-btn").forEach(function(item) {
+                item.classList.toggle("activo", item === boton);
+            });
+            renderizarOpcionesTallas();
+        });
+    });
+
+    renderizarOpcionesTallas();
+    renderizarTallasSeleccionadasAdmin();
+
     function exigirAdminFrontend() {
         if (!usuarioEsAdmin()) {
             alert("Solo el administrador puede realizar esta acción.");
@@ -326,10 +595,12 @@
         const categoria = document.getElementById("inp-tipo").value;
         const cantidad = document.getElementById("inp-cantidad").value;
         const precio = document.getElementById("inp-precio").value;
+        const costo = document.getElementById("inp-costo").value;
+        const tallas = document.getElementById("inp-tallas").value.trim();
         const imagen = document.getElementById("inp-img").files[0];
         const mensajeError = document.getElementById("error-msg");
 
-        if (!codigo || !nombre || !marca || !categoria || cantidad === "" || precio === "") {
+        if (!codigo || !nombre || !marca || !categoria || cantidad === "" || precio === "" || costo === "") {
             mensajeError.style.display = "block";
             mensajeError.innerText = "Completa todos los campos";
             return;
@@ -343,6 +614,8 @@
         datos.append("categoria", categoria);
         datos.append("cantidad", cantidad);
         datos.append("precio", precio);
+        datos.append("costo", costo);
+        datos.append("tallas", tallas);
 
         if (imagen) {
             datos.append("imagen", imagen);
@@ -375,7 +648,14 @@
             document.getElementById("inp-marca").value = "";
             document.getElementById("inp-tipo").value = "";
             document.getElementById("inp-cantidad").value = "";
+            document.getElementById("inp-tallas").value = "";
+            tallasSeleccionadasAdmin = {};
+            tallaSeleccionadaAdmin = "";
+            document.getElementById("selectedSizeLabel").textContent = "Selecciona una talla";
+            renderizarOpcionesTallas();
+            renderizarTallasSeleccionadasAdmin();
             document.getElementById("inp-precio").value = "";
+            document.getElementById("inp-costo").value = "";
             document.getElementById("inp-img").value = "";
 
         } catch (error) {
@@ -463,12 +743,16 @@
             
             const nuevaCantidadTexto = prompt("Cantidad disponible:", producto.cantidad);
             if (nuevaCantidadTexto === null) return;
-            
+
             const nuevoPrecioTexto = prompt("Precio:", producto.precio);
             if (nuevoPrecioTexto === null) return;
+
+            const nuevoCostoTexto = prompt("Costo de compra:", producto.costo_unitario || 0);
+            if (nuevoCostoTexto === null) return;
             
             const nuevaCantidad = parseInt(nuevaCantidadTexto);
             const nuevoPrecio = parseFloat(nuevoPrecioTexto);
+            const nuevoCosto = parseFloat(nuevoCostoTexto);
             
             if (
                 nuevoCodigo.trim() === "" ||
@@ -478,7 +762,9 @@
                 isNaN(nuevaCantidad) ||
                 nuevaCantidad < 0 ||
                 isNaN(nuevoPrecio) ||
-                nuevoPrecio <= 0
+                nuevoPrecio <= 0 ||
+                isNaN(nuevoCosto) ||
+                nuevoCosto < 0
             ) {
                 alert("Datos inválidos. Revisa la información ingresada.");
                 return;
@@ -493,6 +779,7 @@
             datos.append("categoria", nuevaCategoria.trim().toLowerCase());
             datos.append("cantidad", nuevaCantidad);
             datos.append("precio", nuevoPrecio);
+            datos.append("costo", nuevoCosto);
             
             const respuesta = await fetch("php/producto_editar.php", {
                 method: "POST",
@@ -644,7 +931,7 @@
             if (ventas.error) {
                 tabla.innerHTML = `
                 <tr>
-                    <td colspan="12">${ventas.mensaje}</td>
+                    <td colspan="13">${ventas.mensaje}</td>
                 </tr>
                 `;
                 return;
@@ -653,7 +940,7 @@
             if (ventas.length === 0) {
                 tabla.innerHTML = `
                 <tr>
-                    <td colspan="12">No hay ventas registradas</td>
+                    <td colspan="13">No hay ventas registradas</td>
                 </tr>
                 `;
                 return;
@@ -668,6 +955,7 @@
                     <td>${venta.codigo || "Sin código"}</td>
                     <td>${venta.producto}</td>
                     <td>${venta.marca || "Sin marca"}</td>
+                    <td>${venta.talla || "-"}</td>
                     <td>${venta.cantidad}</td>
                     <td>${formatoPrecioBD(venta.precio_unitario)}</td>
                     <td>${formatoPrecioBD(venta.subtotal)}</td>
@@ -687,7 +975,7 @@
         } catch (error) {
             tabla.innerHTML = `
             <tr>
-                <td colspan="12">Error al cargar historial de ventas</td>
+                <td colspan="13">Error al cargar historial de ventas</td>
             </tr>
             `;
             console.error(error);
@@ -789,7 +1077,7 @@
             if (productos.error) {
                 tabla.innerHTML = `
                 <tr>
-                    <td colspan="8">${productos.mensaje}</td>
+                    <td colspan="11">${productos.mensaje}</td>
                 </tr>
                 `;
                 return;
@@ -814,7 +1102,7 @@
             if (productosFiltrados.length === 0) {
                 tabla.innerHTML = `
                 <tr>
-                    <td colspan="8">No se encontraron productos</td>
+                    <td colspan="11">No se encontraron productos</td>
                 </tr>
                 `;
                 return;
@@ -847,7 +1135,10 @@
                     <td>${producto.marca}</td>
                     <td>${producto.categoria}</td>
                     <td>${formatoPrecioBD(producto.precio)}</td>
+                    <td>${formatoPrecioBD(producto.costo_unitario || 0)}</td>
+                    <td>${formatoPrecioBD(Number(producto.precio) - Number(producto.costo_unitario || 0))}</td>
                     <td>${producto.cantidad}</td>
+                    <td>${textoTallasBD(producto.tallas) || "-"}</td>
                     <td class="${claseEstado}">${producto.estado}</td>
                     <td>${accionesAdmin}</td>
                 </tr>
@@ -857,7 +1148,7 @@
         } catch (error) {
             tabla.innerHTML = `
             <tr>
-                <td colspan="8">Error al cargar inventario desde PostgreSQL</td>
+                <td colspan="11">Error al cargar inventario desde PostgreSQL</td>
             </tr>
             `;
             console.error(error);
@@ -866,6 +1157,235 @@
     
     function formatoPrecioBD(valor) {
         return "$" + Number(valor).toLocaleString("es-CO");
+    }
+
+    async function guardarGastoBD(evento) {
+        evento.preventDefault();
+
+        if (!exigirAdminFrontend()) return;
+
+        const datos = new FormData();
+        datos.append("tipo", document.getElementById("gastoTipo").value);
+        datos.append("concepto", document.getElementById("gastoConcepto").value.trim());
+        datos.append("valor", document.getElementById("gastoValor").value);
+        datos.append("fecha", document.getElementById("gastoFecha").value);
+        datos.append("detalle", document.getElementById("gastoDetalle").value.trim());
+
+        try {
+            const respuesta = await fetch("php/gasto_guardar.php", {
+                method: "POST",
+                body: datos
+            });
+            const resultado = await respuesta.json();
+
+            if (resultado.error) {
+                alert(resultado.mensaje);
+                return;
+            }
+
+            alert(resultado.mensaje);
+            document.getElementById("formGasto").reset();
+            definirFechasFinanzas();
+            cargarFinanzasBD();
+            cargarResumenFinancieroBD();
+        } catch (error) {
+            alert("Error al registrar el gasto.");
+            console.error(error);
+        }
+    }
+
+    async function guardarInversionBD(evento) {
+        evento.preventDefault();
+
+        if (!exigirAdminFrontend()) return;
+
+        const datos = new FormData();
+        datos.append("tipo", document.getElementById("inversionTipo").value);
+        datos.append("concepto", document.getElementById("inversionConcepto").value.trim());
+        datos.append("valor", document.getElementById("inversionValor").value);
+        datos.append("fecha", document.getElementById("inversionFecha").value);
+        datos.append("detalle", document.getElementById("inversionDetalle").value.trim());
+
+        try {
+            const respuesta = await fetch("php/inversion_guardar.php", {
+                method: "POST",
+                body: datos
+            });
+            const resultado = await respuesta.json();
+
+            if (resultado.error) {
+                alert(resultado.mensaje);
+                return;
+            }
+
+            alert(resultado.mensaje);
+            document.getElementById("formInversion").reset();
+            definirFechasFinanzas();
+            cargarFinanzasBD();
+            cargarResumenFinancieroBD();
+        } catch (error) {
+            alert("Error al registrar la inversion.");
+            console.error(error);
+        }
+    }
+
+    async function cargarFinanzasBD() {
+        const tabla = document.getElementById("tablaFinanzas");
+
+        if (!tabla || !usuarioEsAdmin()) return;
+
+        try {
+            const respuesta = await fetch("php/finanzas_listar.php");
+            const movimientos = await respuesta.json();
+
+            tabla.innerHTML = "";
+
+            if (movimientos.error) {
+                tabla.innerHTML = `<tr><td colspan="7">${movimientos.mensaje}</td></tr>`;
+                return;
+            }
+
+            if (movimientos.length === 0) {
+                tabla.innerHTML = '<tr><td colspan="7">No hay movimientos financieros registrados</td></tr>';
+                return;
+            }
+
+            movimientos.forEach(function(movimiento) {
+                const claseValor = Number(movimiento.valor) < 0 ? "stock-bajo" : "stock-alto";
+
+                tabla.innerHTML += `
+                    <tr>
+                        <td>${new Date(movimiento.fecha + "T00:00:00").toLocaleDateString()}</td>
+                        <td>${movimiento.clase}</td>
+                        <td>${movimiento.tipo}</td>
+                        <td>${movimiento.concepto}</td>
+                        <td class="${claseValor}">${formatoPrecioBD(movimiento.valor)}</td>
+                        <td>${movimiento.usuario || "Sin usuario"}</td>
+                        <td>${movimiento.detalle || "Sin detalle"}</td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            tabla.innerHTML = '<tr><td colspan="7">Error al cargar finanzas</td></tr>';
+            console.error(error);
+        }
+    }
+
+    async function cargarResumenFinancieroBD() {
+        if (!usuarioEsAdmin()) return;
+
+        try {
+            const respuesta = await fetch("php/finanzas_resumen.php");
+            const resumen = await respuesta.json();
+
+            if (resumen.error) {
+                console.error(resumen.mensaje);
+                return;
+            }
+
+            document.getElementById("finVentasNetas").innerText = formatoPrecioBD(resumen.ventas_netas);
+            document.getElementById("finCostoMercancia").innerText = formatoPrecioBD(resumen.costo_mercancia);
+            document.getElementById("finUtilidadBruta").innerText = formatoPrecioBD(resumen.utilidad_bruta);
+            document.getElementById("finGastos").innerText = formatoPrecioBD(resumen.gastos);
+            document.getElementById("finInversiones").innerText = formatoPrecioBD(resumen.inversiones);
+            document.getElementById("finUtilidad").innerText = formatoPrecioBD(resumen.utilidad_neta);
+            document.getElementById("finMargen").innerText = Number(resumen.margen_ganancia).toFixed(2) + "%";
+            document.getElementById("finSaldo").innerText = formatoPrecioBD(resumen.saldo_estimado);
+            renderizarDetalleGastosFinancieros(resumen);
+        } catch (error) {
+            console.error("Error al cargar resumen financiero", error);
+        }
+    }
+
+    function etiquetaGastoFinanciero(tipo) {
+        const etiquetas = {
+            primario: "Gastos primarios",
+            secundario: "Gastos secundarios",
+            servicio: "Servicios publicos",
+            nomina: "Pago de trabajadores",
+            transporte: "Transporte",
+            publicidad: "Publicidad",
+            empaque: "Bolsas y empaques",
+            mantenimiento: "Mantenimiento",
+            otro: "Otros gastos"
+        };
+
+        return etiquetas[tipo] || tipo;
+    }
+
+    function renderizarDetalleGastosFinancieros(resumen) {
+        const contenedor = document.getElementById("finGastosDetalle");
+        if (!contenedor) return;
+
+        const gastosPorTipo = resumen.gastos_por_tipo || {};
+        const ventasNetas = Number(resumen.ventas_netas || 0);
+        const tipos = ["servicio", "nomina", "empaque", "publicidad", "transporte", "primario", "secundario", "mantenimiento", "otro"];
+
+        contenedor.innerHTML = `
+            <div>
+                <strong>Formula de ganancia</strong>
+                <p>Ventas netas - costo de mercancia vendida - gastos = utilidad neta.</p>
+            </div>
+            <div>
+                <strong>Porcentajes principales</strong>
+                <p>Costo mercancia: ${Number(resumen.porcentaje_costo_mercancia || 0).toFixed(2)}%</p>
+                <p>Gastos: ${Number(resumen.porcentaje_gastos || 0).toFixed(2)}%</p>
+                <p>Inversiones registradas: ${Number(resumen.porcentaje_inversiones || 0).toFixed(2)}%</p>
+            </div>
+        `;
+
+        tipos.forEach(function(tipo) {
+            const valor = Number(gastosPorTipo[tipo] || 0);
+            if (valor <= 0) return;
+
+            const porcentaje = ventasNetas > 0 ? (valor / ventasNetas) * 100 : 0;
+            const item = document.createElement("div");
+            item.innerHTML = `
+                <strong>${etiquetaGastoFinanciero(tipo)}</strong>
+                <p>${formatoPrecioBD(valor)} (${porcentaje.toFixed(2)}% de ventas netas)</p>
+            `;
+            contenedor.appendChild(item);
+        });
+    }
+
+    function definirFechasFinanzas() {
+        const hoy = new Date().toISOString().slice(0, 10);
+        const gastoFecha = document.getElementById("gastoFecha");
+        const inversionFecha = document.getElementById("inversionFecha");
+
+        if (gastoFecha && !gastoFecha.value) {
+            gastoFecha.value = hoy;
+        }
+
+        if (inversionFecha && !inversionFecha.value) {
+            inversionFecha.value = hoy;
+        }
+    }
+
+    function leerTallasBD(tallas) {
+        if (Array.isArray(tallas)) return tallas;
+
+        if (typeof tallas === "string" && tallas.trim() !== "") {
+            try {
+                return JSON.parse(tallas);
+            } catch (error) {
+                return [];
+            }
+        }
+
+        return [];
+    }
+
+    function textoTallasBD(tallas) {
+        const lista = leerTallasBD(tallas);
+
+        if (lista.length === 0) {
+            return "";
+        }
+
+        return lista.map(function(item) {
+            return item.talla + ":" + item.cantidad;
+        }).join(", ");
     }
 
     async function registrarDevolucionBD(idVenta, idProducto) {
@@ -924,9 +1444,12 @@
         cargarHistorialVentasBD();
         cargarReportesBD();
         cargarMovimientosBD();
+        definirFechasFinanzas();
 
         if (usuarioEsAdmin()) {
             cargarCambiosPrecioBD();
+            cargarFinanzasBD();
+            cargarResumenFinancieroBD();
         }
     }
 
@@ -936,6 +1459,17 @@
     
     if (buscadorBD) {
         buscadorBD.addEventListener("input", cargarInventarioBD);
+    }
+
+    const formGasto = document.getElementById("formGasto");
+    const formInversion = document.getElementById("formInversion");
+
+    if (formGasto) {
+        formGasto.addEventListener("submit", guardarGastoBD);
+    }
+
+    if (formInversion) {
+        formInversion.addEventListener("submit", guardarInversionBD);
     }
 
     async function cargarCambiosPrecioBD() {

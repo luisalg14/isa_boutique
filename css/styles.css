@@ -586,6 +586,146 @@ h2 {
     outline: none;
 }
 
+.size-builder {
+    display: grid;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid #d9c1c3;
+    background: #fffdfb;
+}
+
+.size-mode,
+.size-options,
+.selected-sizes-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.size-mode-btn,
+.size-option,
+.selected-size-pill button,
+.size-quantity-row button {
+    border: 1px solid #d9c1c3;
+    background: #fff;
+    color: #954053;
+    cursor: pointer;
+}
+
+.size-mode-btn,
+.size-option {
+    min-width: 42px;
+    min-height: 38px;
+    padding: 8px 10px;
+    font-weight: 800;
+}
+
+.size-mode-btn.activo,
+.size-option.activo {
+    border-color: #954053;
+    background: #954053;
+    color: #fff;
+}
+
+.size-option.agotada,
+.size-option:disabled {
+    position: relative;
+    opacity: 0.45;
+    cursor: not-allowed;
+    color: #7b6f68;
+    background:
+        linear-gradient(135deg, transparent 47%, #954053 49%, #954053 51%, transparent 53%),
+        #f4ece8;
+}
+
+.size-quantity-row {
+    display: grid;
+    grid-template-columns: minmax(140px, 1fr) 140px auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.size-quantity-row span {
+    color: #544245;
+    font-weight: 800;
+}
+
+.size-quantity-row input {
+    max-width: none;
+}
+
+.size-quantity-row button {
+    min-height: 42px;
+    padding: 10px 14px;
+    font-weight: 800;
+}
+
+.selected-size-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border: 1px solid #d9c1c3;
+    background: #fff1ea;
+    color: #211a15;
+    font-weight: 800;
+}
+
+.selected-size-pill button {
+    width: 22px;
+    height: 22px;
+    line-height: 1;
+}
+
+.public-size-options {
+    margin-top: 4px;
+}
+
+.finance-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin: 24px 0;
+}
+
+.finance-form {
+    padding: 18px;
+    border: 1px solid #d9c1c3;
+    background: #fffdfb;
+}
+
+.finance-form h3,
+.finance-subtitle {
+    margin-bottom: 16px;
+    color: #954053;
+    font-family: "Libre Caslon Text", Georgia, serif;
+    font-size: 26px;
+    font-weight: 400;
+}
+
+.finance-breakdown {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin: 18px 0 24px;
+}
+
+.finance-breakdown div {
+    padding: 14px;
+    border: 1px solid #eadfd7;
+    background: #fff8f5;
+}
+
+.finance-breakdown strong {
+    color: #954053;
+}
+
+.finance-breakdown p {
+    margin-top: 6px;
+    color: #544245;
+    font-size: 14px;
+}
+
 /* ===============================
    FILTROS Y TABLAS
 ================================ */
@@ -877,6 +1017,37 @@ h2 {
     padding: 10px 14px;
 }
 
+.cart-list {
+    display: grid;
+    gap: 12px;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.cart-item strong {
+    color: var(--text);
+}
+
+.cart-item p {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.cart-item button {
+    height: fit-content;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--brand-dark);
+    cursor: pointer;
+}
+
 .btn-cancelar {
     background: #ece4de;
     color: var(--text);
@@ -957,6 +1128,14 @@ footer {
     .modal-acciones button {
         width: 100%;
     }
+
+    .size-quantity-row {
+        grid-template-columns: 1fr;
+    }
+
+    .finance-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 520px) {
@@ -1016,6 +1195,51 @@ footer {
     font-weight: 400;
     letter-spacing: 0;
     text-transform: none;
+}
+
+.public-page .menu .nav-home-arrow {
+    min-width: 38px;
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid #d9c1c3;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.55);
+    color: #954053;
+    font-size: 18px;
+    line-height: 1;
+    text-decoration: none;
+}
+
+.public-page .menu .cart-link {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 13px;
+    border: 1px solid #d9c1c3;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.55);
+    color: #954053;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.cart-link span {
+    min-width: 22px;
+    height: 22px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 999px;
+    background: #954053;
+    color: #fff;
+    font-size: 12px;
+}
+
+button.cart-link {
+    font: inherit;
 }
 
 .editorial-hero {

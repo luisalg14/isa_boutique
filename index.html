@@ -10,6 +10,7 @@
 <body class="public-page stitch-home">
 
     <nav class="menu stitch-nav">
+        <a class="nav-home-arrow" href="index.html" title="Volver al inicio">←</a>
         <a class="brand-link" href="index.html">Isa Boutique</a>
         <a href="index.html">Inicio</a>
         <a href="Producto.html">Ver todo</a>
@@ -17,6 +18,7 @@
         <a href="categoria.html?tipo=vestidos">Vestidos</a>
         <a href="categoria.html?tipo=conjuntos">Conjuntos</a>
         <a href="#contacto">Contacto</a>
+        <a class="cart-link" href="Producto.html">Carrito <span id="cartCount">0</span></a>
     </nav>
 
     <header class="stitch-hero">
@@ -131,6 +133,14 @@
             <a href="https://instagram.com/Isa.boutique14" target="_blank">Instagram</a>
         </div>
     </footer>
+
+    <script>
+        const carritoInicio = JSON.parse(localStorage.getItem("isa_carrito")) || [];
+        const totalCarritoInicio = carritoInicio.reduce(function(suma, item) {
+            return suma + Number(item.cantidad);
+        }, 0);
+        document.getElementById("cartCount").textContent = totalCarritoInicio;
+    </script>
 
 </body>
 </html>

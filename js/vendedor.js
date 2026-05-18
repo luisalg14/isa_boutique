@@ -48,18 +48,82 @@ function llenarSelectorProductos() {
     });
 
     selector.value = seleccionado;
+    llenarSelectorTallas();
+}
+
+function leerTallasVendedor(tallas) {
+    if (Array.isArray(tallas)) return tallas;
+
+    if (typeof tallas === "string" && tallas.trim() !== "") {
+        try {
+            return JSON.parse(tallas);
+        } catch (error) {
+            return [];
+        }
+    }
+
+    return [];
+}
+
+function textoTallasVendedor(tallas) {
+    const lista = leerTallasVendedor(tallas);
+
+    if (lista.length === 0) return "-";
+
+    return lista.map(function(item) {
+        return item.talla + " (" + item.cantidad + ")";
+    }).join(", ");
+}
+
+function llenarSelectorTallas() {
+    const idProducto = Number(document.getElementById("ventaProducto")?.value || 0);
+    const selector = document.getElementById("ventaTalla");
+    const producto = productosVendedor.find(function(item) {
+        return Number(item.id_producto) === idProducto;
+    });
+
+    if (!selector) return;
+
+    selector.innerHTML = '<option value="">Seleccionar talla</option>';
+
+    if (!producto) {
+        actualizarResumenVenta();
+        return;
+    }
+
+    leerTallasVendedor(producto.tallas)
+        .filter(function(item) {
+            return Number(item.cantidad) > 0;
+        })
+        .forEach(function(item) {
+            const opcion = document.createElement("option");
+            opcion.value = item.talla;
+            opcion.textContent = item.talla + " - " + item.cantidad + " disponibles";
+            selector.appendChild(opcion);
+        });
+
+    if (selector.options.length === 2) {
+        selector.selectedIndex = 1;
+    }
+
+    actualizarResumenVenta();
 }
 
 function actualizarResumenVenta() {
     const idProducto = Number(document.getElementById("ventaProducto")?.value || 0);
     const cantidad = Number(document.getElementById("ventaCantidad")?.value || 0);
+    const talla = document.getElementById("ventaTalla")?.value || "";
     const producto = productosVendedor.find(function(item) {
         return Number(item.id_producto) === idProducto;
+    });
+    const tallaSeleccionada = leerTallasVendedor(producto ? producto.tallas : []).find(function(item) {
+        return item.talla === talla;
     });
 
     document.getElementById("ventaNombreProducto").textContent = producto ? producto.nombre : "Sin producto seleccionado";
     document.getElementById("ventaCodigoProducto").textContent = "Codigo: " + (producto ? producto.codigo : "-");
-    document.getElementById("ventaStockProducto").textContent = "Stock: " + (producto ? producto.cantidad : "-");
+    document.getElementById("ventaTallasProducto").textContent = "Tallas disponibles: " + (producto ? textoTallasVendedor(producto.tallas) : "-");
+    document.getElementById("ventaStockProducto").textContent = "Stock talla: " + (tallaSeleccionada ? tallaSeleccionada.cantidad : "-");
     document.getElementById("ventaTotal").textContent = formatoPrecioVendedor(producto ? Number(producto.precio) * cantidad : 0);
 }
 
@@ -74,7 +138,7 @@ async function cargarInventarioVendedor() {
 
         if (productos.error) {
             if (tabla) {
-                tabla.innerHTML = `<tr><td colspan="7">${productos.mensaje}</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="8">${productos.mensaje}</td></tr>`;
             }
             return;
         }
@@ -98,7 +162,7 @@ async function cargarInventarioVendedor() {
         });
 
         if (productosFiltrados.length === 0) {
-            tabla.innerHTML = '<tr><td colspan="7">No se encontraron productos</td></tr>';
+            tabla.innerHTML = '<tr><td colspan="8">No se encontraron productos</td></tr>';
             return;
         }
 
@@ -113,13 +177,14 @@ async function cargarInventarioVendedor() {
                     <td>${producto.categoria}</td>
                     <td>${formatoPrecioVendedor(producto.precio)}</td>
                     <td>${producto.cantidad}</td>
+                    <td>${textoTallasVendedor(producto.tallas)}</td>
                     <td class="${claseEstadoVendedor(producto)}">${producto.estado}</td>
                 </tr>
             `;
         });
     } catch (error) {
         if (tabla) {
-            tabla.innerHTML = '<tr><td colspan="7">Error al cargar inventario</td></tr>';
+            tabla.innerHTML = '<tr><td colspan="8">Error al cargar inventario</td></tr>';
         }
         console.error(error);
     }
@@ -136,6 +201,7 @@ async function registrarVentaVendedor(evento) {
     datos.append("telefono", document.getElementById("ventaTelefono").value.trim());
     datos.append("cantidad", document.getElementById("ventaCantidad").value);
     datos.append("medio_pago", document.getElementById("ventaMedioPago").value);
+    datos.append("talla", document.getElementById("ventaTalla").value);
 
     mensaje.textContent = "";
 
@@ -174,12 +240,12 @@ async function cargarHistorialVendedor() {
         const historial = await respuesta.json();
 
         if (historial.error) {
-            tabla.innerHTML = `<tr><td colspan="10">${historial.mensaje}</td></tr>`;
+            tabla.innerHTML = `<tr><td colspan="11">${historial.mensaje}</td></tr>`;
             return;
         }
 
         if (historial.length === 0) {
-            tabla.innerHTML = '<tr><td colspan="10">No hay ventas registradas</td></tr>';
+            tabla.innerHTML = '<tr><td colspan="11">No hay ventas registradas</td></tr>';
             return;
         }
 
@@ -197,6 +263,7 @@ async function cargarHistorialVendedor() {
                     <td>${registro.tipo}</td>
                     <td>${registro.codigo || "Sin codigo"}</td>
                     <td>${registro.producto}</td>
+                    <td>${registro.talla || "-"}</td>
                     <td>${registro.cantidad}</td>
                     <td>${formatoPrecioVendedor(registro.subtotal)}</td>
                     <td>${registro.medio_pago}</td>
@@ -206,7 +273,7 @@ async function cargarHistorialVendedor() {
             `;
         });
     } catch (error) {
-        tabla.innerHTML = '<tr><td colspan="10">Error al cargar historial</td></tr>';
+        tabla.innerHTML = '<tr><td colspan="11">Error al cargar historial</td></tr>';
         console.error(error);
     }
 }
@@ -295,7 +362,8 @@ document.querySelectorAll(".admin-tab").forEach(function(tab) {
 window.addEventListener("sesion-lista", iniciarPanelVendedor);
 
 document.getElementById("buscadorVendedor")?.addEventListener("input", cargarInventarioVendedor);
-document.getElementById("ventaProducto")?.addEventListener("change", actualizarResumenVenta);
+document.getElementById("ventaProducto")?.addEventListener("change", llenarSelectorTallas);
+document.getElementById("ventaTalla")?.addEventListener("change", actualizarResumenVenta);
 document.getElementById("ventaCantidad")?.addEventListener("input", actualizarResumenVenta);
 document.getElementById("formVenta")?.addEventListener("submit", registrarVentaVendedor);
 

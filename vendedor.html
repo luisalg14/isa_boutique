@@ -65,6 +65,13 @@
                             </div>
 
                             <div class="campo">
+                                <label>Talla</label>
+                                <select id="ventaTalla" required>
+                                    <option value="">Seleccionar talla</option>
+                                </select>
+                            </div>
+
+                            <div class="campo">
                                 <label>Cliente</label>
                                 <input id="ventaCliente" placeholder="Nombre del cliente" required>
                             </div>
@@ -97,6 +104,7 @@
                             <span>Detalle</span>
                             <h3 id="ventaNombreProducto">Sin producto seleccionado</h3>
                             <p id="ventaCodigoProducto">Codigo: -</p>
+                            <p id="ventaTallasProducto">Tallas disponibles: -</p>
                             <p id="ventaStockProducto">Stock: -</p>
                             <strong id="ventaTotal">$0</strong>
                         </aside>
@@ -119,6 +127,7 @@
                                 <th>Categoria</th>
                                 <th>Precio</th>
                                 <th>Cantidad</th>
+                                <th>Tallas</th>
                                 <th>Estado</th>
                             </tr>
                         </thead>
@@ -137,6 +146,7 @@
                                 <th>Tipo</th>
                                 <th>Codigo</th>
                                 <th>Producto</th>
+                                <th>Talla</th>
                                 <th>Cantidad</th>
                                 <th>Total</th>
                                 <th>Medio de pago</th>

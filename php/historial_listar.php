@@ -18,9 +18,11 @@ try {
             p.codigo,
             p.nombre AS producto,
             p.marca,
+            dv.talla,
             dv.cantidad,
             dv.precio_unitario,
             dv.subtotal AS total,
+            dv.subtotal AS subtotal,
             v.medio_pago,
             v.fecha,
             NULL AS motivo
@@ -43,9 +45,11 @@ try {
             p.codigo,
             p.nombre AS producto,
             p.marca,
+            dd.talla,
             dd.cantidad,
             dd.precio_unitario,
             -dd.subtotal_devuelto AS total,
+            -dd.subtotal_devuelto AS subtotal,
             v.medio_pago,
             d.fecha,
             d.motivo
