@@ -9,7 +9,7 @@ try {
     exigir_roles(["admin"]);
 
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-        echo json_encode(["error" => true, "mensaje" => "Metodo no permitido"], JSON_UNESCAPED_UNICODE);
+        echo json_encode(["error" => true, "mensaje" => "Método no permitido"], JSON_UNESCAPED_UNICODE);
         exit;
     }
 

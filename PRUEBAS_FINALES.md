@@ -1,31 +1,31 @@
 # Pruebas finales Isa Boutique
 
-Marca cada punto despues de probarlo en el navegador.
+Marca cada punto después de probarlo en el navegador.
 
 ## Acceso y seguridad
 
-- [ ] Iniciar sesion como administrador.
-- [ ] Iniciar sesion como vendedor dentro del horario permitido.
+- [ ] Iniciar sesión como administrador.
+- [ ] Iniciar sesión como vendedor dentro del horario permitido.
 - [ ] Verificar que vendedor no vea funciones exclusivas del administrador.
-- [ ] Verificar que vendedor no pueda cambiar contrasenas.
-- [ ] Verificar sesion unica: intentar entrar con el mismo usuario en otro navegador.
-- [ ] Cerrar sesion y confirmar que permite entrar nuevamente.
+- [ ] Verificar que vendedor no pueda cambiar contraseñas.
+- [ ] Verificar sesión única: intentar entrar con el mismo usuario en otro navegador.
+- [ ] Cerrar sesión y confirmar que permite entrar nuevamente.
 
-## Catalogo publico
+## Catálogo público
 
 - [ ] Abrir `index.html`.
 - [ ] Entrar a `Producto.html`.
-- [ ] Entrar a una categoria desde el menu.
+- [ ] Entrar a una categoría desde el menú.
 - [ ] Ver productos activos desde PostgreSQL.
 - [ ] Seleccionar una talla disponible.
 - [ ] Ver talla agotada o inactiva cuando no tenga stock.
-- [ ] Registrar un pedido desde la pagina publica.
+- [ ] Registrar un pedido desde la página pública.
 
 ## Inventario
 
-- [ ] Crear producto con codigo, categoria, precio, costo, imagen y tallas.
+- [ ] Crear producto con código, categoría, precio, costo, imagen y tallas.
 - [ ] Confirmar que aparece en inventario.
-- [ ] Confirmar que aparece en la tienda publica.
+- [ ] Confirmar que aparece en la tienda pública.
 - [ ] Editar producto.
 - [ ] Cambiar precio y revisar historial de cambios.
 - [ ] Desactivar producto y confirmar que no se venda.
@@ -34,19 +34,19 @@ Marca cada punto despues de probarlo en el navegador.
 
 - [ ] Registrar venta desde administrador.
 - [ ] Registrar venta desde vendedor.
-- [ ] Registrar pedido desde la pagina publica.
-- [ ] Confirmar que el pedido publico queda como pendiente.
+- [ ] Registrar pedido desde la página pública.
+- [ ] Confirmar que el pedido público queda como pendiente.
 - [ ] Confirmar pago desde historial.
 - [ ] Cancelar pedido pendiente y verificar que devuelve stock.
-- [ ] Registrar devolucion de una venta pagada.
+- [ ] Registrar devolución de una venta pagada.
 - [ ] Revisar canal de venta y tipo de entrega.
 
 ## Finanzas y reportes
 
 - [ ] Revisar ventas de hoy.
 - [ ] Revisar ventas del mes.
-- [ ] Revisar productos mas vendidos.
-- [ ] Revisar productos con menor rotacion.
+- [ ] Revisar productos más vendidos.
+- [ ] Revisar productos con menor rotación.
 - [ ] Revisar medios de pago.
 - [ ] Revisar canales de venta.
 - [ ] Registrar gasto.
@@ -60,10 +60,10 @@ Marca cada punto despues de probarlo en el navegador.
 - [ ] Confirmar que ventas se guardan en PostgreSQL.
 - [ ] Confirmar que clientes se guardan en PostgreSQL.
 - [ ] Confirmar que movimientos se guardan en PostgreSQL.
-- [ ] Confirmar que `php/config.local.php` no se sube a publicacion.
+- [ ] Confirmar que `php/config.local.php` no se publica ni se sube a GitHub.
 
 ## Entrega
 
-- [ ] Usar la carpeta `publicacion_isa_boutique` para publicar o entregar version limpia.
+- [ ] Entregar solo las carpetas y archivos reales del proyecto.
 - [ ] Explicar que la base final es PostgreSQL.
-- [ ] Mencionar mejoras futuras: plan separe, QR, backups automaticos y promociones.
+- [ ] Mencionar mejoras futuras: plan separe, QR, backups automáticos y promociones.

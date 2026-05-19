@@ -16,7 +16,7 @@ try {
     exigir_roles(["admin"]);
 
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-        echo json_encode(["error" => true, "mensaje" => "Metodo no permitido"], JSON_UNESCAPED_UNICODE);
+        echo json_encode(["error" => true, "mensaje" => "Método no permitido"], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
@@ -51,14 +51,14 @@ try {
 
 } catch (PDOException $e) {
     if ($e->getCode() === "23505") {
-        echo json_encode(["error" => true, "mensaje" => "Ya existe otra categoria con ese nombre"], JSON_UNESCAPED_UNICODE);
+        echo json_encode(["error" => true, "mensaje" => "Ya existe otra categoría con ese nombre"], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
     error_log("Error categoria_editar: " . $e->getMessage());
     echo json_encode([
         "error" => true,
-        "mensaje" => "No se pudo actualizar la categoria"
+        "mensaje" => "No se pudo actualizar la categoría"
     ], JSON_UNESCAPED_UNICODE);
 }
 

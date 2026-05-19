@@ -26,7 +26,7 @@ function formatoPrecioVendedor(valor) {
 function etiquetaCanalVendedor(canal) {
     const etiquetas = {
         tienda_fisica: "Tienda fisica",
-        pagina_web: "Pagina web",
+        pagina_web: "Página web",
         whatsapp: "WhatsApp",
         instagram: "Instagram"
     };
@@ -303,7 +303,7 @@ async function cargarHistorialVendedor() {
                     <button onclick="actualizarEstadoVentaVendedor(${registro.id_venta}, 'cancelada')">Cancelar</button>
                 `;
             } else if (registro.tipo === "Venta" && registro.estado === "pagada") {
-                accion = `<button onclick="registrarDevolucionVendedor(${registro.id_venta}, ${registro.id_producto})">Devolucion</button>`;
+                accion = `<button onclick="registrarDevolucionVendedor(${registro.id_venta}, ${registro.id_producto})">Devolución</button>`;
             }
 
             tabla.innerHTML += `
@@ -394,7 +394,7 @@ async function registrarDevolucionVendedor(idVenta, idProducto) {
         return;
     }
 
-    const motivo = prompt("Motivo de la devolucion:");
+    const motivo = prompt("Motivo de la devolución:");
 
     if (motivo === null || motivo.trim() === "") {
         alert("Debes ingresar un motivo.");
@@ -426,7 +426,7 @@ async function registrarDevolucionVendedor(idVenta, idProducto) {
         await cargarHistorialVendedor();
         await cargarReportesVendedor();
     } catch (error) {
-        alert("Error al registrar la devolucion.");
+        alert("Error al registrar la devolución.");
         console.error(error);
     }
 }

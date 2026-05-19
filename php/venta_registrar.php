@@ -281,7 +281,7 @@ try {
 
     echo json_encode([
         "error" => false,
-        "mensaje" => $usuarioActual ? "Venta registrada correctamente" : "Pedido registrado correctamente. Queda pendiente de confirmacion.",
+        "mensaje" => $usuarioActual ? "Venta registrada correctamente" : "Pedido registrado correctamente. Queda pendiente de confirmación.",
         "id_venta" => $idVenta,
         "total" => $subtotal,
         "estado" => $estadoVenta,

@@ -194,7 +194,7 @@
                             <option value="tienda_fisica">Tienda fisica</option>
                             <option value="whatsapp">WhatsApp</option>
                             <option value="instagram">Instagram</option>
-                            <option value="pagina_web">Pagina web</option>
+                            <option value="pagina_web">Página web</option>
                         </select>
                     </div>
 
@@ -306,7 +306,7 @@
                 <div class="size-builder">
                     <div class="size-mode">
                         <button type="button" class="size-mode-btn activo" data-size-mode="letras">Letras</button>
-                        <button type="button" class="size-mode-btn" data-size-mode="numeros">Numeros</button>
+                        <button type="button" class="size-mode-btn" data-size-mode="numeros">Números</button>
                     </div>
                     <div id="sizeOptions" class="size-options"></div>
                     <div class="size-quantity-row">
@@ -346,7 +346,7 @@
 
             <div class="finance-grid">
                 <form id="formCategoria" class="finance-form">
-                    <h3>Crear categoria</h3>
+                    <h3>Crear categoría</h3>
 
                     <div class="campo">
                         <label>Nombre</label>
@@ -354,11 +354,11 @@
                     </div>
 
                     <div class="campo">
-                        <label>Descripcion</label>
+                        <label>Descripción</label>
                         <input id="categoriaDescripcion" placeholder="Ej: Enterizos y prendas completas">
                     </div>
 
-                    <button class="btn btn-agregar" type="submit">Guardar categoria</button>
+                    <button class="btn btn-agregar" type="submit">Guardar categoría</button>
                 </form>
             </div>
 
@@ -366,7 +366,7 @@
                 <thead>
                     <tr>
                         <th>Nombre</th>
-                        <th>Descripcion</th>
+                        <th>Descripción</th>
                         <th>Productos</th>
                         <th>Estado</th>
                         <th>Acciones</th>
@@ -1796,7 +1796,7 @@
                         <button onclick="actualizarEstadoVentaBD(${venta.id_venta}, 'cancelada')">Cancelar</button>
                     `;
                 } else if (venta.tipo === "Venta" && venta.estado === "pagada") {
-                    accion = `<button onclick="registrarDevolucionBD(${venta.id_venta}, ${venta.id_producto})">Devolucion</button>`;
+                    accion = `<button onclick="registrarDevolucionBD(${venta.id_venta}, ${venta.id_producto})">Devolución</button>`;
                 }
 
                 tabla.innerHTML += `
@@ -2263,7 +2263,7 @@
     function etiquetaCanalVenta(canal) {
         const etiquetas = {
             tienda_fisica: "Tienda fisica",
-            pagina_web: "Pagina web",
+            pagina_web: "Página web",
             whatsapp: "WhatsApp",
             instagram: "Instagram"
         };
@@ -2467,7 +2467,7 @@
                 await cargarCategoriasBD();
             }
         } catch (error) {
-            alert("Error al guardar categoria.");
+            alert("Error al guardar categoría.");
             console.error(error);
         }
     }
@@ -2512,7 +2512,7 @@
             tabla.innerHTML = "";
 
             if (categorias.length === 0) {
-                tabla.innerHTML = '<tr><td colspan="5">No hay categorias registradas</td></tr>';
+                tabla.innerHTML = '<tr><td colspan="5">No hay categorías registradas</td></tr>';
                 return;
             }
 
@@ -2536,7 +2536,7 @@
             });
         } catch (error) {
             if (tabla) {
-                tabla.innerHTML = '<tr><td colspan="5">Error al cargar categorias</td></tr>';
+                tabla.innerHTML = '<tr><td colspan="5">Error al cargar categorías</td></tr>';
             }
             console.error(error);
         }
@@ -2554,10 +2554,10 @@
             return;
         }
 
-        const nuevoNombre = prompt("Nombre de la categoria:", categoria.nombre);
+        const nuevoNombre = prompt("Nombre de la categoría:", categoria.nombre);
         if (nuevoNombre === null) return;
 
-        const nuevaDescripcion = prompt("Descripcion:", categoria.descripcion || "");
+        const nuevaDescripcion = prompt("Descripción:", categoria.descripcion || "");
         if (nuevaDescripcion === null) return;
 
         const datos = new FormData();
@@ -2579,7 +2579,7 @@
                 cargarInventarioBD();
             }
         } catch (error) {
-            alert("Error al editar categoria.");
+            alert("Error al editar categoría.");
             console.error(error);
         }
     }
@@ -2589,7 +2589,7 @@
 
         const accion = estado === "1" ? "activar" : "desactivar";
 
-        if (!confirm("Deseas " + accion + " esta categoria?")) return;
+        if (!confirm("¿Deseas " + accion + " esta categoría?")) return;
 
         const datos = new FormData();
         datos.append("id_categoria", idCategoria);
@@ -2608,7 +2608,7 @@
                 await cargarCategoriasBD();
             }
         } catch (error) {
-            alert("Error al cambiar categoria.");
+            alert("Error al cambiar categoría.");
             console.error(error);
         }
     }
@@ -2616,7 +2616,7 @@
     async function eliminarCategoriaBD(idCategoria) {
         if (!exigirAdminFrontend()) return;
 
-        if (!confirm("Deseas eliminar esta categoria? Solo se permite si no tiene productos.")) return;
+        if (!confirm("¿Deseas eliminar esta categoría? Solo se permite si no tiene productos.")) return;
 
         const datos = new FormData();
         datos.append("id_categoria", idCategoria);
@@ -2634,7 +2634,7 @@
                 await cargarCategoriasBD();
             }
         } catch (error) {
-            alert("Error al eliminar categoria.");
+            alert("Error al eliminar categoría.");
             console.error(error);
         }
     }

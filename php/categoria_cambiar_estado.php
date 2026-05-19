@@ -9,7 +9,7 @@ try {
     exigir_roles(["admin"]);
 
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-        echo json_encode(["error" => true, "mensaje" => "Metodo no permitido"], JSON_UNESCAPED_UNICODE);
+        echo json_encode(["error" => true, "mensaje" => "Método no permitido"], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
@@ -33,7 +33,7 @@ try {
         if (intval($consultaProductos->fetch()["total"]) > 0) {
             echo json_encode([
                 "error" => true,
-                "mensaje" => "No se puede desactivar una categoria con productos activos"
+                "mensaje" => "No se puede desactivar una categoría con productos activos"
             ], JSON_UNESCAPED_UNICODE);
             exit;
         }
@@ -58,7 +58,7 @@ try {
     error_log("Error categoria_cambiar_estado: " . $e->getMessage());
     echo json_encode([
         "error" => true,
-        "mensaje" => "No se pudo cambiar el estado de la categoria"
+        "mensaje" => "No se pudo cambiar el estado de la categoría"
     ], JSON_UNESCAPED_UNICODE);
 }
 

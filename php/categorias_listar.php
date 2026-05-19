@@ -37,7 +37,7 @@ try {
     error_log("Error categorias_listar: " . $e->getMessage());
     echo json_encode([
         "error" => true,
-        "mensaje" => "No se pudieron cargar las categorias"
+        "mensaje" => "No se pudieron cargar las categorías"
     ], JSON_UNESCAPED_UNICODE);
 }
 

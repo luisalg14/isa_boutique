@@ -13,11 +13,8 @@ function mostrarContenido(loginBox, contenido) {
 }
 
 function rutaApi(archivo) {
-    const ruta = window.location.pathname;
-    const base = ruta.includes("/html/")
-        ? ruta.split("/html/")[0] + "/"
-        : ruta.substring(0, ruta.lastIndexOf("/") + 1);
-
+    const esProduccion = window.location.hostname !== "localhost";
+    const base = esProduccion ? "/" : "/isa_boutique/";
     return base + "php/" + archivo;
 }
 
@@ -96,7 +93,7 @@ export async function verificarSesion(loginBox, contenido) {
     } catch (error) {
         mostrarLogin(loginBox, contenido);
         aplicarRol(null);
-        console.error("Error al verificar la sesion", error);
+        console.error("Error al verificar la sesión", error);
     }
 }
 
@@ -128,7 +125,7 @@ export async function iniciarSesion(correo, contrasena, loginBox, contenido, men
             detail: resultado.usuario
         }));
     } catch (error) {
-        mensaje.textContent = "Error al iniciar sesion";
+        mensaje.textContent = "Error al iniciar sesión";
         console.error(error);
     }
 }
@@ -137,11 +134,10 @@ export async function cerrarSesion(loginBox, contenido) {
     try {
         await fetch(rutaApi("logout.php"));
     } catch (error) {
-        console.error("Error al cerrar sesion", error);
+        console.error("Error al cerrar sesión", error);
     }
 
     aplicarRol(null);
     mostrarLogin(loginBox, contenido);
 }
-
 

@@ -9,7 +9,7 @@ try {
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
         echo json_encode([
             "error" => true,
-            "mensaje" => "Metodo no permitido"
+            "mensaje" => "Método no permitido"
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -20,7 +20,7 @@ try {
     if ($correo === "" || $contrasena === "") {
         echo json_encode([
             "error" => true,
-            "mensaje" => "Ingresa correo y contrasena"
+            "mensaje" => "Ingresa correo y contraseña"
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -39,7 +39,7 @@ try {
     if (!$usuario || !password_verify($contrasena, $usuario["contrasena"])) {
         echo json_encode([
             "error" => true,
-            "mensaje" => "Correo o contrasena incorrectos"
+            "mensaje" => "Correo o contraseña incorrectos"
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -67,7 +67,7 @@ try {
     ) {
         echo json_encode([
             "error" => true,
-            "mensaje" => "Este usuario ya tiene una sesion activa. Cierra sesion en el otro dispositivo o espera a que expire."
+            "mensaje" => "Este usuario ya tiene una sesión activa. Cierra sesión en el otro dispositivo o espera a que expire."
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -105,7 +105,7 @@ try {
     error_log("Error en login: " . $e->getMessage());
     echo json_encode([
         "error" => true,
-        "mensaje" => "No se pudo iniciar sesion en este momento"
+        "mensaje" => "No se pudo iniciar sesión en este momento"
     ], JSON_UNESCAPED_UNICODE);
 }
 

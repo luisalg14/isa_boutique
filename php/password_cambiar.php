@@ -7,11 +7,11 @@ header("Content-Type: application/json; charset=UTF-8");
 
 function validar_password_seguro($password) {
     if (strlen($password) < 8) {
-        return "La nueva contrasena debe tener minimo 8 caracteres";
+        return "La nueva contraseña debe tener mínimo 8 caracteres";
     }
 
     if (!preg_match("/[A-Za-z]/", $password) || !preg_match("/[0-9]/", $password)) {
-        return "La nueva contrasena debe incluir letras y numeros";
+        return "La nueva contraseña debe incluir letras y números";
     }
 
     return "";
@@ -21,7 +21,7 @@ try {
     $usuarioActual = exigir_sesion();
 
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-        echo json_encode(["error" => true, "mensaje" => "Metodo no permitido"], JSON_UNESCAPED_UNICODE);
+        echo json_encode(["error" => true, "mensaje" => "Método no permitido"], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
@@ -30,12 +30,12 @@ try {
     $passwordConfirmar = trim($_POST["password_confirmar"] ?? "");
 
     if ($passwordNueva === "" || $passwordConfirmar === "") {
-        echo json_encode(["error" => true, "mensaje" => "Completa la nueva contrasena y su confirmacion"], JSON_UNESCAPED_UNICODE);
+        echo json_encode(["error" => true, "mensaje" => "Completa la nueva contraseña y su confirmación"], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
     if ($passwordNueva !== $passwordConfirmar) {
-        echo json_encode(["error" => true, "mensaje" => "Las contrasenas nuevas no coinciden"], JSON_UNESCAPED_UNICODE);
+        echo json_encode(["error" => true, "mensaje" => "Las contraseñas nuevas no coinciden"], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
@@ -47,7 +47,7 @@ try {
     }
 
     if (($usuarioActual["rol"] ?? "") !== "admin") {
-        echo json_encode(["error" => true, "mensaje" => "Solo el administrador puede administrar contrasenas"], JSON_UNESCAPED_UNICODE);
+        echo json_encode(["error" => true, "mensaje" => "Solo el administrador puede administrar contraseñas"], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
@@ -63,7 +63,7 @@ try {
         $passwordActual = trim($_POST["password_actual"] ?? "");
 
         if ($passwordActual === "") {
-            echo json_encode(["error" => true, "mensaje" => "Ingresa tu contrasena actual"], JSON_UNESCAPED_UNICODE);
+            echo json_encode(["error" => true, "mensaje" => "Ingresa tu contraseña actual"], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -77,7 +77,7 @@ try {
         $usuario = $consultaActual->fetch();
 
         if (!$usuario || !password_verify($passwordActual, $usuario["contrasena"])) {
-            echo json_encode(["error" => true, "mensaje" => "La contrasena actual no es correcta"], JSON_UNESCAPED_UNICODE);
+            echo json_encode(["error" => true, "mensaje" => "La contraseña actual no es correcta"], JSON_UNESCAPED_UNICODE);
             exit;
         }
     }
@@ -100,14 +100,14 @@ try {
 
     echo json_encode([
         "error" => false,
-        "mensaje" => "Contrasena actualizada correctamente"
+        "mensaje" => "Contraseña actualizada correctamente"
     ], JSON_UNESCAPED_UNICODE);
 
 } catch (PDOException $e) {
     error_log("Error password_cambiar: " . $e->getMessage());
     echo json_encode([
         "error" => true,
-        "mensaje" => "No se pudo actualizar la contrasena"
+        "mensaje" => "No se pudo actualizar la contraseña"
     ], JSON_UNESCAPED_UNICODE);
 }
 

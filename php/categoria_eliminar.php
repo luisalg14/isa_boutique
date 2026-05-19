@@ -9,7 +9,7 @@ try {
     exigir_roles(["admin"]);
 
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-        echo json_encode(["error" => true, "mensaje" => "Metodo no permitido"], JSON_UNESCAPED_UNICODE);
+        echo json_encode(["error" => true, "mensaje" => "Método no permitido"], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
@@ -30,7 +30,7 @@ try {
     if (intval($consultaProductos->fetch()["total"]) > 0) {
         echo json_encode([
             "error" => true,
-            "mensaje" => "No se puede eliminar una categoria que tiene productos. Puedes desactivarla cuando no tenga productos activos."
+            "mensaje" => "No se puede eliminar una categoría que tiene productos. Puedes desactivarla cuando no tenga productos activos."
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -50,7 +50,7 @@ try {
     error_log("Error categoria_eliminar: " . $e->getMessage());
     echo json_encode([
         "error" => true,
-        "mensaje" => "No se pudo eliminar la categoria"
+        "mensaje" => "No se pudo eliminar la categoría"
     ], JSON_UNESCAPED_UNICODE);
 }
 

@@ -11,7 +11,7 @@ try {
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
         echo json_encode([
             "error" => true,
-            "mensaje" => "Metodo no permitido"
+            "mensaje" => "Método no permitido"
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }

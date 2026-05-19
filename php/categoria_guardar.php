@@ -16,7 +16,7 @@ try {
     exigir_roles(["admin"]);
 
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-        echo json_encode(["error" => true, "mensaje" => "Metodo no permitido"], JSON_UNESCAPED_UNICODE);
+        echo json_encode(["error" => true, "mensaje" => "Método no permitido"], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
@@ -24,7 +24,7 @@ try {
     $descripcion = trim($_POST["descripcion"] ?? "");
 
     if ($nombre === "") {
-        echo json_encode(["error" => true, "mensaje" => "Ingresa un nombre de categoria valido"], JSON_UNESCAPED_UNICODE);
+        echo json_encode(["error" => true, "mensaje" => "Ingresa un nombre de categoría válido"], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
@@ -46,14 +46,14 @@ try {
 
 } catch (PDOException $e) {
     if ($e->getCode() === "23505") {
-        echo json_encode(["error" => true, "mensaje" => "Ya existe una categoria con ese nombre"], JSON_UNESCAPED_UNICODE);
+        echo json_encode(["error" => true, "mensaje" => "Ya existe una categoría con ese nombre"], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
     error_log("Error categoria_guardar: " . $e->getMessage());
     echo json_encode([
         "error" => true,
-        "mensaje" => "No se pudo guardar la categoria"
+        "mensaje" => "No se pudo guardar la categoría"
     ], JSON_UNESCAPED_UNICODE);
 }
 

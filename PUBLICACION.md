@@ -7,10 +7,10 @@
 - Importar `database/produccion_datos_minimos.sql`.
 - Si ya existe una base anterior, ejecutar las migraciones nuevas como `database/migracion_canal_venta.sql`, `database/migracion_entrega_estado_pedido.sql` y `database/migracion_sesion_unica.sql`.
 - Crear un usuario de base de datos que no sea `postgres`.
-- Usar una contrasena fuerte para la base de datos.
+- Usar una contraseña fuerte para la base de datos.
 - Guardar el backup local en `database/backups/`; no subir esa carpeta al hosting ni a GitHub.
 
-## Configuracion
+## Configuración
 
 En el servidor puedes usar variables de entorno:
 
@@ -24,11 +24,11 @@ Si el hosting no permite variables de entorno, copia `php/config.example.php` co
 
 ## Usuarios internos
 
-- Cambiar la contrasena del administrador.
-- Cambiar la contrasena del vendedor.
-- No usar `123456` en produccion.
-- Mantener las contrasenas guardadas con hash.
-- Usar la pestaña `Seguridad` del panel interno para cambiar o restablecer contrasenas.
+- Cambiar la contraseña del administrador.
+- Cambiar la contraseña del vendedor.
+- No usar `123456` en producción.
+- Mantener las contraseñas guardadas con hash.
+- Usar la pestaña `Seguridad` del panel interno para cambiar o restablecer contraseñas.
 - Si usas `produccion_datos_minimos.sql`, las claves temporales son:
 - Admin: `admin@isaboutique.com` / `Admin12345`
 - Vendedor: `vendedora@isaboutique.com` / `Vendedor12345`
@@ -37,8 +37,8 @@ Si el hosting no permite variables de entorno, copia `php/config.example.php` co
 
 - No publicar `php/config.local.php`.
 - No publicar `.git`.
-- No dejar respaldos `.sql` descargables en carpetas publicas.
-- La carpeta `database` tiene bloqueo por `.htaccess`, pero aun asi es mejor no subir respaldos innecesarios.
+- No dejar respaldos `.sql` descargables en carpetas públicas.
+- La carpeta `database` tiene bloqueo por `.htaccess`, pero aun así es mejor no subir respaldos innecesarios.
 
 ## Pruebas finales
 
@@ -47,17 +47,17 @@ Si el hosting no permite variables de entorno, copia `php/config.example.php` co
 - Login administrador.
 - Login vendedor.
 - Agregar producto.
-- Crear, editar y revisar categorias desde el panel administrador.
-- Registrar compra de mercancia.
-- Registrar venta publica.
+- Crear, editar y revisar categorías desde el panel administrador.
+- Registrar compra de mercancía.
+- Registrar venta pública.
 - Validar tallas y stock.
 - Revisar finanzas.
-- Cerrar sesion.
+- Cerrar sesión.
 
 ## Permisos por rol
 
 - Administrador: inventario completo, finanzas, proveedores, trabajadores, usuarios, eliminaciones y cambios de precio.
 - Vendedor: registrar ventas, revisar inventario, historial, devoluciones y resumen de ventas.
-- Publico: ver productos y registrar compra desde la tienda.
-- `venta_registrar.php` queda disponible para compras publicas; los endpoints administrativos requieren sesion y rol.
-- Las contrasenas de usuarios internos son administradas solo por el administrador.
+- Público: ver productos y registrar compra desde la tienda.
+- `venta_registrar.php` queda disponible para compras públicas; los endpoints administrativos requieren sesión y rol.
+- Las contraseñas de usuarios internos son administradas solo por el administrador.

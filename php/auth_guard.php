@@ -82,7 +82,7 @@ function validar_sesion_unica($conexion, $usuario) {
 
     if ($token === "") {
         cerrar_sesion_local();
-        responder_no_autorizado("La sesion no es valida. Inicia sesion nuevamente.");
+        responder_no_autorizado("La sesión no es válida. Inicia sesión nuevamente.");
     }
 
     $consulta = $conexion->prepare("
@@ -99,7 +99,7 @@ function validar_sesion_unica($conexion, $usuario) {
 
     if (!$usuarioBD || !hash_equals($usuarioBD["sesion_token"] ?? "", $token)) {
         cerrar_sesion_local();
-        responder_no_autorizado("Tu usuario inicio sesion en otro dispositivo o la sesion ya no esta activa.");
+        responder_no_autorizado("Tu usuario inició sesión en otro dispositivo o la sesión ya no está activa.");
     }
 
     $actualizar = $conexion->prepare("
@@ -124,7 +124,7 @@ function responder_json_error($mensaje, $codigo = 400) {
     exit;
 }
 
-function responder_no_autorizado($mensaje = "Debes iniciar sesion para realizar esta accion") {
+function responder_no_autorizado($mensaje = "Debes iniciar sesión para realizar esta acción") {
     responder_json_error($mensaje, 401);
 }
 
@@ -144,7 +144,7 @@ function exigir_roles($rolesPermitidos) {
     $usuario = exigir_sesion();
 
     if (!in_array($usuario["rol"], $rolesPermitidos, true)) {
-        responder_json_error("Tu rol no tiene permiso para realizar esta accion", 403);
+        responder_json_error("Tu rol no tiene permiso para realizar esta acción", 403);
     }
 
     if (isset($conexion)) {

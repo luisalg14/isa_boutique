@@ -302,7 +302,7 @@
                 }
             } catch (error) {
                 categoriasDisponibles = [];
-                console.error("No se pudieron cargar las categorias", error);
+                console.error("No se pudieron cargar las categorías", error);
             }
         }
 
@@ -311,7 +311,7 @@
                 return item.nombre === categoria;
             });
 
-            return categoriaBD ? etiquetaCategoria(categoriaBD.nombre) : etiquetaCategoria(categoria || "Categoria");
+            return categoriaBD ? etiquetaCategoria(categoriaBD.nombre) : etiquetaCategoria(categoria || "Categoría");
         }
 
         async function cargarCategoria() {
