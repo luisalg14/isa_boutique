@@ -1,4 +1,4 @@
-// ===============================
+﻿// ===============================
 // CONEXIÓN DEL LOGIN CON ADMIN.HTML
 // ===============================
 
@@ -40,3 +40,4 @@ document.addEventListener("DOMContentLoaded", function() {
         cerrarSesion(loginBox, contenido);
     });
 });
+

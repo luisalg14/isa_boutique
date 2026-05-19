@@ -25,6 +25,8 @@ try {
             dv.subtotal AS subtotal,
             v.medio_pago,
             v.canal_venta,
+            v.tipo_entrega,
+            v.estado,
             v.fecha,
             NULL AS motivo
         FROM venta v
@@ -53,6 +55,8 @@ try {
             -dd.subtotal_devuelto AS subtotal,
             v.medio_pago,
             v.canal_venta,
+            v.tipo_entrega,
+            v.estado,
             d.fecha,
             d.motivo
         FROM devolucion d

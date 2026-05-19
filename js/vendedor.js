@@ -1,4 +1,13 @@
-let productosVendedor = [];
+﻿let productosVendedor = [];
+
+function rutaApiVendedor(archivo) {
+    const ruta = window.location.pathname;
+    const base = ruta.includes("/html/")
+        ? ruta.split("/html/")[0] + "/"
+        : ruta.substring(0, ruta.lastIndexOf("/") + 1);
+
+    return base + "php/" + archivo;
+}
 
 function activarPanelVendedor(idPanel) {
     document.querySelectorAll(".admin-panel").forEach(function(panel) {
@@ -12,6 +21,38 @@ function activarPanelVendedor(idPanel) {
 
 function formatoPrecioVendedor(valor) {
     return "$" + Number(valor || 0).toLocaleString("es-CO");
+}
+
+function etiquetaCanalVendedor(canal) {
+    const etiquetas = {
+        tienda_fisica: "Tienda fisica",
+        pagina_web: "Pagina web",
+        whatsapp: "WhatsApp",
+        instagram: "Instagram"
+    };
+
+    return etiquetas[canal] || "Tienda fisica";
+}
+
+function etiquetaEntregaVendedor(entrega) {
+    const etiquetas = {
+        recoger_tienda: "Recoge en tienda",
+        envio_local: "Envio local",
+        envio_nacional: "Envio nacional"
+    };
+
+    return etiquetas[entrega] || "Recoge en tienda";
+}
+
+function etiquetaEstadoVendedor(estado) {
+    const etiquetas = {
+        pagada: "Pagada",
+        pendiente: "Pendiente",
+        cancelada: "Cancelada",
+        devuelta: "Devuelta"
+    };
+
+    return etiquetas[estado] || "Pagada";
 }
 
 function claseEstadoVendedor(producto) {
@@ -133,7 +174,7 @@ async function cargarInventarioVendedor() {
     const textoBusqueda = buscador ? buscador.value.toLowerCase() : "";
 
     try {
-        const respuesta = await fetch("php/productos_listar.php");
+        const respuesta = await fetch(rutaApiVendedor("productos_listar.php"));
         const productos = await respuesta.json();
 
         if (productos.error) {
@@ -201,12 +242,14 @@ async function registrarVentaVendedor(evento) {
     datos.append("telefono", document.getElementById("ventaTelefono").value.trim());
     datos.append("cantidad", document.getElementById("ventaCantidad").value);
     datos.append("medio_pago", document.getElementById("ventaMedioPago").value);
+    datos.append("canal_venta", document.getElementById("ventaCanal").value);
+    datos.append("tipo_entrega", document.getElementById("ventaEntrega").value);
     datos.append("talla", document.getElementById("ventaTalla").value);
 
     mensaje.textContent = "";
 
     try {
-        const respuesta = await fetch("php/venta_registrar.php", {
+        const respuesta = await fetch(rutaApiVendedor("venta_registrar.php"), {
             method: "POST",
             body: datos
         });
@@ -236,25 +279,32 @@ async function cargarHistorialVendedor() {
     if (!tabla) return;
 
     try {
-        const respuesta = await fetch("php/historial_listar.php");
+        const respuesta = await fetch(rutaApiVendedor("historial_listar.php"));
         const historial = await respuesta.json();
 
         if (historial.error) {
-            tabla.innerHTML = `<tr><td colspan="11">${historial.mensaje}</td></tr>`;
+            tabla.innerHTML = `<tr><td colspan="14">${historial.mensaje}</td></tr>`;
             return;
         }
 
         if (historial.length === 0) {
-            tabla.innerHTML = '<tr><td colspan="11">No hay ventas registradas</td></tr>';
+            tabla.innerHTML = '<tr><td colspan="14">No hay ventas registradas</td></tr>';
             return;
         }
 
         tabla.innerHTML = "";
 
         historial.forEach(function(registro) {
-            const accion = registro.tipo === "Venta"
-                ? `<button onclick="registrarDevolucionVendedor(${registro.id_venta}, ${registro.id_producto})">Devolucion</button>`
-                : "<span>Registrada</span>";
+            let accion = "<span>Registrada</span>";
+
+            if (registro.tipo === "Venta" && registro.estado === "pendiente") {
+                accion = `
+                    <button onclick="actualizarEstadoVentaVendedor(${registro.id_venta}, 'pagada')">Confirmar pago</button>
+                    <button onclick="actualizarEstadoVentaVendedor(${registro.id_venta}, 'cancelada')">Cancelar</button>
+                `;
+            } else if (registro.tipo === "Venta" && registro.estado === "pagada") {
+                accion = `<button onclick="registrarDevolucionVendedor(${registro.id_venta}, ${registro.id_producto})">Devolucion</button>`;
+            }
 
             tabla.innerHTML += `
                 <tr>
@@ -267,20 +317,54 @@ async function cargarHistorialVendedor() {
                     <td>${registro.cantidad}</td>
                     <td>${formatoPrecioVendedor(registro.subtotal)}</td>
                     <td>${registro.medio_pago}</td>
+                    <td>${etiquetaCanalVendedor(registro.canal_venta)}</td>
+                    <td>${etiquetaEntregaVendedor(registro.tipo_entrega)}</td>
+                    <td>${etiquetaEstadoVendedor(registro.estado)}</td>
                     <td>${new Date(registro.fecha).toLocaleString()}</td>
                     <td>${accion}</td>
                 </tr>
             `;
         });
     } catch (error) {
-        tabla.innerHTML = '<tr><td colspan="11">Error al cargar historial</td></tr>';
+        tabla.innerHTML = '<tr><td colspan="14">Error al cargar historial</td></tr>';
+        console.error(error);
+    }
+}
+
+async function actualizarEstadoVentaVendedor(idVenta, estado) {
+    const texto = estado === "pagada" ? "confirmar este pedido como pagado" : "cancelar este pedido y devolver el stock";
+
+    if (!confirm("Deseas " + texto + "?")) {
+        return;
+    }
+
+    const datos = new FormData();
+    datos.append("id_venta", idVenta);
+    datos.append("estado", estado);
+
+    try {
+        const respuesta = await fetch(rutaApiVendedor("venta_actualizar_estado.php"), {
+            method: "POST",
+            body: datos
+        });
+        const resultado = await respuesta.json();
+
+        alert(resultado.mensaje);
+
+        if (!resultado.error) {
+            await cargarInventarioVendedor();
+            await cargarHistorialVendedor();
+            await cargarReportesVendedor();
+        }
+    } catch (error) {
+        alert("Error al actualizar el pedido.");
         console.error(error);
     }
 }
 
 async function cargarReportesVendedor() {
     try {
-        const respuesta = await fetch("php/reportes_admin.php");
+        const respuesta = await fetch(rutaApiVendedor("reportes_admin.php"));
         const reportes = await respuesta.json();
 
         if (reportes.error) {
@@ -324,7 +408,7 @@ async function registrarDevolucionVendedor(idVenta, idProducto) {
     datos.append("motivo", motivo.trim());
 
     try {
-        const respuesta = await fetch("php/devolucion_registrar.php", {
+        const respuesta = await fetch(rutaApiVendedor("devolucion_registrar.php"), {
             method: "POST",
             body: datos
         });
@@ -368,3 +452,6 @@ document.getElementById("ventaCantidad")?.addEventListener("input", actualizarRe
 document.getElementById("formVenta")?.addEventListener("submit", registrarVentaVendedor);
 
 window.registrarDevolucionVendedor = registrarDevolucionVendedor;
+
+
+

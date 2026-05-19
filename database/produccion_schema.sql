@@ -1090,6 +1090,8 @@ CREATE TABLE public.usuario_sistema (
     contrasena character varying(255) NOT NULL,
     rol public.rol_usuario DEFAULT 'vendedor'::public.rol_usuario NOT NULL,
     estado boolean DEFAULT true,
+    sesion_token character varying(128),
+    sesion_actualizada timestamp without time zone,
     fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -1128,8 +1130,12 @@ CREATE TABLE public.venta (
     id_usuario integer NOT NULL,
     fecha timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     medio_pago public.medio_pago NOT NULL,
+    canal_venta character varying(30) DEFAULT 'tienda_fisica'::character varying NOT NULL,
+    tipo_entrega character varying(30) DEFAULT 'recoger_tienda'::character varying NOT NULL,
     total numeric(12,2) DEFAULT 0 NOT NULL,
     estado public.estado_venta DEFAULT 'pagada'::public.estado_venta NOT NULL,
+    CONSTRAINT venta_canal_venta_check CHECK (((canal_venta)::text = ANY ((ARRAY['tienda_fisica'::character varying, 'pagina_web'::character varying, 'whatsapp'::character varying, 'instagram'::character varying])::text[]))),
+    CONSTRAINT venta_tipo_entrega_check CHECK (((tipo_entrega)::text = ANY ((ARRAY['recoger_tienda'::character varying, 'envio_local'::character varying, 'envio_nacional'::character varying])::text[]))),
     CONSTRAINT venta_total_check CHECK ((total >= (0)::numeric))
 );
 
@@ -1257,6 +1263,8 @@ CREATE VIEW public.vista_ventas_detalladas AS
     dv.precio_unitario,
     dv.subtotal,
     v.medio_pago,
+    v.canal_venta,
+    v.tipo_entrega,
     v.total,
     v.estado
    FROM ((((public.venta v
@@ -1822,4 +1830,3 @@ ALTER TABLE ONLY public.venta
 --
 
 \unrestrict DQcJNKS5Vpdt1TnsDy3FuxvC6Wk8p5kD4KEy10aT8O5sMabPSOtqH1Kbk5e1d7C
-

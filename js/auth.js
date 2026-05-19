@@ -1,4 +1,4 @@
-// ===============================
+﻿// ===============================
 // FUNCIONES DEL LOGIN
 // ===============================
 
@@ -10,6 +10,15 @@ function mostrarLogin(loginBox, contenido) {
 function mostrarContenido(loginBox, contenido) {
     loginBox.style.display = "none";
     contenido.style.display = "block";
+}
+
+function rutaApi(archivo) {
+    const ruta = window.location.pathname;
+    const base = ruta.includes("/html/")
+        ? ruta.split("/html/")[0] + "/"
+        : ruta.substring(0, ruta.lastIndexOf("/") + 1);
+
+    return base + "php/" + archivo;
 }
 
 function panelPorRol(rol) {
@@ -68,7 +77,7 @@ export function aplicarRol(usuario) {
 
 export async function verificarSesion(loginBox, contenido) {
     try {
-        const respuesta = await fetch("php/sesion_actual.php");
+        const respuesta = await fetch(rutaApi("sesion_actual.php"));
         const sesion = await respuesta.json();
 
         if (sesion.autenticado) {
@@ -97,7 +106,7 @@ export async function iniciarSesion(correo, contrasena, loginBox, contenido, men
     datos.append("contrasena", contrasena.trim());
 
     try {
-        const respuesta = await fetch("php/login.php", {
+        const respuesta = await fetch(rutaApi("login.php"), {
             method: "POST",
             body: datos
         });
@@ -126,7 +135,7 @@ export async function iniciarSesion(correo, contrasena, loginBox, contenido, men
 
 export async function cerrarSesion(loginBox, contenido) {
     try {
-        await fetch("php/logout.php");
+        await fetch(rutaApi("logout.php"));
     } catch (error) {
         console.error("Error al cerrar sesion", error);
     }
@@ -134,3 +143,5 @@ export async function cerrarSesion(loginBox, contenido) {
     aplicarRol(null);
     mostrarLogin(loginBox, contenido);
 }
+
+

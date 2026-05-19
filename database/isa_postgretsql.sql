@@ -86,6 +86,8 @@ CREATE TABLE usuario_sistema (
     contrasena VARCHAR(255) NOT NULL,
     rol rol_usuario NOT NULL DEFAULT 'vendedor',
     estado BOOLEAN DEFAULT TRUE,
+    sesion_token VARCHAR(128),
+    sesion_actualizada TIMESTAMP,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -149,6 +151,10 @@ CREATE TABLE venta (
     id_usuario INT NOT NULL,
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     medio_pago medio_pago NOT NULL,
+    canal_venta VARCHAR(30) NOT NULL DEFAULT 'tienda_fisica'
+        CHECK (canal_venta IN ('tienda_fisica', 'pagina_web', 'whatsapp', 'instagram')),
+    tipo_entrega VARCHAR(30) NOT NULL DEFAULT 'recoger_tienda'
+        CHECK (tipo_entrega IN ('recoger_tienda', 'envio_local', 'envio_nacional')),
     total NUMERIC(12,2) NOT NULL DEFAULT 0 CHECK (total >= 0),
     estado estado_venta NOT NULL DEFAULT 'pagada',
 
@@ -569,6 +575,8 @@ SELECT
     dv.precio_unitario,
     dv.subtotal,
     v.medio_pago,
+    v.canal_venta,
+    v.tipo_entrega,
     v.total,
     v.estado
 FROM venta v
@@ -822,6 +830,8 @@ INSERT INTO venta (
     id_cliente,
     id_usuario,
     medio_pago,
+    canal_venta,
+    tipo_entrega,
     total,
     estado
 )
@@ -829,6 +839,8 @@ VALUES (
     1,
     1,
     'efectivo',
+    'tienda_fisica',
+    'recoger_tienda',
     85000,
     'pagada'
 );

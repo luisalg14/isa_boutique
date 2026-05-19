@@ -24,6 +24,7 @@ try {
             dv.subtotal,
             v.medio_pago,
             v.canal_venta,
+            v.tipo_entrega,
             v.total,
             v.estado
         FROM venta v

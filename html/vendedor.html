@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vendedor - Isa Boutique</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 
 <body class="admin-page vendedor-page" data-panel="vendedor">
@@ -14,7 +14,7 @@
             <h2>Panel Vendedor</h2>
 
             <input type="email" id="correo" placeholder="Correo">
-            <input type="password" id="clave" placeholder="Contrasena">
+            <input type="password" id="clave" placeholder="Contraseña">
 
             <button id="btnEntrar">Ingresar</button>
 
@@ -96,6 +96,25 @@
                                 </select>
                             </div>
 
+                            <div class="campo">
+                                <label>Canal de venta</label>
+                                <select id="ventaCanal" required>
+                                    <option value="tienda_fisica">Tienda fisica</option>
+                                    <option value="whatsapp">WhatsApp</option>
+                                    <option value="instagram">Instagram</option>
+                                    <option value="pagina_web">Pagina web</option>
+                                </select>
+                            </div>
+
+                            <div class="campo">
+                                <label>Entrega</label>
+                                <select id="ventaEntrega" required>
+                                    <option value="recoger_tienda">Recoge en tienda</option>
+                                    <option value="envio_local">Envio local</option>
+                                    <option value="envio_nacional">Envio nacional</option>
+                                </select>
+                            </div>
+
                             <button class="btn btn-agregar" type="submit">Guardar venta</button>
                             <p id="mensajeVenta" class="mensaje-compra"></p>
                         </form>
@@ -150,6 +169,9 @@
                                 <th>Cantidad</th>
                                 <th>Total</th>
                                 <th>Medio de pago</th>
+                                <th>Canal</th>
+                                <th>Entrega</th>
+                                <th>Estado</th>
                                 <th>Fecha</th>
                                 <th>Accion</th>
                             </tr>
@@ -198,7 +220,9 @@
         </div>
     </div>
 
-    <script type="module" src="js/script.js"></script>
-    <script src="js/vendedor.js"></script>
+    <script type="module" src="../js/script.js"></script>
+    <script src="../js/vendedor.js"></script>
 </body>
 </html>
+
+

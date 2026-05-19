@@ -230,6 +230,20 @@ try {
     $consultaMediosPago->execute($paramsRango);
     $mediosPago = $consultaMediosPago->fetchAll();
 
+    $consultaCanalesVenta = $conexion->prepare("
+        SELECT
+            canal_venta,
+            COUNT(*) AS ventas,
+            COALESCE(SUM(total), 0) AS total
+        FROM venta
+        WHERE estado IN ('pagada', 'devuelta')
+        AND fecha::date BETWEEN :fecha_inicio AND :fecha_fin
+        GROUP BY canal_venta
+        ORDER BY total DESC
+    ");
+    $consultaCanalesVenta->execute($paramsRango);
+    $canalesVenta = $consultaCanalesVenta->fetchAll();
+
     $netoRango = $ventasRango - $devolucionesRango;
     $costoNetoRango = $costoVendidoRango - $costoDevueltoRango;
     $utilidadBrutaRango = $netoRango - $costoNetoRango;
@@ -271,7 +285,8 @@ try {
             "productos_top" => $productosTop,
             "menor_rotacion_lista" => $menorRotacionLista,
             "ventas_por_dia" => $ventasPorDia,
-            "medios_pago" => $mediosPago
+            "medios_pago" => $mediosPago,
+            "canales_venta" => $canalesVenta
         ]
     ], JSON_UNESCAPED_UNICODE);
 

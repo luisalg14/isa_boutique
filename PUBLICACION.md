@@ -5,6 +5,7 @@
 - Crear una base PostgreSQL en el hosting.
 - Importar `database/produccion_schema.sql`.
 - Importar `database/produccion_datos_minimos.sql`.
+- Si ya existe una base anterior, ejecutar las migraciones nuevas como `database/migracion_canal_venta.sql`, `database/migracion_entrega_estado_pedido.sql` y `database/migracion_sesion_unica.sql`.
 - Crear un usuario de base de datos que no sea `postgres`.
 - Usar una contrasena fuerte para la base de datos.
 - Guardar el backup local en `database/backups/`; no subir esa carpeta al hosting ni a GitHub.
@@ -41,6 +42,8 @@ Si el hosting no permite variables de entorno, copia `php/config.example.php` co
 
 ## Pruebas finales
 
+- Revisar `README.md` para explicar el alcance del sistema.
+- Marcar `PRUEBAS_FINALES.md` antes de publicar o exponer.
 - Login administrador.
 - Login vendedor.
 - Agregar producto.

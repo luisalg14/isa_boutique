@@ -1,16 +1,16 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos - Isa Boutique</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 
 <body class="public-page catalog-page stitch-catalog">
 
     <nav class="menu stitch-nav">
-        <a class="nav-home-arrow" href="index.html" title="Volver al inicio">←</a>
+        <a class="nav-home-arrow" href="index.html" title="Volver al inicio">&larr;</a>
         <a class="brand-link" href="index.html">Isa Boutique</a>
         <a href="index.html">Inicio</a>
         <a href="Producto.html">Ver todo</a>
@@ -104,6 +104,16 @@
                     </select>
                 </div>
 
+                <div class="campo">
+                    <label for="compraEntrega">Entrega</label>
+                    <select id="compraEntrega" required>
+                        <option value="">Seleccionar</option>
+                        <option value="recoger_tienda">Recoger en tienda</option>
+                        <option value="envio_local">Envio local</option>
+                        <option value="envio_nacional">Envio nacional</option>
+                    </select>
+                </div>
+
                 <p id="mensajeCompra" class="mensaje-compra"></p>
             </div>
 
@@ -149,6 +159,13 @@
 
         function formatoPrecio(valor) {
             return "$" + Number(valor).toLocaleString("es-CO");
+        }
+
+        function rutaImagenProducto(ruta) {
+            if (!ruta) return "../img/logo.png.png";
+            if (ruta.startsWith("http") || ruta.startsWith("../")) return ruta;
+            if (ruta.startsWith("img/")) return "../" + ruta;
+            return ruta;
         }
 
         function formatearCategoria(categoria) {
@@ -342,6 +359,7 @@
             const cliente = document.getElementById("compraCliente").value.trim();
             const telefono = document.getElementById("compraTelefono").value.trim();
             const medioPago = document.getElementById("compraMedioPago").value;
+            const tipoEntrega = document.getElementById("compraEntrega").value;
             const mensaje = document.getElementById("mensajeCompra");
 
             if (isNaN(cantidad) || cantidad <= 0) {
@@ -363,7 +381,7 @@
                 return;
             }
 
-            if (!cliente || !telefono || !medioPago) {
+            if (!cliente || !telefono || !medioPago || !tipoEntrega) {
                 mensaje.textContent = "Completa todos los campos.";
                 return;
             }
@@ -375,9 +393,11 @@
             datos.append("cliente", cliente);
             datos.append("telefono", telefono);
             datos.append("medio_pago", medioPago);
+            datos.append("canal_venta", "pagina_web");
+            datos.append("tipo_entrega", tipoEntrega);
 
             try {
-                const respuesta = await fetch("php/venta_registrar.php", {
+                const respuesta = await fetch("../php/venta_registrar.php", {
                     method: "POST",
                     body: datos
                 });
@@ -390,7 +410,7 @@
                 }
 
                 const idProductoComprado = productoSeleccionado.id_producto;
-                alert(resultado.mensaje + "\nTotal: " + formatoPrecio(resultado.total));
+                alert(resultado.mensaje + "\nEstado: " + resultado.estado + "\nTotal: " + formatoPrecio(resultado.total));
                 carrito = carrito.filter(function(item) {
                     return !(Number(item.id_producto) === Number(idProductoComprado) && item.talla === talla);
                 });
@@ -465,7 +485,7 @@
 
         async function cargarCategoriasCatalogo() {
             try {
-                const respuesta = await fetch("php/categorias_listar.php?solo_activas=1");
+                const respuesta = await fetch("../php/categorias_listar.php?solo_activas=1");
                 const categorias = await respuesta.json();
 
                 if (categorias.error) {
@@ -533,13 +553,13 @@
                 card.className = "card producto-card";
                 card.innerHTML =
                     '<div class="producto-imagen-wrap">' +
-                        '<img src="' + producto.imagen + '" alt="' + producto.nombre + '">' +
+                        '<img src="' + rutaImagenProducto(producto.imagen) + '" alt="' + producto.nombre + '">' +
                         '<span class="producto-badge ' + (agotado ? "agotado" : "disponible") + '">' + estadoTexto + '</span>' +
                     '</div>' +
                     '<div class="producto-card-body">' +
                         '<p class="producto-codigo">Codigo: ' + producto.codigo + '</p>' +
                         '<h3>' + producto.nombre + '</h3>' +
-                        '<p class="producto-meta">' + producto.marca + ' · ' + formatearCategoria(producto.categoria) + '</p>' +
+                        '<p class="producto-meta">' + producto.marca + '  -  ' + formatearCategoria(producto.categoria) + '</p>' +
                         '<p class="producto-precio">' + formatoPrecio(producto.precio) + '</p>' +
                         '<p class="producto-stock">' + estadoTexto + '</p>' +
                         '<p class="producto-stock">' + textoTallas(producto.tallas) + '</p>' +
@@ -560,7 +580,7 @@
             contenedor.innerHTML = '<div class="estado-vacio">Cargando productos...</div>';
 
             try {
-                const respuesta = await fetch("php/productos_listar.php");
+                const respuesta = await fetch("../php/productos_listar.php");
                 const productos = await respuesta.json();
 
                 if (productos.error) {
@@ -613,3 +633,5 @@
 
 </body>
 </html>
+
+

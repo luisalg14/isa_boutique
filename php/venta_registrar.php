@@ -22,6 +22,8 @@ try {
     $talla = strtoupper(trim($_POST["talla"] ?? ""));
     $usuarioActual = usuario_actual();
     $canal_venta = trim($_POST["canal_venta"] ?? ($usuarioActual ? "tienda_fisica" : "pagina_web"));
+    $tipo_entrega = trim($_POST["tipo_entrega"] ?? ($usuarioActual ? "recoger_tienda" : "envio_local"));
+    $estadoVenta = $usuarioActual ? "pagada" : "pendiente";
 
     $mediosPermitidos = [
         "efectivo",
@@ -37,13 +39,20 @@ try {
         "instagram"
     ];
 
+    $entregasPermitidas = [
+        "recoger_tienda",
+        "envio_local",
+        "envio_nacional"
+    ];
+
     if (
         $id_producto <= 0 ||
         $cliente === "" ||
         $telefono === "" ||
         $cantidad <= 0 ||
         !in_array($medio_pago, $mediosPermitidos) ||
-        !in_array($canal_venta, $canalesPermitidos)
+        !in_array($canal_venta, $canalesPermitidos) ||
+        !in_array($tipo_entrega, $entregasPermitidas)
     ) {
         echo json_encode([
             "error" => true,
@@ -186,6 +195,7 @@ try {
             id_usuario,
             medio_pago,
             canal_venta,
+            tipo_entrega,
             total,
             estado
         )
@@ -194,8 +204,9 @@ try {
             :id_usuario,
             :medio_pago,
             :canal_venta,
+            :tipo_entrega,
             :total,
-            'pagada'
+            :estado
         )
         RETURNING id_venta
     ";
@@ -206,7 +217,9 @@ try {
         ":id_usuario" => $idUsuario,
         ":medio_pago" => $medio_pago,
         ":canal_venta" => $canal_venta,
-        ":total" => $subtotal
+        ":tipo_entrega" => $tipo_entrega,
+        ":total" => $subtotal,
+        ":estado" => $estadoVenta
     ]);
 
     $idVenta = $consultaVenta->fetch()["id_venta"];
@@ -268,9 +281,11 @@ try {
 
     echo json_encode([
         "error" => false,
-        "mensaje" => "Venta registrada correctamente",
+        "mensaje" => $usuarioActual ? "Venta registrada correctamente" : "Pedido registrado correctamente. Queda pendiente de confirmacion.",
         "id_venta" => $idVenta,
-        "total" => $subtotal
+        "total" => $subtotal,
+        "estado" => $estadoVenta,
+        "tipo_entrega" => $tipo_entrega
     ]);
 
 } catch (PDOException $e) {

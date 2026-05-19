@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administrador - Isa Boutique</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 
 <body class="admin-page" data-panel="admin">
@@ -195,6 +195,15 @@
                             <option value="whatsapp">WhatsApp</option>
                             <option value="instagram">Instagram</option>
                             <option value="pagina_web">Pagina web</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Entrega</label>
+                        <select id="ventaAdminEntrega" required>
+                            <option value="recoger_tienda">Recoge en tienda</option>
+                            <option value="envio_local">Envio local</option>
+                            <option value="envio_nacional">Envio nacional</option>
                         </select>
                     </div>
 
@@ -584,6 +593,18 @@
                 </thead>
                 <tbody id="tablaMediosPago"></tbody>
             </table>
+
+            <h3 class="finance-subtitle reportes-canales-title">Canales de venta</h3>
+            <table class="tabla-inventario reportes-canales-table">
+                <thead>
+                    <tr>
+                        <th>Canal</th>
+                        <th>Ventas</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaCanalesVenta"></tbody>
+            </table>
             </div>
         </section>
 
@@ -605,6 +626,8 @@
                         <th>Total</th>
                         <th>Medio de Pago</th>
                         <th>Canal</th>
+                        <th>Entrega</th>
+                        <th>Estado</th>
                         <th>Fecha</th>
                         <th>Acciones</th>
                     </tr>
@@ -1167,28 +1190,28 @@
 
             <div class="finance-grid">
                 <form id="formCambiarPassword" class="finance-form">
-                    <h3>Cambiar mi contrasena</h3>
+                    <h3>Cambiar mi contraseña</h3>
 
                     <div class="campo">
-                        <label>Contrasena actual</label>
+                        <label>Contraseña actual</label>
                         <input id="passwordActual" type="password" autocomplete="current-password">
                     </div>
 
                     <div class="campo">
-                        <label>Nueva contrasena</label>
+                        <label>Nueva contraseña</label>
                         <input id="passwordNueva" type="password" autocomplete="new-password">
                     </div>
 
                     <div class="campo">
-                        <label>Confirmar nueva contrasena</label>
+                        <label>Confirmar nueva contraseña</label>
                         <input id="passwordConfirmar" type="password" autocomplete="new-password">
                     </div>
 
-                    <button class="btn btn-agregar" type="submit">Actualizar mi contrasena</button>
+                    <button class="btn btn-agregar" type="submit">Actualizar mi contraseña</button>
                 </form>
 
                 <form id="formRestablecerPassword" class="finance-form" data-admin-only>
-                    <h3>Restablecer contrasena</h3>
+                    <h3>Restablecer contraseña</h3>
 
                     <div class="campo">
                         <label>Usuario interno</label>
@@ -1198,16 +1221,16 @@
                     </div>
 
                     <div class="campo">
-                        <label>Nueva contrasena</label>
+                        <label>Nueva contraseña</label>
                         <input id="passwordResetNueva" type="password" autocomplete="new-password">
                     </div>
 
                     <div class="campo">
-                        <label>Confirmar nueva contrasena</label>
+                        <label>Confirmar nueva contraseña</label>
                         <input id="passwordResetConfirmar" type="password" autocomplete="new-password">
                     </div>
 
-                    <button class="btn btn-agregar" type="submit">Restablecer contrasena</button>
+                    <button class="btn btn-agregar" type="submit">Restablecer contraseña</button>
                 </form>
             </div>
         </section>
@@ -1217,7 +1240,7 @@
 
 
   <!-- SCRIPTS -->
-<script type="module" src="js/script.js"></script>
+<script type="module" src="../js/script.js"></script>
 
 
 <script>
@@ -1440,7 +1463,7 @@
         }
 
         try {
-            const respuesta = await fetch("php/productos_guardar.php", {
+            const respuesta = await fetch("../php/productos_guardar.php", {
                 method: "POST",
                 body: datos
             });
@@ -1505,7 +1528,7 @@
         datos.append("estado", nuevoEstado);
         
         try {
-            const respuesta = await fetch("php/producto_cambiar_estado.php", {
+            const respuesta = await fetch("../php/producto_cambiar_estado.php", {
                 method: "POST",
                 body: datos
             });
@@ -1532,7 +1555,7 @@
         if (!exigirAdminFrontend()) return;
 
         try {
-            const respuestaProductos = await fetch("php/productos_listar.php");
+            const respuestaProductos = await fetch("../php/productos_listar.php");
             const productos = await respuestaProductos.json();
             
             const producto = productos.find(function(item) {
@@ -1599,7 +1622,7 @@
             datos.append("precio", nuevoPrecio);
             datos.append("costo", nuevoCosto);
             
-            const respuesta = await fetch("php/producto_editar.php", {
+            const respuesta = await fetch("../php/producto_editar.php", {
                 method: "POST",
                 body: datos
             });
@@ -1657,7 +1680,7 @@
         }
 
         try {
-            const respuesta = await fetch("php/producto_eliminar.php", {
+            const respuesta = await fetch("../php/producto_eliminar.php", {
                 method: "POST",
                 body: datos
             });
@@ -1711,7 +1734,7 @@
         datos.append("confirmacion", texto);
 
         try {
-            const respuesta = await fetch("php/historial_eliminar.php", {
+            const respuesta = await fetch("../php/historial_eliminar.php", {
                 method: "POST",
                 body: datos
             });
@@ -1741,7 +1764,7 @@
         if (!tabla) return;
 
         try {
-            const respuesta = await fetch("php/historial_listar.php");
+            const respuesta = await fetch("../php/historial_listar.php");
             const ventas = await respuesta.json();
 
             tabla.innerHTML = "";
@@ -1749,7 +1772,7 @@
             if (ventas.error) {
                 tabla.innerHTML = `
                 <tr>
-                    <td colspan="13">${ventas.mensaje}</td>
+                    <td colspan="16">${ventas.mensaje}</td>
                 </tr>
                 `;
                 return;
@@ -1758,13 +1781,24 @@
             if (ventas.length === 0) {
                 tabla.innerHTML = `
                 <tr>
-                    <td colspan="13">No hay ventas registradas</td>
+                    <td colspan="16">No hay ventas registradas</td>
                 </tr>
                 `;
                 return;
             }
             
             ventas.forEach(function(venta) {
+                let accion = `<span>Registrada</span>`;
+
+                if (venta.tipo === "Venta" && venta.estado === "pendiente") {
+                    accion = `
+                        <button onclick="actualizarEstadoVentaBD(${venta.id_venta}, 'pagada')">Confirmar pago</button>
+                        <button onclick="actualizarEstadoVentaBD(${venta.id_venta}, 'cancelada')">Cancelar</button>
+                    `;
+                } else if (venta.tipo === "Venta" && venta.estado === "pagada") {
+                    accion = `<button onclick="registrarDevolucionBD(${venta.id_venta}, ${venta.id_producto})">Devolucion</button>`;
+                }
+
                 tabla.innerHTML += `
                 <tr>
                     <td>${venta.cliente || "Sin nombre"}</td>
@@ -1779,12 +1813,14 @@
                     <td>${formatoPrecioBD(venta.subtotal)}</td>
                     <td>${venta.medio_pago}</td>
                     <td>${etiquetaCanalVenta(venta.canal_venta)}</td>
+                    <td>${etiquetaEntregaVenta(venta.tipo_entrega)}</td>
+                    <td>${etiquetaEstadoVenta(venta.estado)}</td>
                     <td>${new Date(venta.fecha).toLocaleString()}</td>
                     <td>
                       ${
-                        venta.tipo === "Venta"
+                        false && venta.tipo === "Venta"
                         ? `<button onclick="registrarDevolucionBD(${venta.id_venta}, ${venta.id_producto})">Devolución</button>`
-                        : `<span>Registrada</span>`
+                        : accion
                         }
                     </td>
                 </tr>
@@ -1794,9 +1830,41 @@
         } catch (error) {
             tabla.innerHTML = `
             <tr>
-                <td colspan="14">Error al cargar historial de ventas</td>
+                <td colspan="16">Error al cargar historial de ventas</td>
             </tr>
             `;
+            console.error(error);
+        }
+    }
+
+    async function actualizarEstadoVentaBD(idVenta, estado) {
+        const texto = estado === "pagada" ? "confirmar este pedido como pagado" : "cancelar este pedido y devolver el stock";
+
+        if (!confirm("¿Deseas " + texto + "?")) {
+            return;
+        }
+
+        const datos = new FormData();
+        datos.append("id_venta", idVenta);
+        datos.append("estado", estado);
+
+        try {
+            const respuesta = await fetch("../php/venta_actualizar_estado.php", {
+                method: "POST",
+                body: datos
+            });
+            const resultado = await respuesta.json();
+
+            alert(resultado.mensaje);
+
+            if (!resultado.error) {
+                cargarHistorialVentasBD();
+                cargarReportesBD();
+                cargarInventarioBD();
+                cargarInicioAdmin();
+            }
+        } catch (error) {
+            alert("Error al actualizar el pedido.");
             console.error(error);
         }
     }
@@ -1918,6 +1986,29 @@
         });
     }
 
+    function renderizarTablaCanalesVenta(canales) {
+        const tabla = document.getElementById("tablaCanalesVenta");
+
+        if (!tabla) return;
+
+        tabla.innerHTML = "";
+
+        if (!Array.isArray(canales) || canales.length === 0) {
+            tabla.innerHTML = '<tr><td colspan="3">No hay ventas en este rango</td></tr>';
+            return;
+        }
+
+        canales.forEach(function(canal) {
+            tabla.innerHTML += `
+                <tr>
+                    <td>${etiquetaCanalVenta(canal.canal_venta)}</td>
+                    <td>${canal.ventas}</td>
+                    <td>${formatoPrecioBD(canal.total)}</td>
+                </tr>
+            `;
+        });
+    }
+
     async function cargarReportesBD() {
         try {
             definirFechasReporte();
@@ -1929,7 +2020,7 @@
             if (inicio) parametros.append("fecha_inicio", inicio);
             if (fin) parametros.append("fecha_fin", fin);
 
-            const respuesta = await fetch("php/reportes_admin.php?" + parametros.toString());
+            const respuesta = await fetch("../php/reportes_admin.php?" + parametros.toString());
             const reportes = await respuesta.json();
 
             if (reportes.error) {
@@ -2000,6 +2091,7 @@
                 renderizarTablaMenorRotacion(rango.menor_rotacion_lista);
                 renderizarTablaVentasPorDia(rango.ventas_por_dia);
                 renderizarTablaMediosPago(rango.medios_pago);
+                renderizarTablaCanalesVenta(rango.canales_venta);
             }
         
         } catch (error) {
@@ -2013,7 +2105,7 @@
         if (!tabla) return;
 
         try {
-            const respuesta = await fetch("php/movimientos_listar.php");
+            const respuesta = await fetch("../php/movimientos_listar.php");
             const movimientos = await respuesta.json();  
         
             tabla.innerHTML = "";
@@ -2069,7 +2161,7 @@
         const textoBusqueda = buscador ? buscador.value.toLowerCase() : "";
         
         try {
-            const respuesta = await fetch("php/productos_listar.php");
+            const respuesta = await fetch("../php/productos_listar.php");
             const productos = await respuesta.json();
             
             tabla.innerHTML = "";
@@ -2168,6 +2260,38 @@
             .replaceAll("'", "&#039;");
     }
 
+    function etiquetaCanalVenta(canal) {
+        const etiquetas = {
+            tienda_fisica: "Tienda fisica",
+            pagina_web: "Pagina web",
+            whatsapp: "WhatsApp",
+            instagram: "Instagram"
+        };
+
+        return etiquetas[canal] || "Tienda fisica";
+    }
+
+    function etiquetaEntregaVenta(entrega) {
+        const etiquetas = {
+            recoger_tienda: "Recoge en tienda",
+            envio_local: "Envio local",
+            envio_nacional: "Envio nacional"
+        };
+
+        return etiquetas[entrega] || "Recoge en tienda";
+    }
+
+    function etiquetaEstadoVenta(estado) {
+        const etiquetas = {
+            pagada: "Pagada",
+            pendiente: "Pendiente",
+            cancelada: "Cancelada",
+            devuelta: "Devuelta"
+        };
+
+        return etiquetas[estado] || "Pagada";
+    }
+
     let clientesAdmin = [];
 
     function normalizarTextoCliente(valor) {
@@ -2227,7 +2351,7 @@
 
     async function cargarClientesBD() {
         try {
-            const respuesta = await fetch("php/clientes_listar.php");
+            const respuesta = await fetch("../php/clientes_listar.php");
             const clientes = await respuesta.json();
 
             if (clientes.error) {
@@ -2263,7 +2387,7 @@
         datos.append("detalle", document.getElementById("gastoDetalle").value.trim());
 
         try {
-            const respuesta = await fetch("php/gasto_guardar.php", {
+            const respuesta = await fetch("../php/gasto_guardar.php", {
                 method: "POST",
                 body: datos
             });
@@ -2298,7 +2422,7 @@
         datos.append("detalle", document.getElementById("inversionDetalle").value.trim());
 
         try {
-            const respuesta = await fetch("php/inversion_guardar.php", {
+            const respuesta = await fetch("../php/inversion_guardar.php", {
                 method: "POST",
                 body: datos
             });
@@ -2330,7 +2454,7 @@
         datos.append("descripcion", document.getElementById("categoriaDescripcion").value.trim());
 
         try {
-            const respuesta = await fetch("php/categoria_guardar.php", {
+            const respuesta = await fetch("../php/categoria_guardar.php", {
                 method: "POST",
                 body: datos
             });
@@ -2353,7 +2477,7 @@
         const selectorProducto = document.getElementById("inp-tipo");
 
         try {
-            const respuesta = await fetch("php/categorias_listar.php");
+            const respuesta = await fetch("../php/categorias_listar.php");
             const categorias = await respuesta.json();
 
             if (categorias.error) {
@@ -2442,7 +2566,7 @@
         datos.append("descripcion", nuevaDescripcion.trim());
 
         try {
-            const respuesta = await fetch("php/categoria_editar.php", {
+            const respuesta = await fetch("../php/categoria_editar.php", {
                 method: "POST",
                 body: datos
             });
@@ -2472,7 +2596,7 @@
         datos.append("estado", estado);
 
         try {
-            const respuesta = await fetch("php/categoria_cambiar_estado.php", {
+            const respuesta = await fetch("../php/categoria_cambiar_estado.php", {
                 method: "POST",
                 body: datos
             });
@@ -2498,7 +2622,7 @@
         datos.append("id_categoria", idCategoria);
 
         try {
-            const respuesta = await fetch("php/categoria_eliminar.php", {
+            const respuesta = await fetch("../php/categoria_eliminar.php", {
                 method: "POST",
                 body: datos
             });
@@ -2521,7 +2645,7 @@
         if (!tabla || !usuarioEsAdmin()) return;
 
         try {
-            const respuesta = await fetch("php/finanzas_listar.php");
+            const respuesta = await fetch("../php/finanzas_listar.php");
             const movimientos = await respuesta.json();
 
             tabla.innerHTML = "";
@@ -2561,7 +2685,7 @@
         if (!usuarioEsAdmin()) return;
 
         try {
-            const respuesta = await fetch("php/finanzas_resumen.php");
+            const respuesta = await fetch("../php/finanzas_resumen.php");
             const resumen = await respuesta.json();
 
             if (resumen.error) {
@@ -2598,7 +2722,7 @@
         datos.append("fecha_ingreso", document.getElementById("trabajadorFechaIngreso").value);
 
         try {
-            const respuesta = await fetch("php/trabajador_guardar.php", {
+            const respuesta = await fetch("../php/trabajador_guardar.php", {
                 method: "POST",
                 body: datos
             });
@@ -2632,7 +2756,7 @@
         datos.append("detalle", document.getElementById("pagoDetalle").value.trim());
 
         try {
-            const respuesta = await fetch("php/pago_trabajador_guardar.php", {
+            const respuesta = await fetch("../php/pago_trabajador_guardar.php", {
                 method: "POST",
                 body: datos
             });
@@ -2662,7 +2786,7 @@
         if (!tabla || !selector || !usuarioEsAdmin()) return;
 
         try {
-            const respuesta = await fetch("php/trabajadores_listar.php");
+            const respuesta = await fetch("../php/trabajadores_listar.php");
             const trabajadores = await respuesta.json();
 
             tabla.innerHTML = "";
@@ -2710,7 +2834,7 @@
         if (!tabla || !usuarioEsAdmin()) return;
 
         try {
-            const respuesta = await fetch("php/pagos_trabajador_listar.php");
+            const respuesta = await fetch("../php/pagos_trabajador_listar.php");
             const pagos = await respuesta.json();
 
             tabla.innerHTML = "";
@@ -2756,7 +2880,7 @@
         datos.append("producto_suministra", document.getElementById("proveedorProducto").value.trim());
 
         try {
-            const respuesta = await fetch("php/proveedor_guardar.php", {
+            const respuesta = await fetch("../php/proveedor_guardar.php", {
                 method: "POST",
                 body: datos
             });
@@ -2783,7 +2907,7 @@
         if (!tabla || !selector || !usuarioEsAdmin()) return;
 
         try {
-            const respuesta = await fetch("php/proveedores_listar.php");
+            const respuesta = await fetch("../php/proveedores_listar.php");
             const proveedores = await respuesta.json();
 
             tabla.innerHTML = "";
@@ -2829,7 +2953,7 @@
         if (!selector || !usuarioEsAdmin()) return;
 
         try {
-            const respuesta = await fetch("php/productos_listar.php");
+            const respuesta = await fetch("../php/productos_listar.php");
             const productos = await respuesta.json();
 
             selector.innerHTML = '<option value="">Seleccionar producto</option>';
@@ -3004,7 +3128,7 @@
         datos.append("detalle", document.getElementById("compraDetalle").value.trim());
 
         try {
-            const respuesta = await fetch("php/compra_mercancia_guardar.php", {
+            const respuesta = await fetch("../php/compra_mercancia_guardar.php", {
                 method: "POST",
                 body: datos
             });
@@ -3038,7 +3162,7 @@
         if (!tabla || !usuarioEsAdmin()) return;
 
         try {
-            const respuesta = await fetch("php/compras_mercancia_listar.php");
+            const respuesta = await fetch("../php/compras_mercancia_listar.php");
             const compras = await respuesta.json();
 
             tabla.innerHTML = "";
@@ -3087,7 +3211,7 @@
         datos.append("password_confirmar", document.getElementById("passwordConfirmar").value);
 
         try {
-            const respuesta = await fetch("php/password_cambiar.php", {
+            const respuesta = await fetch("../php/password_cambiar.php", {
                 method: "POST",
                 body: datos
             });
@@ -3099,7 +3223,7 @@
                 document.getElementById("formCambiarPassword").reset();
             }
         } catch (error) {
-            alert("Error al cambiar la contrasena.");
+            alert("Error al cambiar la contraseña.");
             console.error(error);
         }
     }
@@ -3116,7 +3240,7 @@
         datos.append("password_confirmar", document.getElementById("passwordResetConfirmar").value);
 
         try {
-            const respuesta = await fetch("php/password_cambiar.php", {
+            const respuesta = await fetch("../php/password_cambiar.php", {
                 method: "POST",
                 body: datos
             });
@@ -3128,7 +3252,7 @@
                 document.getElementById("formRestablecerPassword").reset();
             }
         } catch (error) {
-            alert("Error al restablecer la contrasena.");
+            alert("Error al restablecer la contraseña.");
             console.error(error);
         }
     }
@@ -3139,7 +3263,7 @@
         if (!selector || !usuarioEsAdmin()) return;
 
         try {
-            const respuesta = await fetch("php/usuarios_listar.php");
+            const respuesta = await fetch("../php/usuarios_listar.php");
             const usuarios = await respuesta.json();
 
             selector.innerHTML = '<option value="">Seleccionar usuario</option>';
@@ -3347,7 +3471,7 @@
 
     async function cargarProductosVentaAdmin() {
         try {
-            const respuesta = await fetch("php/productos_listar.php");
+            const respuesta = await fetch("../php/productos_listar.php");
             const productos = await respuesta.json();
 
             if (productos.error) {
@@ -3373,12 +3497,14 @@
         datos.append("telefono", document.getElementById("ventaAdminTelefono").value.trim());
         datos.append("cantidad", document.getElementById("ventaAdminCantidad").value);
         datos.append("medio_pago", document.getElementById("ventaAdminMedioPago").value);
+        datos.append("canal_venta", document.getElementById("ventaAdminCanal").value);
+        datos.append("tipo_entrega", document.getElementById("ventaAdminEntrega").value);
         datos.append("talla", document.getElementById("ventaAdminTalla").value);
 
         mensaje.textContent = "";
 
         try {
-            const respuesta = await fetch("php/venta_registrar.php", {
+            const respuesta = await fetch("../php/venta_registrar.php", {
                 method: "POST",
                 body: datos
             });
@@ -3436,7 +3562,7 @@
         datos.append("motivo", motivo.trim());
 
         try {
-            const respuesta = await fetch("php/devolucion_registrar.php", {
+            const respuesta = await fetch("../php/devolucion_registrar.php", {
                 method: "POST",
                 body: datos
             });
@@ -3464,13 +3590,13 @@
     async function cargarInicioAdmin() {
         try {
             const solicitudes = [
-                fetch("php/reportes_admin.php"),
-                fetch("php/productos_listar.php"),
-                fetch("php/movimientos_listar.php")
+                fetch("../php/reportes_admin.php"),
+                fetch("../php/productos_listar.php"),
+                fetch("../php/movimientos_listar.php")
             ];
 
             if (usuarioEsAdmin()) {
-                solicitudes.push(fetch("php/finanzas_resumen.php"));
+                solicitudes.push(fetch("../php/finanzas_resumen.php"));
             }
 
             const respuestas = await Promise.all(solicitudes);
@@ -3642,7 +3768,7 @@
         if (!tabla) return;
         
         try {
-            const respuesta = await fetch("php/cambios_precio_listar.php");
+            const respuesta = await fetch("../php/cambios_precio_listar.php");
             const cambios = await respuesta.json();
             
             tabla.innerHTML = "";
@@ -3692,3 +3818,5 @@
 
 </body>
 </html>
+
+
