@@ -12,7 +12,7 @@ try {
         echo json_encode([
             "error" => true,
             "mensaje" => "Método no permitido"
-        ]);
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
@@ -20,6 +20,7 @@ try {
     $codigo = strtoupper(trim($_POST["codigo"] ?? ""));
     $nombre = trim($_POST["nombre"] ?? "");
     $marca = trim($_POST["marca"] ?? "");
+    $color = trim($_POST["color"] ?? "");
     $categoria = trim($_POST["categoria"] ?? "");
     $cantidad = intval($_POST["cantidad"] ?? -1);
     $precio = floatval($_POST["precio"] ?? 0);
@@ -42,14 +43,14 @@ try {
             $datos = explode(":", $parte);
 
             if (count($datos) !== 2) {
-                throw new Exception("Formato de tallas invalido. Usa: S:2, M:3, L:1");
+                throw new Exception("Formato de tallas inválido. Usa: S:2, M:3, L:1");
             }
 
             $talla = strtoupper(trim($datos[0]));
             $cantidadTalla = intval(trim($datos[1]));
 
             if ($talla === "" || $cantidadTalla < 0) {
-                throw new Exception("Las tallas deben tener nombre y cantidad valida");
+                throw new Exception("Las tallas deben tener nombre y cantidad válida");
             }
 
             $tallas[$talla] = ($tallas[$talla] ?? 0) + $cantidadTalla;
@@ -77,7 +78,7 @@ try {
         echo json_encode([
             "error" => true,
             "mensaje" => "Datos incompletos o inválidos"
-        ]);
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
@@ -99,7 +100,7 @@ try {
         echo json_encode([
             "error" => true,
             "mensaje" => "Ya existe otro producto con ese código"
-        ]);
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
@@ -121,11 +122,23 @@ try {
         echo json_encode([
             "error" => true,
             "mensaje" => "La categoría no existe en la base de datos"
-        ]);
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
     $id_categoria = $categoriaEncontrada["id_categoria"];
+
+    $consultaColor = $conexion->query("
+        SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+            AND table_name = 'producto'
+            AND column_name = 'color'
+        ) AS existe
+    ");
+    $productoTieneColor = filter_var($consultaColor->fetch()["existe"], FILTER_VALIDATE_BOOLEAN);
+    $actualizarColor = $productoTieneColor ? ", color = :color" : "";
 
     $sqlActualizar = "
         UPDATE producto
@@ -137,13 +150,13 @@ try {
             cantidad = :cantidad,
             costo_unitario = :costo_unitario,
             precio = :precio
+            $actualizarColor
         WHERE id_producto = :id_producto
     ";
 
     $conexion->beginTransaction();
 
-    $consultaActualizar = $conexion->prepare($sqlActualizar);
-    $consultaActualizar->execute([
+    $parametrosActualizar = [
         ":codigo" => $codigo,
         ":nombre" => $nombre,
         ":marca" => $marca,
@@ -152,7 +165,14 @@ try {
         ":costo_unitario" => $costo,
         ":precio" => $precio,
         ":id_producto" => $id_producto
-    ]);
+    ];
+
+    if ($productoTieneColor) {
+        $parametrosActualizar[":color"] = $color;
+    }
+
+    $consultaActualizar = $conexion->prepare($sqlActualizar);
+    $consultaActualizar->execute($parametrosActualizar);
 
     if (count($tallas) > 0) {
         $conexion->prepare("DELETE FROM producto_talla WHERE id_producto = :id_producto")
@@ -172,12 +192,42 @@ try {
         }
     }
 
+    $conexion->prepare("DELETE FROM producto_color WHERE id_producto = :id_producto")
+        ->execute([":id_producto" => $id_producto]);
+
+    $nombreColor = $color !== "" ? $color : "Único";
+    $consultaColorProducto = $conexion->prepare("
+        INSERT INTO producto_color (id_producto, nombre_color, codigo_hex, orden)
+        VALUES (:id_producto, :nombre_color, NULL, 0)
+        RETURNING id_producto_color
+    ");
+    $consultaColorProducto->execute([
+        ":id_producto" => $id_producto,
+        ":nombre_color" => $nombreColor
+    ]);
+    $idProductoColor = $consultaColorProducto->fetch()["id_producto_color"];
+
+    if (count($tallas) > 0) {
+        $consultaTallaColor = $conexion->prepare("
+            INSERT INTO producto_color_talla (id_producto_color, talla, cantidad)
+            VALUES (:id_producto_color, :talla, :cantidad)
+        ");
+
+        foreach ($tallas as $talla => $cantidadTalla) {
+            $consultaTallaColor->execute([
+                ":id_producto_color" => $idProductoColor,
+                ":talla" => $talla,
+                ":cantidad" => $cantidadTalla
+            ]);
+        }
+    }
+
     $conexion->commit();
 
     echo json_encode([
         "error" => false,
         "mensaje" => "Producto actualizado correctamente"
-    ]);
+    ], JSON_UNESCAPED_UNICODE);
 
 } catch (Exception $e) {
     if (isset($conexion) && $conexion->inTransaction()) {
@@ -197,7 +247,7 @@ try {
     echo json_encode([
         "error" => true,
         "mensaje" => $e->getMessage()
-    ]);
+    ], JSON_UNESCAPED_UNICODE);
 }
 
 ?>

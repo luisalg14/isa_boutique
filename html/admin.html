@@ -49,7 +49,7 @@
                 <button class="admin-tab" data-panel-target="panel-menu-ventas">Ventas</button>
                 <button class="admin-tab" data-admin-only data-panel-target="panel-menu-finanzas">Finanzas</button>
                 <button class="admin-tab" data-admin-only data-panel-target="panel-menu-personas">Personas</button>
-                <button class="admin-tab" data-panel-target="panel-menu-configuracion">Configuracion</button>
+                <button class="admin-tab" data-panel-target="panel-menu-configuracion">Configuración</button>
             </aside>
 
             <main class="admin-content">
@@ -132,6 +132,10 @@
                     <span>Ventas e historial</span>
                     <strong>Compras, clientes y devoluciones</strong>
                 </button>
+                <button type="button" onclick="activarPanelAdmin('panel-facturas')">
+                    <span>Facturas</span>
+                    <strong>Comprobantes para imprimir o consultar</strong>
+                </button>
                 <button type="button" onclick="activarPanelAdmin('panel-reportes')">
                     <span>Reportes de ventas</span>
                     <strong>Fechas, productos y medios de pago</strong>
@@ -158,6 +162,13 @@
                     </div>
 
                     <div class="campo">
+                        <label>Color</label>
+                        <select id="ventaAdminColor" required>
+                            <option value="">Seleccionar color</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
                         <label>Talla</label>
                         <select id="ventaAdminTalla" required>
                             <option value="">Seleccionar talla</option>
@@ -170,8 +181,13 @@
                     </div>
 
                     <div class="campo">
-                        <label>Telefono</label>
-                        <input id="ventaAdminTelefono" placeholder="Telefono o WhatsApp" required>
+                        <label>Teléfono</label>
+                        <input id="ventaAdminTelefono" placeholder="Teléfono o WhatsApp" required>
+                    </div>
+
+                    <div class="campo">
+                        <label>Correo</label>
+                        <input id="ventaAdminCorreo" type="email" placeholder="correo@cliente.com">
                     </div>
 
                     <div class="campo">
@@ -180,19 +196,30 @@
                     </div>
 
                     <div class="campo">
+                        <label>Descuento</label>
+                        <div class="discount-row">
+                            <select id="ventaAdminDescuentoTipo">
+                                <option value="valor">$</option>
+                                <option value="porcentaje">%</option>
+                            </select>
+                            <input id="ventaAdminDescuentoValor" type="number" min="0" value="0" placeholder="0">
+                        </div>
+                    </div>
+
+                    <div class="campo">
                         <label>Medio de pago</label>
                         <select id="ventaAdminMedioPago" required>
                             <option value="efectivo">Efectivo</option>
                             <option value="transferencia">Transferencia</option>
-                            <option value="tarjeta_debito">Tarjeta debito</option>
-                            <option value="tarjeta_credito">Tarjeta credito</option>
+                            <option value="tarjeta_debito">Tarjeta débito</option>
+                            <option value="tarjeta_credito">Tarjeta crédito</option>
                         </select>
                     </div>
 
                     <div class="campo">
                         <label>Canal de venta</label>
                         <select id="ventaAdminCanal" required>
-                            <option value="tienda_fisica">Tienda fisica</option>
+                            <option value="tienda_fisica">Tienda física</option>
                             <option value="whatsapp">WhatsApp</option>
                             <option value="instagram">Instagram</option>
                             <option value="pagina_web">Página web</option>
@@ -203,8 +230,8 @@
                         <label>Entrega</label>
                         <select id="ventaAdminEntrega" required>
                             <option value="recoger_tienda">Recoge en tienda</option>
-                            <option value="envio_local">Envio local</option>
-                            <option value="envio_nacional">Envio nacional</option>
+                            <option value="envio_local">Envío local</option>
+                            <option value="envio_nacional">Envío nacional</option>
                         </select>
                     </div>
 
@@ -215,7 +242,8 @@
                 <aside class="venta-resumen">
                     <span>Detalle</span>
                     <h3 id="ventaAdminNombreProducto">Sin producto seleccionado</h3>
-                    <p id="ventaAdminCodigoProducto">Codigo: -</p>
+                    <p id="ventaAdminCodigoProducto">Código: -</p>
+                    <p id="ventaAdminColorProducto">Color: -</p>
                     <p id="ventaAdminTallasProducto">Tallas disponibles: -</p>
                     <p id="ventaAdminStockProducto">Stock talla: -</p>
                     <strong id="ventaAdminTotal">$0</strong>
@@ -297,25 +325,50 @@
             </div>
 
             <div class="campo">
-                <label>Cantidad</label>
-                <input id="inp-cantidad" type="number" placeholder="0">
+                <label>Cantidad total</label>
+                <input id="inp-cantidad" type="number" placeholder="0" readonly>
+                <small>Se calcula automáticamente con las tallas.</small>
             </div>
 
             <div class="campo">
-                <label>Tallas y cantidades</label>
+                <label>Variantes del producto</label>
+                <input id="inp-color" type="hidden">
                 <input id="inp-tallas" type="hidden">
-                <div class="size-builder">
-                    <div class="size-mode">
-                        <button type="button" class="size-mode-btn activo" data-size-mode="letras">Letras</button>
-                        <button type="button" class="size-mode-btn" data-size-mode="numeros">Números</button>
+                <div class="variant-builder">
+                    <div class="variant-step">
+                        <strong>1. Color</strong>
+                        <div class="color-builder">
+                            <div id="colorOptions" class="color-options"></div>
+                            <div class="variant-custom-color">
+                                <input id="customColorInput" placeholder="Agregar otro color">
+                                <button type="button" onclick="agregarColorPersonalizado()">Agregar otro</button>
+                            </div>
+                            <small id="selectedColorLabel">Selecciona un color antes de agregar tallas</small>
+                        </div>
                     </div>
-                    <div id="sizeOptions" class="size-options"></div>
-                    <div class="size-quantity-row">
-                        <span id="selectedSizeLabel">Selecciona una talla</span>
-                        <input id="selectedSizeQty" type="number" min="0" placeholder="Cantidad">
-                        <button type="button" onclick="agregarTallaSeleccionada()">Agregar talla</button>
+
+                    <div class="variant-step">
+                        <strong>2. Tallas de ese color</strong>
+                        <div class="size-builder">
+                            <div class="size-mode">
+                                <button type="button" class="size-mode-btn activo" data-size-mode="letras">Letras</button>
+                                <button type="button" class="size-mode-btn" data-size-mode="numeros">Números</button>
+                            </div>
+                            <div id="sizeOptions" class="size-options"></div>
+                            <div class="size-quantity-row">
+                                <span id="selectedSizeLabel">Selecciona una talla</span>
+                                <input id="selectedSizeQty" type="number" min="0" placeholder="Cantidad">
+                                <button type="button" onclick="agregarTallaSeleccionada()">Agregar al color</button>
+                            </div>
+                            <div id="selectedSizesList" class="selected-sizes-list"></div>
+                        </div>
                     </div>
-                    <div id="selectedSizesList" class="selected-sizes-list"></div>
+
+                    <div class="variant-step">
+                        <strong>Resumen de colores y tallas</strong>
+                        <input id="inp-variantes" type="hidden">
+                        <div id="selectedVariantsList" class="selected-sizes-list"></div>
+                    </div>
                 </div>
             </div>
 
@@ -330,8 +383,9 @@
             </div>
 
             <div class="campo">
-                <label>Imagen</label>
-                <input id="inp-img" type="file">
+                <label>Imágenes</label>
+                <input id="inp-img" type="file" multiple accept="image/*">
+                <small>Puedes elegir varias fotos. La primera será la principal.</small>
             </div>
 
             <button class="btn btn-agregar" onclick="agregarProductoBD()">
@@ -343,7 +397,7 @@
         </section>
 
         <section id="panel-categorias" class="admin-panel" data-admin-only>
-            <h2>Categorias</h2>
+            <h2>Categorías</h2>
 
             <div class="finance-grid">
                 <form id="formCategoria" class="finance-form">
@@ -383,7 +437,7 @@
             <h2>Inventario</h2>
 
             <div class="filtros">
-                <input type="text" id="buscador" placeholder="Buscar por código, nombre, marca o categoría...">
+                <input type="text" id="buscador" placeholder="Buscar por código, nombre, marca, color o categoría...">
             </div>
 
             <table class="tabla-inventario">
@@ -392,6 +446,7 @@
                         <th>Código</th>
                         <th>Producto</th>
                         <th>Marca</th>
+                        <th>Color</th>
                         <th>Tipo</th>
                         <th>Precio</th>
                         <th>Costo</th>
@@ -541,7 +596,7 @@
                     <table class="tabla-inventario">
                         <thead>
                             <tr>
-                                <th>Codigo</th>
+                                <th>Código</th>
                                 <th>Producto</th>
                                 <th>Cantidad</th>
                                 <th>Ventas</th>
@@ -557,7 +612,7 @@
                     <table class="tabla-inventario">
                         <thead>
                             <tr>
-                                <th>Codigo</th>
+                                <th>Código</th>
                                 <th>Producto</th>
                                 <th>Cantidad</th>
                                 <th>Ventas</th>
@@ -570,7 +625,7 @@
             </div>
 
             <div class="admin-subsection" data-subsection="reportes-dias-pagos">
-            <h3 class="finance-subtitle reportes-dia-title">Ventas por dia</h3>
+            <h3 class="finance-subtitle reportes-dia-title">Ventas por día</h3>
             <table class="tabla-inventario reportes-dia-table">
                 <thead>
                     <tr>
@@ -640,6 +695,32 @@
             <button data-admin-only onclick="limpiarHistorialAntiguo()">
                 Limpiar historial antiguo
             </button>
+        </section>
+
+        <section id="panel-facturas" class="admin-panel">
+            <h2>Facturas</h2>
+
+            <div class="filtros">
+                <input type="text" id="buscadorFacturas" placeholder="Buscar por factura, cliente, teléfono o canal...">
+            </div>
+
+            <table class="tabla-inventario">
+                <thead>
+                    <tr>
+                        <th>Factura</th>
+                        <th>Venta</th>
+                        <th>Cliente</th>
+                        <th>Teléfono</th>
+                        <th>Medio</th>
+                        <th>Canal</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th>Fecha</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaFacturas"></tbody>
+            </table>
         </section>
 
 
@@ -858,8 +939,8 @@
                     </div>
 
                     <div class="campo">
-                        <label>Telefono</label>
-                        <input id="proveedorTelefono" placeholder="Telefono o WhatsApp">
+                        <label>Teléfono</label>
+                        <input id="proveedorTelefono" placeholder="Teléfono o WhatsApp">
                     </div>
 
                     <div class="campo">
@@ -967,7 +1048,7 @@
                 <thead>
                     <tr>
                         <th>Proveedor</th>
-                        <th>Telefono</th>
+                        <th>Teléfono</th>
                         <th>Ciudad</th>
                         <th>Suministra</th>
                         <th>Estado</th>
@@ -984,7 +1065,7 @@
                     <tr>
                         <th>Fecha</th>
                         <th>Proveedor</th>
-                        <th>Codigo</th>
+                        <th>Código</th>
                         <th>Producto</th>
                         <th>Talla</th>
                         <th>Cantidad</th>
@@ -1026,8 +1107,8 @@
                     </div>
 
                     <div class="campo">
-                        <label>Telefono</label>
-                        <input id="trabajadorTelefono" placeholder="Telefono o WhatsApp">
+                        <label>Teléfono</label>
+                        <input id="trabajadorTelefono" placeholder="Teléfono o WhatsApp">
                     </div>
 
                     <div class="campo">
@@ -1097,7 +1178,7 @@
                     <tr>
                         <th>Nombre</th>
                         <th>Documento</th>
-                        <th>Telefono</th>
+                        <th>Teléfono</th>
                         <th>Cargo</th>
                         <th>Salario base</th>
                         <th>Fecha ingreso</th>
@@ -1269,6 +1350,7 @@
             "panel-menu-ventas": "panel-menu-ventas",
             "panel-venta-interna": "panel-menu-ventas",
             "panel-historial": "panel-menu-ventas",
+            "panel-facturas": "panel-menu-ventas",
             "panel-reportes": "panel-menu-ventas",
             "panel-menu-finanzas": "panel-menu-finanzas",
             "panel-finanzas": "panel-menu-finanzas",
@@ -1326,6 +1408,19 @@
     let modoTallas = "letras";
     let tallaSeleccionadaAdmin = "";
     let tallasSeleccionadasAdmin = {};
+    let variantesColorAdmin = [];
+    const coloresPrenda = [
+        { nombre: "Negro", valor: "#1f1a1a" },
+        { nombre: "Blanco", valor: "#ffffff" },
+        { nombre: "Rosa", valor: "#d98b9a" },
+        { nombre: "Rojo", valor: "#b83245" },
+        { nombre: "Azul", valor: "#2f5f9f" },
+        { nombre: "Dorado", valor: "#c8a45d" },
+        { nombre: "Beige", valor: "#d8c2a8" },
+        { nombre: "Verde", valor: "#496f53" },
+        { nombre: "Marrón", valor: "#6d4a35" }
+    ];
+    let colorSeleccionadoAdmin = "";
     let productosCompraMercancia = [];
     let itemsCompraMercancia = [];
     let categoriasAdmin = [];
@@ -1357,9 +1452,18 @@
         const input = document.getElementById("inp-tallas");
         if (!input) return;
 
-        input.value = Object.keys(tallasSeleccionadasAdmin).map(function(talla) {
-            return talla + ":" + tallasSeleccionadasAdmin[talla];
+        const acumuladas = {};
+
+        variantesColorAdmin.forEach(function(variante) {
+            Object.keys(variante.tallas || {}).forEach(function(talla) {
+                acumuladas[talla] = Number(acumuladas[talla] || 0) + Number(variante.tallas[talla] || 0);
+            });
+        });
+
+        input.value = Object.keys(acumuladas).map(function(talla) {
+            return talla + ":" + acumuladas[talla];
         }).join(", ");
+        actualizarCantidadTotalAdmin();
     }
 
     function renderizarTallasSeleccionadasAdmin() {
@@ -1368,40 +1472,77 @@
 
         lista.innerHTML = "";
 
-        Object.keys(tallasSeleccionadasAdmin).forEach(function(talla) {
+        if (!colorSeleccionadoAdmin) {
+            lista.innerHTML = "<small>Selecciona un color para ver o agregar sus tallas.</small>";
+            return;
+        }
+
+        const varianteActual = variantesColorAdmin.find(function(variante) {
+            return variante.color.toLowerCase() === colorSeleccionadoAdmin.toLowerCase();
+        });
+
+        const tallasColor = varianteActual ? varianteActual.tallas : {};
+
+        Object.keys(tallasColor).forEach(function(talla) {
             const item = document.createElement("span");
             item.className = "selected-size-pill";
-            item.innerHTML = talla + ": " + tallasSeleccionadasAdmin[talla] + '<button type="button">x</button>';
+            item.innerHTML = talla + ": " + tallasColor[talla] + '<button type="button">x</button>';
             item.querySelector("button").addEventListener("click", function() {
-                delete tallasSeleccionadasAdmin[talla];
+                delete tallasColor[talla];
+                if (Object.keys(tallasColor).length === 0) {
+                    variantesColorAdmin = variantesColorAdmin.filter(function(variante) {
+                        return variante !== varianteActual;
+                    });
+                }
                 actualizarCampoTallasAdmin();
                 renderizarTallasSeleccionadasAdmin();
+                renderizarVariantesAdmin();
             });
             lista.appendChild(item);
         });
 
-        if (Object.keys(tallasSeleccionadasAdmin).length === 0) {
-            lista.innerHTML = "<small>No hay tallas agregadas.</small>";
+        if (Object.keys(tallasColor).length === 0) {
+            lista.innerHTML = "<small>Este color todavía no tiene tallas agregadas.</small>";
         }
+        actualizarCantidadTotalAdmin();
     }
 
     function agregarTallaSeleccionada() {
         const cantidad = parseInt(document.getElementById("selectedSizeQty").value);
+
+        if (!colorSeleccionadoAdmin) {
+            alert("Selecciona primero el color de la prenda.");
+            return;
+        }
 
         if (!tallaSeleccionadaAdmin) {
             alert("Selecciona una talla.");
             return;
         }
 
-        if (isNaN(cantidad) || cantidad < 0) {
-            alert("Ingresa una cantidad valida.");
+        if (isNaN(cantidad) || cantidad <= 0) {
+            alert("Ingresa una cantidad válida mayor a cero.");
             return;
         }
 
-        tallasSeleccionadasAdmin[tallaSeleccionadaAdmin] = cantidad;
+        let varianteActual = variantesColorAdmin.find(function(variante) {
+            return variante.color.toLowerCase() === colorSeleccionadoAdmin.toLowerCase();
+        });
+
+        if (!varianteActual) {
+            varianteActual = {
+                color: colorSeleccionadoAdmin,
+                hex: "",
+                tallas: {}
+            };
+            variantesColorAdmin.push(varianteActual);
+        }
+
+        varianteActual.tallas[tallaSeleccionadaAdmin] = Number(varianteActual.tallas[tallaSeleccionadaAdmin] || 0) + cantidad;
         document.getElementById("selectedSizeQty").value = "";
         actualizarCampoTallasAdmin();
         renderizarTallasSeleccionadasAdmin();
+        renderizarVariantesAdmin();
     }
 
     document.querySelectorAll(".size-mode-btn").forEach(function(boton) {
@@ -1418,6 +1559,8 @@
 
     renderizarOpcionesTallas();
     renderizarTallasSeleccionadasAdmin();
+    renderizarColoresAdmin();
+    renderizarVariantesAdmin();
 
     function exigirAdminFrontend() {
         if (!usuarioEsAdmin()) {
@@ -1434,12 +1577,15 @@
         const codigo = document.getElementById("inp-codigo").value.trim().toUpperCase();
         const nombre = document.getElementById("inp-nombre").value.trim();
         const marca = document.getElementById("inp-marca").value.trim();
+        const color = document.getElementById("inp-color").value.trim();
         const categoria = document.getElementById("inp-tipo").value;
         const cantidad = document.getElementById("inp-cantidad").value;
         const precio = document.getElementById("inp-precio").value;
         const costo = document.getElementById("inp-costo").value;
+        guardarVarianteActualAdmin();
         const tallas = document.getElementById("inp-tallas").value.trim();
-        const imagen = document.getElementById("inp-img").files[0];
+        const variantes = document.getElementById("inp-variantes").value.trim();
+        const imagenes = document.getElementById("inp-img").files;
         const mensajeError = document.getElementById("error-msg");
 
         if (!codigo || !nombre || !marca || !categoria || cantidad === "" || precio === "" || costo === "") {
@@ -1453,14 +1599,18 @@
         datos.append("codigo", codigo);
         datos.append("nombre", nombre);
         datos.append("marca", marca);
+        datos.append("color", color);
         datos.append("categoria", categoria);
         datos.append("cantidad", cantidad);
         datos.append("precio", precio);
         datos.append("costo", costo);
         datos.append("tallas", tallas);
+        datos.append("variantes", variantes);
 
-        if (imagen) {
-            datos.append("imagen", imagen);
+        if (imagenes && imagenes.length > 0) {
+            Array.from(imagenes).forEach(function(imagen) {
+                datos.append("imagenes[]", imagen);
+            });
         }
 
         try {
@@ -1488,14 +1638,20 @@
             document.getElementById("inp-codigo").value = "";
             document.getElementById("inp-nombre").value = "";
             document.getElementById("inp-marca").value = "";
+            document.getElementById("inp-color").value = "";
+            colorSeleccionadoAdmin = "";
+            actualizarColorAdmin();
             document.getElementById("inp-tipo").value = "";
             document.getElementById("inp-cantidad").value = "";
             document.getElementById("inp-tallas").value = "";
+            document.getElementById("inp-variantes").value = "";
             tallasSeleccionadasAdmin = {};
+            variantesColorAdmin = [];
             tallaSeleccionadaAdmin = "";
             document.getElementById("selectedSizeLabel").textContent = "Selecciona una talla";
             renderizarOpcionesTallas();
             renderizarTallasSeleccionadasAdmin();
+            renderizarVariantesAdmin();
             document.getElementById("inp-precio").value = "";
             document.getElementById("inp-costo").value = "";
             document.getElementById("inp-img").value = "";
@@ -1576,6 +1732,9 @@
             
             const nuevaMarca = prompt("Marca:", producto.marca);
             if (nuevaMarca === null) return;
+
+            const nuevoColor = prompt("Color de la prenda:", producto.color || "");
+            if (nuevoColor === null) return;
             
             const nuevaCategoria = prompt(
                 "Categoría: vestidos, blusas, conjuntos, shorts, jeans, bodys, faldas o accesorios",
@@ -1618,6 +1777,7 @@
             datos.append("codigo", nuevoCodigo.trim().toUpperCase());
             datos.append("nombre", nuevoNombre.trim());
             datos.append("marca", nuevaMarca.trim());
+            datos.append("color", nuevoColor.trim());
             datos.append("categoria", nuevaCategoria.trim().toLowerCase());
             datos.append("cantidad", nuevaCantidad);
             datos.append("precio", nuevoPrecio);
@@ -1790,6 +1950,7 @@
             
             ventas.forEach(function(venta) {
                 let accion = `<span>Registrada</span>`;
+                let botonFactura = "";
 
                 if (venta.tipo === "Venta" && venta.estado === "pendiente") {
                     accion = `
@@ -1798,6 +1959,10 @@
                     `;
                 } else if (venta.tipo === "Venta" && venta.estado === "pagada") {
                     accion = `<button onclick="registrarDevolucionBD(${venta.id_venta}, ${venta.id_producto})">Devolución</button>`;
+                }
+
+                if (venta.tipo === "Venta" && (venta.estado === "pagada" || venta.estado === "devuelta")) {
+                    botonFactura = `<button onclick="abrirFacturaBD(${venta.id_venta})">${venta.numero_factura || "Factura"}</button>`;
                 }
 
                 tabla.innerHTML += `
@@ -1821,7 +1986,7 @@
                       ${
                         false && venta.tipo === "Venta"
                         ? `<button onclick="registrarDevolucionBD(${venta.id_venta}, ${venta.id_producto})">Devolución</button>`
-                        : accion
+                        : botonFactura + accion
                         }
                     </td>
                 </tr>
@@ -1836,6 +2001,359 @@
             `;
             console.error(error);
         }
+    }
+
+    function renderizarColoresAdmin() {
+        const contenedor = document.getElementById("colorOptions");
+        if (!contenedor) return;
+
+        contenedor.innerHTML = "";
+
+        coloresPrenda.forEach(function(color) {
+            const boton = document.createElement("button");
+            boton.type = "button";
+            boton.className = "color-option";
+            boton.title = color.nombre;
+            boton.style.background = color.valor;
+            boton.classList.toggle("activo", colorSeleccionadoAdmin === color.nombre);
+            boton.addEventListener("click", function() {
+                colorSeleccionadoAdmin = color.nombre;
+                actualizarColorAdmin();
+            });
+            contenedor.appendChild(boton);
+        });
+    }
+
+    function actualizarColorAdmin() {
+        const input = document.getElementById("inp-color");
+        const etiqueta = document.getElementById("selectedColorLabel");
+
+        if (input) input.value = colorSeleccionadoAdmin;
+        if (etiqueta) etiqueta.textContent = colorSeleccionadoAdmin ? "Color activo: " + colorSeleccionadoAdmin : "Selecciona un color antes de agregar tallas";
+        renderizarColoresAdmin();
+        renderizarTallasSeleccionadasAdmin();
+    }
+
+    function agregarColorPersonalizado() {
+        const input = document.getElementById("customColorInput");
+        const valor = input ? input.value.trim() : "";
+
+        if (!valor) {
+            alert("Escribe el color que deseas agregar.");
+            return;
+        }
+
+        colorSeleccionadoAdmin = valor;
+        if (input) input.value = "";
+        actualizarColorAdmin();
+    }
+
+    function actualizarCantidadTotalAdmin() {
+        const cantidadVariantes = variantesColorAdmin.reduce(function(total, variante) {
+            return total + Object.values(variante.tallas || {}).reduce(function(suma, valor) {
+                return suma + Number(valor || 0);
+            }, 0);
+        }, 0);
+        const inputCantidad = document.getElementById("inp-cantidad");
+
+        if (inputCantidad) inputCantidad.value = cantidadVariantes;
+    }
+
+    function actualizarCampoVariantesAdmin() {
+        const input = document.getElementById("inp-variantes");
+        if (input) input.value = JSON.stringify(variantesColorAdmin);
+        actualizarCampoTallasAdmin();
+        actualizarCantidadTotalAdmin();
+    }
+
+    function renderizarVariantesAdmin() {
+        const lista = document.getElementById("selectedVariantsList");
+        if (!lista) return;
+
+        lista.innerHTML = "";
+
+        if (variantesColorAdmin.length === 0) {
+            lista.innerHTML = "<small>Resumen: aún no hay colores con tallas agregadas.</small>";
+            actualizarCampoVariantesAdmin();
+            return;
+        }
+
+        variantesColorAdmin.forEach(function(variante, indice) {
+            const tallas = Object.keys(variante.tallas).map(function(talla) {
+                return talla + ": " + variante.tallas[talla];
+            }).join(", ");
+            const item = document.createElement("span");
+            item.className = "selected-size-pill";
+            item.innerHTML = "Color " + variante.color + " - " + tallas + '<button type="button">x</button>';
+            item.querySelector("button").addEventListener("click", function() {
+                variantesColorAdmin.splice(indice, 1);
+                actualizarCampoTallasAdmin();
+                renderizarTallasSeleccionadasAdmin();
+                renderizarVariantesAdmin();
+            });
+            lista.appendChild(item);
+        });
+
+        actualizarCampoVariantesAdmin();
+    }
+
+    function agregarVarianteColorAdmin() {
+        if (!colorSeleccionadoAdmin) {
+            alert("Selecciona un color para esta variante.");
+            return;
+        }
+
+        if (Object.keys(tallasSeleccionadasAdmin).length === 0) {
+            alert("Agrega al menos una talla para el color seleccionado.");
+            return;
+        }
+
+        const existente = variantesColorAdmin.find(function(variante) {
+            return variante.color.toLowerCase() === colorSeleccionadoAdmin.toLowerCase();
+        });
+
+        if (existente) {
+            Object.keys(tallasSeleccionadasAdmin).forEach(function(talla) {
+                existente.tallas[talla] = Number(existente.tallas[talla] || 0) + Number(tallasSeleccionadasAdmin[talla] || 0);
+            });
+        } else {
+            variantesColorAdmin.push({
+                color: colorSeleccionadoAdmin,
+                hex: "",
+                tallas: Object.assign({}, tallasSeleccionadasAdmin)
+            });
+        }
+
+        tallasSeleccionadasAdmin = {};
+        tallaSeleccionadaAdmin = "";
+        document.getElementById("selectedSizeLabel").textContent = "Selecciona una talla";
+        actualizarCampoTallasAdmin();
+        renderizarTallasSeleccionadasAdmin();
+        renderizarOpcionesTallas();
+        renderizarVariantesAdmin();
+    }
+
+    function guardarVarianteActualAdmin() {
+        if (!colorSeleccionadoAdmin || Object.keys(tallasSeleccionadasAdmin).length === 0) {
+            return;
+        }
+
+        const existente = variantesColorAdmin.find(function(variante) {
+            return variante.color.toLowerCase() === colorSeleccionadoAdmin.toLowerCase();
+        });
+
+        if (existente) {
+            Object.keys(tallasSeleccionadasAdmin).forEach(function(talla) {
+                existente.tallas[talla] = Number(existente.tallas[talla] || 0) + Number(tallasSeleccionadasAdmin[talla] || 0);
+            });
+        } else {
+            variantesColorAdmin.push({
+                color: colorSeleccionadoAdmin,
+                hex: "",
+                tallas: Object.assign({}, tallasSeleccionadasAdmin)
+            });
+        }
+
+        tallasSeleccionadasAdmin = {};
+        tallaSeleccionadaAdmin = "";
+        document.getElementById("selectedSizeLabel").textContent = "Selecciona una talla";
+        actualizarCampoTallasAdmin();
+        renderizarTallasSeleccionadasAdmin();
+        renderizarOpcionesTallas();
+        renderizarVariantesAdmin();
+    }
+
+    async function cargarFacturasBD() {
+        const tabla = document.getElementById("tablaFacturas");
+        const buscador = document.getElementById("buscadorFacturas");
+
+        if (!tabla) return;
+
+        try {
+            const respuesta = await fetch("../php/facturas_listar.php");
+            const facturas = await respuesta.json();
+            const textoBusqueda = buscador ? buscador.value.toLowerCase() : "";
+
+            if (facturas.error) {
+                tabla.innerHTML = `<tr><td colspan="10">${facturas.mensaje}</td></tr>`;
+                return;
+            }
+
+            const filtradas = facturas.filter(function(factura) {
+                const texto = [
+                    factura.numero_factura,
+                    factura.id_venta,
+                    factura.cliente,
+                    factura.telefono,
+                    factura.medio_pago,
+                    factura.canal_venta,
+                    factura.estado_factura
+                ].join(" ").toLowerCase();
+
+                return texto.includes(textoBusqueda);
+            });
+
+            if (filtradas.length === 0) {
+                tabla.innerHTML = '<tr><td colspan="10">No hay facturas registradas</td></tr>';
+                return;
+            }
+
+            tabla.innerHTML = "";
+
+            filtradas.forEach(function(factura) {
+                tabla.innerHTML += `
+                    <tr>
+                        <td>${factura.numero_factura}</td>
+                        <td>${factura.id_venta}</td>
+                        <td>${factura.cliente || "Sin nombre"}</td>
+                        <td>${factura.telefono || "-"}</td>
+                        <td>${factura.medio_pago}</td>
+                        <td>${etiquetaCanalVenta(factura.canal_venta)}</td>
+                        <td>${formatoPrecioBD(factura.total)}</td>
+                        <td>${factura.estado_factura}</td>
+                        <td>${new Date(factura.fecha).toLocaleString()}</td>
+                        <td><button onclick="abrirFacturaBD(${factura.id_venta})">Abrir</button></td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            tabla.innerHTML = '<tr><td colspan="10">Error al cargar facturas</td></tr>';
+            console.error(error);
+        }
+    }
+
+    async function abrirFacturaBD(idVenta) {
+        try {
+            const respuesta = await fetch("../php/factura_obtener.php?id_venta=" + encodeURIComponent(idVenta));
+            const resultado = await respuesta.json();
+
+            if (resultado.error) {
+                alert(resultado.mensaje);
+                return;
+            }
+
+            imprimirFacturaBD(resultado.factura, resultado.detalles);
+            cargarFacturasBD();
+            cargarHistorialVentasBD();
+        } catch (error) {
+            alert("Error al abrir la factura.");
+            console.error(error);
+        }
+    }
+
+    function imprimirFacturaBD(factura, detalles) {
+        const filas = detalles.map(function(detalle) {
+            return `
+                <tr>
+                    <td>${limpiarTextoBD(detalle.codigo)}</td>
+                    <td>${limpiarTextoBD(detalle.producto)}</td>
+                    <td>${limpiarTextoBD(detalle.color || "-")}</td>
+                    <td>${limpiarTextoBD(detalle.talla || "-")}</td>
+                    <td>${detalle.cantidad}</td>
+                    <td>${formatoPrecioBD(detalle.precio_unitario)}</td>
+                    <td>${formatoPrecioBD(detalle.iva)}</td>
+                    <td>${formatoPrecioBD(detalle.subtotal)}</td>
+                </tr>
+            `;
+        }).join("");
+
+        const correoCliente = String(factura.correo || "");
+        const asuntoCorreo = encodeURIComponent("Factura " + factura.numero_factura + " - Isa Boutique");
+        const cuerpoCorreo = encodeURIComponent(
+            "Hola " + (factura.cliente || "") + ",\n\n" +
+            "Adjuntamos/compartimos la información de tu factura " + factura.numero_factura + ".\n" +
+            "Total: " + formatoPrecioBD(factura.total) + "\n\n" +
+            "Gracias por comprar en Isa Boutique."
+        );
+        const enlaceCorreo = correoCliente
+            ? "mailto:" + encodeURIComponent(correoCliente) + "?subject=" + asuntoCorreo + "&body=" + cuerpoCorreo
+            : "";
+
+        const ventana = window.open("", "_blank", "width=860,height=720");
+
+        if (!ventana) {
+            alert("El navegador bloqueó la ventana de impresión.");
+            return;
+        }
+
+        ventana.document.write(`
+            <!doctype html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>${limpiarTextoBD(factura.numero_factura)}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; color: #2f2424; margin: 32px; }
+                    header { display: flex; justify-content: space-between; gap: 24px; border-bottom: 2px solid #954053; padding-bottom: 18px; margin-bottom: 24px; }
+                    h1 { margin: 0; color: #954053; font-family: Georgia, serif; font-weight: 400; }
+                    h2 { margin: 0 0 6px; font-size: 18px; }
+                    p { margin: 4px 0; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 22px; }
+                    th, td { border-bottom: 1px solid #ead8d2; padding: 10px; text-align: left; }
+                    th { background: #fff3ef; color: #5c353b; }
+                    .totales { margin-left: auto; margin-top: 24px; width: 280px; }
+                    .totales div { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ead8d2; }
+                    .total { font-size: 18px; font-weight: 700; color: #954053; }
+                    .acciones { display: flex; gap: 10px; margin-bottom: 18px; }
+                    .acciones button, .acciones a { border: 0; background: #954053; color: #fff; padding: 10px 14px; text-decoration: none; cursor: pointer; font-size: 14px; }
+                    .acciones a.inactivo { background: #b8aaa5; pointer-events: none; }
+                    @media print { .acciones { display: none; } body { margin: 18px; } }
+                </style>
+            </head>
+            <body>
+                <div class="acciones">
+                    <button onclick="window.print()">Imprimir</button>
+                    <a class="${enlaceCorreo ? "" : "inactivo"}" href="${enlaceCorreo || "#"}">Enviar por correo</a>
+                </div>
+                <header>
+                    <div>
+                        <h1>Isa Boutique</h1>
+                        <p>Moda femenina</p>
+                    </div>
+                    <div>
+                        <h2>Factura ${limpiarTextoBD(factura.numero_factura)}</h2>
+                        <p>Venta: ${factura.id_venta}</p>
+                        <p>Fecha: ${new Date(factura.fecha_factura).toLocaleString()}</p>
+                        <p>Estado: ${limpiarTextoBD(factura.estado_factura)}</p>
+                    </div>
+                </header>
+
+                <section>
+                    <h2>Cliente</h2>
+                    <p>${limpiarTextoBD(factura.cliente)}</p>
+                    <p>Teléfono: ${limpiarTextoBD(factura.telefono)}</p>
+                    <p>Correo: ${limpiarTextoBD(factura.correo || "-")}</p>
+                    <p>Canal: ${etiquetaCanalVenta(factura.canal_venta)} | Pago: ${limpiarTextoBD(factura.medio_pago)}</p>
+                    <p>Atendido por: ${limpiarTextoBD(factura.atendido_por)}</p>
+                </section>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Producto</th>
+                            <th>Color</th>
+                            <th>Talla</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>IVA</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>${filas}</tbody>
+                </table>
+
+                <div class="totales">
+                    <div><span>Subtotal bruto</span><strong>${formatoPrecioBD(factura.subtotal)}</strong></div>
+                    <div><span>Descuento</span><strong>${formatoPrecioBD(factura.descuento)}</strong></div>
+                    <div><span>Base gravable</span><strong>${formatoPrecioBD(factura.base_gravable)}</strong></div>
+                    <div><span>IVA (${Number(factura.tarifa_iva || 19).toFixed(0)}%)</span><strong>${formatoPrecioBD(factura.iva)}</strong></div>
+                    <div class="total"><span>Total</span><strong>${formatoPrecioBD(factura.total)}</strong></div>
+                </div>
+            </body>
+            </html>
+        `);
+        ventana.document.close();
     }
 
     async function actualizarEstadoVentaBD(idVenta, estado) {
@@ -1860,6 +2378,7 @@
 
             if (!resultado.error) {
                 cargarHistorialVentasBD();
+                cargarFacturasBD();
                 cargarReportesBD();
                 cargarInventarioBD();
                 cargarInicioAdmin();
@@ -2170,7 +2689,7 @@
             if (productos.error) {
                 tabla.innerHTML = `
                 <tr>
-                    <td colspan="11">${productos.mensaje}</td>
+                    <td colspan="12">${productos.mensaje}</td>
                 </tr>
                 `;
                 return;
@@ -2180,6 +2699,7 @@
                 const codigo = producto.codigo ? producto.codigo.toLowerCase() : "";
                 const nombre = producto.nombre ? producto.nombre.toLowerCase() : "";
                 const marca = producto.marca ? producto.marca.toLowerCase() : "";
+                const color = textoColoresBD(producto).toLowerCase();
                 const categoria = producto.categoria ? producto.categoria.toLowerCase() : "";
                 const estado = producto.estado ? producto.estado.toLowerCase() : "";
                 
@@ -2187,6 +2707,7 @@
                     codigo.includes(textoBusqueda) ||
                     nombre.includes(textoBusqueda) ||
                     marca.includes(textoBusqueda) ||
+                    color.includes(textoBusqueda) ||
                     categoria.includes(textoBusqueda) ||
                     estado.includes(textoBusqueda)
                 );
@@ -2195,7 +2716,7 @@
             if (productosFiltrados.length === 0) {
                 tabla.innerHTML = `
                 <tr>
-                    <td colspan="11">No se encontraron productos</td>
+                    <td colspan="12">No se encontraron productos</td>
                 </tr>
                 `;
                 return;
@@ -2226,6 +2747,7 @@
                     <td>${producto.codigo}</td>
                     <td>${producto.nombre}</td>
                     <td>${producto.marca}</td>
+                    <td>${textoColoresBD(producto)}</td>
                     <td>${producto.categoria}</td>
                     <td>${formatoPrecioBD(producto.precio)}</td>
                     <td>${formatoPrecioBD(producto.costo_unitario || 0)}</td>
@@ -2241,7 +2763,7 @@
         } catch (error) {
             tabla.innerHTML = `
             <tr>
-                <td colspan="11">Error al cargar inventario desde PostgreSQL</td>
+                <td colspan="12">Error al cargar inventario desde PostgreSQL</td>
             </tr>
             `;
             console.error(error);
@@ -2263,20 +2785,20 @@
 
     function etiquetaCanalVenta(canal) {
         const etiquetas = {
-            tienda_fisica: "Tienda fisica",
+            tienda_fisica: "Tienda física",
             pagina_web: "Página web",
             whatsapp: "WhatsApp",
             instagram: "Instagram"
         };
 
-        return etiquetas[canal] || "Tienda fisica";
+        return etiquetas[canal] || "Tienda física";
     }
 
     function etiquetaEntregaVenta(entrega) {
         const etiquetas = {
             recoger_tienda: "Recoge en tienda",
-            envio_local: "Envio local",
-            envio_nacional: "Envio nacional"
+            envio_local: "Envío local",
+            envio_nacional: "Envío nacional"
         };
 
         return etiquetas[entrega] || "Recoge en tienda";
@@ -2551,7 +3073,7 @@
         });
 
         if (!categoria) {
-            alert("Categoria no encontrada.");
+            alert("Categoría no encontrada.");
             return;
         }
 
@@ -3381,6 +3903,42 @@
         return [];
     }
 
+    function leerColoresBD(colores) {
+        if (Array.isArray(colores)) return colores;
+
+        if (typeof colores === "string" && colores.trim() !== "") {
+            try {
+                return JSON.parse(colores);
+            } catch (error) {
+                return [];
+            }
+        }
+
+        return [];
+    }
+
+    function obtenerColorSeleccionadoAdmin(producto) {
+        const selectorColor = document.getElementById("ventaAdminColor");
+        const idColor = Number(selectorColor?.value || 0);
+        const colores = leerColoresBD(producto ? producto.colores : []);
+
+        return colores.find(function(item) {
+            return Number(item.id_producto_color) === idColor;
+        }) || null;
+    }
+
+    function textoColoresBD(producto) {
+        const colores = leerColoresBD(producto ? producto.colores : []);
+
+        if (colores.length === 0) {
+            return producto && producto.color ? producto.color : "-";
+        }
+
+        return colores.map(function(item) {
+            return item.color;
+        }).join(", ");
+    }
+
     function textoTallasBD(tallas) {
         const lista = leerTallasBD(tallas);
 
@@ -3415,6 +3973,45 @@
         });
 
         selector.value = seleccionado;
+        llenarColoresVentaAdmin();
+    }
+
+    function llenarColoresVentaAdmin() {
+        const idProducto = Number(document.getElementById("ventaAdminProducto")?.value || 0);
+        const selector = document.getElementById("ventaAdminColor");
+        const producto = productosVentaAdmin.find(function(item) {
+            return Number(item.id_producto) === idProducto;
+        });
+
+        if (!selector) return;
+
+        selector.innerHTML = '<option value="">Seleccionar color</option>';
+
+        if (!producto) {
+            llenarTallasVentaAdmin();
+            return;
+        }
+
+        const colores = leerColoresBD(producto.colores);
+
+        if (colores.length === 0 && producto.color) {
+            const opcion = document.createElement("option");
+            opcion.value = "";
+            opcion.textContent = producto.color;
+            selector.appendChild(opcion);
+        }
+
+        colores.forEach(function(item) {
+            const opcion = document.createElement("option");
+            opcion.value = item.id_producto_color;
+            opcion.textContent = item.color;
+            selector.appendChild(opcion);
+        });
+
+        if (selector.options.length === 2) {
+            selector.selectedIndex = 1;
+        }
+
         llenarTallasVentaAdmin();
     }
 
@@ -3434,7 +4031,10 @@
             return;
         }
 
-        leerTallasBD(producto.tallas)
+        const colorSeleccionado = obtenerColorSeleccionadoAdmin(producto);
+        const tallas = colorSeleccionado ? colorSeleccionado.tallas : producto.tallas;
+
+        leerTallasBD(tallas)
             .filter(function(item) {
                 return Number(item.cantidad) > 0;
             })
@@ -3455,19 +4055,31 @@
     function actualizarResumenVentaAdmin() {
         const idProducto = Number(document.getElementById("ventaAdminProducto")?.value || 0);
         const cantidad = Number(document.getElementById("ventaAdminCantidad")?.value || 0);
+        const descuentoTipo = document.getElementById("ventaAdminDescuentoTipo")?.value || "valor";
+        const descuentoValor = Number(document.getElementById("ventaAdminDescuentoValor")?.value || 0);
         const talla = document.getElementById("ventaAdminTalla")?.value || "";
         const producto = productosVentaAdmin.find(function(item) {
             return Number(item.id_producto) === idProducto;
         });
-        const tallaSeleccionada = leerTallasBD(producto ? producto.tallas : []).find(function(item) {
+        const colorSeleccionado = obtenerColorSeleccionadoAdmin(producto);
+        const tallas = colorSeleccionado ? colorSeleccionado.tallas : (producto ? producto.tallas : []);
+        const tallaSeleccionada = leerTallasBD(tallas).find(function(item) {
             return item.talla === talla;
         });
 
         document.getElementById("ventaAdminNombreProducto").textContent = producto ? producto.nombre : "Sin producto seleccionado";
-        document.getElementById("ventaAdminCodigoProducto").textContent = "Codigo: " + (producto ? producto.codigo : "-");
-        document.getElementById("ventaAdminTallasProducto").textContent = "Tallas disponibles: " + (producto ? textoTallasBD(producto.tallas) : "-");
+        document.getElementById("ventaAdminCodigoProducto").textContent = "Código: " + (producto ? producto.codigo : "-");
+        document.getElementById("ventaAdminColorProducto").textContent = "Color: " + (colorSeleccionado ? colorSeleccionado.color : (producto ? textoColoresBD(producto) : "-"));
+        document.getElementById("ventaAdminTallasProducto").textContent = "Tallas disponibles: " + (producto ? textoTallasBD(tallas) : "-");
         document.getElementById("ventaAdminStockProducto").textContent = "Stock talla: " + (tallaSeleccionada ? tallaSeleccionada.cantidad : "-");
-        document.getElementById("ventaAdminTotal").textContent = formatoPrecioBD(producto ? Number(producto.precio) * cantidad : 0);
+        const bruto = producto ? Number(producto.precio) * cantidad : 0;
+        let descuento = descuentoTipo === "porcentaje" ? bruto * (descuentoValor / 100) : descuentoValor;
+        descuento = Math.min(Math.max(descuento, 0), bruto);
+        const total = bruto - descuento;
+        const base = total / 1.19;
+        const iva = total - base;
+
+        document.getElementById("ventaAdminTotal").textContent = formatoPrecioBD(total) + " | IVA incluido: " + formatoPrecioBD(iva);
     }
 
     async function cargarProductosVentaAdmin() {
@@ -3496,10 +4108,15 @@
         datos.append("id_producto", document.getElementById("ventaAdminProducto").value);
         datos.append("cliente", document.getElementById("ventaAdminCliente").value.trim());
         datos.append("telefono", document.getElementById("ventaAdminTelefono").value.trim());
+        datos.append("correo", document.getElementById("ventaAdminCorreo").value.trim());
         datos.append("cantidad", document.getElementById("ventaAdminCantidad").value);
+        datos.append("descuento_tipo", document.getElementById("ventaAdminDescuentoTipo").value);
+        datos.append("descuento_valor", document.getElementById("ventaAdminDescuentoValor").value);
         datos.append("medio_pago", document.getElementById("ventaAdminMedioPago").value);
         datos.append("canal_venta", document.getElementById("ventaAdminCanal").value);
         datos.append("tipo_entrega", document.getElementById("ventaAdminEntrega").value);
+        datos.append("id_producto_color", document.getElementById("ventaAdminColor")?.value || "");
+        datos.append("color", document.getElementById("ventaAdminColor")?.selectedOptions[0]?.textContent || "");
         datos.append("talla", document.getElementById("ventaAdminTalla").value);
 
         mensaje.textContent = "";
@@ -3516,13 +4133,20 @@
                 return;
             }
 
-            alert(resultado.mensaje + "\nTotal: " + formatoPrecioBD(resultado.total));
+            const textoFactura = resultado.factura ? "\nFactura: " + resultado.factura.numero_factura : "";
+            alert(resultado.mensaje + "\nTotal: " + formatoPrecioBD(resultado.total) + textoFactura);
+
+            if (resultado.factura) {
+                abrirFacturaBD(resultado.id_venta);
+            }
+
             document.getElementById("formVentaAdmin").reset();
             document.getElementById("ventaAdminCantidad").value = 1;
 
             await cargarProductosVentaAdmin();
             cargarInventarioBD();
             cargarHistorialVentasBD();
+            cargarFacturasBD();
             cargarClientesBD();
             cargarReportesBD();
             cargarMovimientosBD();
@@ -3579,6 +4203,7 @@
             
             cargarInventarioBD();
             cargarHistorialVentasBD();
+            cargarFacturasBD();
             cargarReportesBD();
             cargarMovimientosBD();
         
@@ -3658,6 +4283,7 @@
         cargarInventarioBD();
         cargarProductosVentaAdmin();
         cargarHistorialVentasBD();
+        cargarFacturasBD();
         cargarClientesBD();
         cargarReportesBD();
         cargarMovimientosBD();
@@ -3682,6 +4308,12 @@
     
     if (buscadorBD) {
         buscadorBD.addEventListener("input", cargarInventarioBD);
+    }
+
+    const buscadorFacturas = document.getElementById("buscadorFacturas");
+
+    if (buscadorFacturas) {
+        buscadorFacturas.addEventListener("input", cargarFacturasBD);
     }
 
     const buscadorClientes = document.getElementById("buscadorClientes");
@@ -3759,9 +4391,12 @@
         formVentaAdmin.addEventListener("submit", registrarVentaAdmin);
     }
 
-    document.getElementById("ventaAdminProducto")?.addEventListener("change", llenarTallasVentaAdmin);
+    document.getElementById("ventaAdminProducto")?.addEventListener("change", llenarColoresVentaAdmin);
+    document.getElementById("ventaAdminColor")?.addEventListener("change", llenarTallasVentaAdmin);
     document.getElementById("ventaAdminTalla")?.addEventListener("change", actualizarResumenVentaAdmin);
     document.getElementById("ventaAdminCantidad")?.addEventListener("input", actualizarResumenVentaAdmin);
+    document.getElementById("ventaAdminDescuentoTipo")?.addEventListener("change", actualizarResumenVentaAdmin);
+    document.getElementById("ventaAdminDescuentoValor")?.addEventListener("input", actualizarResumenVentaAdmin);
 
     async function cargarCambiosPrecioBD() {
         const tabla = document.getElementById("tablaCambiosPrecio");

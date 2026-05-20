@@ -28,6 +28,7 @@ try {
             v.tipo_entrega,
             v.estado,
             v.fecha,
+            f.numero_factura,
             NULL AS motivo
         FROM venta v
         INNER JOIN cliente cl
@@ -36,6 +37,8 @@ try {
             ON v.id_venta = dv.id_venta
         INNER JOIN producto p
             ON dv.id_producto = p.id_producto
+        LEFT JOIN factura f
+            ON v.id_venta = f.id_venta
 
         UNION ALL
 
@@ -58,6 +61,7 @@ try {
             v.tipo_entrega,
             v.estado,
             d.fecha,
+            f.numero_factura,
             d.motivo
         FROM devolucion d
         INNER JOIN cliente cl
@@ -68,6 +72,8 @@ try {
             ON d.id_devolucion = dd.id_devolucion
         INNER JOIN producto p
             ON dd.id_producto = p.id_producto
+        LEFT JOIN factura f
+            ON v.id_venta = f.id_venta
 
         ORDER BY fecha DESC
     ";

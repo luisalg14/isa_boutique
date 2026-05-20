@@ -2,6 +2,7 @@
 
 require_once "conexion.php";
 require_once "auth_guard.php";
+require_once "factura_util.php";
 
 header("Content-Type: application/json; charset=UTF-8");
 
@@ -62,7 +63,7 @@ try {
 
     if ($estadoNuevo === "cancelada") {
         $consultaDetalles = $conexion->prepare("
-            SELECT id_producto, talla, cantidad
+            SELECT id_producto, id_producto_color, talla, cantidad
             FROM detalle_venta
             WHERE id_venta = :id_venta
         ");
@@ -85,6 +86,13 @@ try {
             AND UPPER(talla) = UPPER(:talla)
         ");
 
+        $actualizarTallaColor = $conexion->prepare("
+            UPDATE producto_color_talla
+            SET cantidad = cantidad + :cantidad
+            WHERE id_producto_color = :id_producto_color
+            AND UPPER(talla) = UPPER(:talla)
+        ");
+
         foreach ($detalles as $detalle) {
             $actualizarProducto->execute([
                 ":cantidad" => $detalle["cantidad"],
@@ -92,6 +100,14 @@ try {
             ]);
 
             if ($detalle["talla"] !== null && $detalle["talla"] !== "") {
+                if (!empty($detalle["id_producto_color"])) {
+                    $actualizarTallaColor->execute([
+                        ":cantidad" => $detalle["cantidad"],
+                        ":id_producto_color" => $detalle["id_producto_color"],
+                        ":talla" => $detalle["talla"]
+                    ]);
+                }
+
                 $actualizarTalla->execute([
                     ":cantidad" => $detalle["cantidad"],
                     ":id_producto" => $detalle["id_producto"],
@@ -111,13 +127,19 @@ try {
         ":id_venta" => $idVenta
     ]);
 
+    $factura = null;
+    if ($estadoNuevo === "pagada") {
+        $factura = asegurar_factura_venta($conexion, $idVenta);
+    }
+
     $conexion->commit();
 
     echo json_encode([
         "error" => false,
         "mensaje" => $estadoNuevo === "pagada"
             ? "Pedido confirmado como pagado"
-            : "Pedido cancelado y stock restaurado"
+            : "Pedido cancelado y stock restaurado",
+        "factura" => $factura
     ], JSON_UNESCAPED_UNICODE);
 
 } catch (PDOException $e) {

@@ -42,6 +42,7 @@ try {
             v.id_venta,
             v.id_cliente,
             dv.id_producto,
+            dv.id_producto_color,
             dv.talla,
             dv.cantidad AS cantidad_vendida,
             dv.precio_unitario,
@@ -106,6 +107,7 @@ try {
     $subtotalDevuelto = $precioUnitario * $cantidad;
     $subtotalCostoDevuelto = $costoUnitario * $cantidad;
     $talla = $venta["talla"];
+    $idProductoColor = intval($venta["id_producto_color"] ?? 0);
 
     // Registrar devolución
     $sqlDevolucion = "
@@ -174,6 +176,22 @@ try {
     ]);
 
     if ($talla !== null && $talla !== "") {
+        if ($idProductoColor > 0) {
+            $sqlActualizarTallaColor = "
+                UPDATE producto_color_talla
+                SET cantidad = cantidad + :cantidad
+                WHERE id_producto_color = :id_producto_color
+                AND UPPER(talla) = UPPER(:talla)
+            ";
+
+            $consultaActualizarTallaColor = $conexion->prepare($sqlActualizarTallaColor);
+            $consultaActualizarTallaColor->execute([
+                ":cantidad" => $cantidad,
+                ":id_producto_color" => $idProductoColor,
+                ":talla" => $talla
+            ]);
+        }
+
         $sqlActualizarTalla = "
             UPDATE producto_talla
             SET cantidad = cantidad + :cantidad

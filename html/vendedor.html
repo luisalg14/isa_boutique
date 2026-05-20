@@ -50,7 +50,7 @@
                 <section id="panel-venta" class="admin-panel activo">
                     <div class="vendedor-panel-header">
                         <div>
-                            <span>Operacion</span>
+                            <span>Operación</span>
                             <h2>Registrar venta</h2>
                         </div>
                         <p>Selecciona un producto disponible y registra los datos del comprador.</p>
@@ -62,6 +62,13 @@
                                 <label>Producto</label>
                                 <select id="ventaProducto" required>
                                     <option value="">Seleccionar producto</option>
+                                </select>
+                            </div>
+
+                            <div class="campo">
+                                <label>Color</label>
+                                <select id="ventaColor" required>
+                                    <option value="">Seleccionar color</option>
                                 </select>
                             </div>
 
@@ -78,8 +85,13 @@
                             </div>
 
                             <div class="campo">
-                                <label>Telefono</label>
-                                <input id="ventaTelefono" placeholder="Telefono o WhatsApp" required>
+                                <label>Teléfono</label>
+                                <input id="ventaTelefono" placeholder="Teléfono o WhatsApp" required>
+                            </div>
+
+                            <div class="campo">
+                                <label>Correo</label>
+                                <input id="ventaCorreo" type="email" placeholder="correo@cliente.com">
                             </div>
 
                             <div class="campo">
@@ -88,19 +100,30 @@
                             </div>
 
                             <div class="campo">
+                                <label>Descuento</label>
+                                <div class="discount-row">
+                                    <select id="ventaDescuentoTipo">
+                                        <option value="valor">$</option>
+                                        <option value="porcentaje">%</option>
+                                    </select>
+                                    <input id="ventaDescuentoValor" type="number" min="0" value="0" placeholder="0">
+                                </div>
+                            </div>
+
+                            <div class="campo">
                                 <label>Medio de pago</label>
                                 <select id="ventaMedioPago" required>
                                     <option value="efectivo">Efectivo</option>
                                     <option value="transferencia">Transferencia</option>
-                                    <option value="tarjeta_debito">Tarjeta debito</option>
-                                    <option value="tarjeta_credito">Tarjeta credito</option>
+                                    <option value="tarjeta_debito">Tarjeta débito</option>
+                                    <option value="tarjeta_credito">Tarjeta crédito</option>
                                 </select>
                             </div>
 
                             <div class="campo">
                                 <label>Canal de venta</label>
                                 <select id="ventaCanal" required>
-                                    <option value="tienda_fisica">Tienda fisica</option>
+                                    <option value="tienda_fisica">Tienda física</option>
                                     <option value="whatsapp">WhatsApp</option>
                                     <option value="instagram">Instagram</option>
                                     <option value="pagina_web">Página web</option>
@@ -111,8 +134,8 @@
                                 <label>Entrega</label>
                                 <select id="ventaEntrega" required>
                                     <option value="recoger_tienda">Recoge en tienda</option>
-                                    <option value="envio_local">Envio local</option>
-                                    <option value="envio_nacional">Envio nacional</option>
+                                    <option value="envio_local">Envío local</option>
+                                    <option value="envio_nacional">Envío nacional</option>
                                 </select>
                             </div>
 
@@ -123,7 +146,8 @@
                         <aside class="venta-resumen">
                             <span>Detalle</span>
                             <h3 id="ventaNombreProducto">Sin producto seleccionado</h3>
-                            <p id="ventaCodigoProducto">Codigo: -</p>
+                            <p id="ventaCodigoProducto">Código: -</p>
+                            <p id="ventaColorProducto">Color: -</p>
                             <p id="ventaTallasProducto">Tallas disponibles: -</p>
                             <p id="ventaStockProducto">Stock: -</p>
                             <strong id="ventaTotal">$0</strong>
@@ -135,16 +159,17 @@
                     <h2>Inventario disponible</h2>
 
                     <div class="filtros">
-                        <input type="text" id="buscadorVendedor" placeholder="Buscar producto, código, marca o categoría...">
+                        <input type="text" id="buscadorVendedor" placeholder="Buscar producto, código, marca, color o categoría...">
                     </div>
 
                     <table class="tabla-inventario">
                         <thead>
                             <tr>
-                                <th>Codigo</th>
+                                <th>Código</th>
                                 <th>Producto</th>
                                 <th>Marca</th>
-                                <th>Categoria</th>
+                                <th>Color</th>
+                                <th>Categoría</th>
                                 <th>Precio</th>
                                 <th>Cantidad</th>
                                 <th>Tallas</th>
@@ -162,9 +187,9 @@
                         <thead>
                             <tr>
                                 <th>Cliente</th>
-                                <th>Telefono</th>
+                                <th>Teléfono</th>
                                 <th>Tipo</th>
-                                <th>Codigo</th>
+                                <th>Código</th>
                                 <th>Producto</th>
                                 <th>Talla</th>
                                 <th>Cantidad</th>
@@ -174,7 +199,7 @@
                                 <th>Entrega</th>
                                 <th>Estado</th>
                                 <th>Fecha</th>
-                                <th>Accion</th>
+                                <th>Acción</th>
                             </tr>
                         </thead>
                         <tbody id="tablaHistorialVendedor"></tbody>
@@ -211,7 +236,7 @@
                         </div>
 
                         <div class="reporte-card">
-                            <h4>Producto mas vendido</h4>
+                            <h4>Producto más vendido</h4>
                             <p id="productoTop">-</p>
                         </div>
                     </div>

@@ -73,6 +73,13 @@
 
             <div class="modal-body">
                 <div class="campo">
+                    <label for="compraColor">Color</label>
+                    <select id="compraColor" required>
+                        <option value="">Seleccionar color</option>
+                    </select>
+                </div>
+
+                <div class="campo">
                     <label for="compraTalla">Talla</label>
                     <input id="compraTalla" type="hidden" required>
                     <div id="compraTallaOpciones" class="size-options public-size-options"></div>
@@ -89,8 +96,13 @@
                 </div>
 
                 <div class="campo">
-                    <label for="compraTelefono">Telefono</label>
+                    <label for="compraTelefono">Teléfono</label>
                     <input id="compraTelefono" required>
+                </div>
+
+                <div class="campo">
+                    <label for="compraCorreo">Correo</label>
+                    <input id="compraCorreo" type="email" placeholder="correo@cliente.com">
                 </div>
 
                 <div class="campo">
@@ -144,6 +156,11 @@
         </div>
     </div>
 
+    <div id="modalImagenProducto" class="modal-imagen-producto" aria-hidden="true">
+        <button type="button" id="btnCerrarImagenProducto" aria-label="Cerrar imagen">&times;</button>
+        <img id="imagenProductoGrande" src="" alt="Producto">
+    </div>
+
     <script>
         let productoSeleccionado = null;
         let productosCatalogo = [];
@@ -166,6 +183,48 @@
             if (ruta.startsWith("http") || ruta.startsWith("../")) return ruta;
             if (ruta.startsWith("img/")) return "../" + ruta;
             return ruta;
+        }
+
+        function leerImagenesProducto(imagenes) {
+            if (Array.isArray(imagenes)) return imagenes;
+
+            if (typeof imagenes === "string" && imagenes.trim() !== "") {
+                try {
+                    return JSON.parse(imagenes);
+                } catch (error) {
+                    return [];
+                }
+            }
+
+            return [];
+        }
+
+        function imagenPrincipalProducto(producto) {
+            const imagenes = leerImagenesProducto(producto.imagenes);
+            const principal = imagenes.find(function(item) {
+                return item.principal === true || item.principal === "t" || item.principal === 1;
+            });
+
+            return (principal && principal.ruta) || (imagenes[0] && imagenes[0].ruta) || producto.imagen;
+        }
+
+        function abrirImagenProducto(imagen) {
+            const modal = document.getElementById("modalImagenProducto");
+            const imagenGrande = document.getElementById("imagenProductoGrande");
+
+            imagenGrande.src = imagen.src;
+            imagenGrande.alt = imagen.alt || "Producto Isa Boutique";
+            modal.classList.add("activo");
+            modal.setAttribute("aria-hidden", "false");
+        }
+
+        function cerrarImagenProducto() {
+            const modal = document.getElementById("modalImagenProducto");
+            const imagenGrande = document.getElementById("imagenProductoGrande");
+
+            modal.classList.remove("activo");
+            modal.setAttribute("aria-hidden", "true");
+            imagenGrande.src = "";
         }
 
         function formatearCategoria(categoria) {
@@ -194,6 +253,42 @@
             }
 
             return [];
+        }
+
+        function leerColores(colores) {
+            if (Array.isArray(colores)) return colores;
+
+            if (typeof colores === "string" && colores.trim() !== "") {
+                try {
+                    return JSON.parse(colores);
+                } catch (error) {
+                    return [];
+                }
+            }
+
+            return [];
+        }
+
+        function obtenerColorCompra(producto) {
+            const selector = document.getElementById("compraColor");
+            const idColor = Number(selector?.value || 0);
+            const colores = leerColores(producto ? producto.colores : []);
+
+            return colores.find(function(item) {
+                return Number(item.id_producto_color) === idColor;
+            }) || null;
+        }
+
+        function textoColores(producto) {
+            const colores = leerColores(producto ? producto.colores : []);
+
+            if (colores.length === 0) {
+                return producto && producto.color ? producto.color : "";
+            }
+
+            return colores.map(function(item) {
+                return item.color;
+            }).join(", ");
         }
 
         function textoTallas(tallas) {
@@ -249,7 +344,7 @@
                 fila.innerHTML =
                     '<div>' +
                         '<strong>' + item.nombre + '</strong>' +
-                        '<p>Talla: ' + item.talla + ' | Cantidad: ' + item.cantidad + '</p>' +
+                        '<p>Color: ' + (item.color || '-') + ' | Talla: ' + item.talla + ' | Cantidad: ' + item.cantidad + '</p>' +
                         '<p>' + formatoPrecio(Number(item.precio) * Number(item.cantidad)) + '</p>' +
                     '</div>' +
                     '<button type="button">Quitar</button>';
@@ -279,13 +374,43 @@
             modal.setAttribute("aria-hidden", "true");
         }
 
+        function llenarColoresCompra(producto) {
+            const selector = document.getElementById("compraColor");
+            selector.innerHTML = '<option value="">Seleccionar color</option>';
+
+            const colores = leerColores(producto.colores);
+
+            if (colores.length === 0 && producto.color) {
+                const opcion = document.createElement("option");
+                opcion.value = "";
+                opcion.textContent = producto.color;
+                selector.appendChild(opcion);
+            }
+
+            colores.forEach(function(item) {
+                const opcion = document.createElement("option");
+                opcion.value = item.id_producto_color;
+                opcion.textContent = item.color;
+                selector.appendChild(opcion);
+            });
+
+            if (selector.options.length === 2) {
+                selector.selectedIndex = 1;
+            }
+
+            llenarTallasCompra(producto);
+        }
+
         function llenarTallasCompra(producto) {
             const input = document.getElementById("compraTalla");
             const contenedor = document.getElementById("compraTallaOpciones");
             input.value = "";
             contenedor.innerHTML = "";
 
-            leerTallas(producto.tallas)
+            const colorSeleccionado = obtenerColorCompra(producto);
+            const tallas = colorSeleccionado ? colorSeleccionado.tallas : producto.tallas;
+
+            leerTallas(tallas)
                 .forEach(function(item) {
                     const cantidad = Number(item.cantidad);
                     const boton = document.createElement("button");
@@ -331,9 +456,10 @@
                 producto.nombre + " - " + formatoPrecio(producto.precio) + " | Disponibles: " + producto.cantidad;
             document.getElementById("compraCantidad").value = "1";
             document.getElementById("compraCantidad").max = producto.cantidad;
-            llenarTallasCompra(producto);
+            llenarColoresCompra(producto);
             document.getElementById("compraCliente").value = "";
             document.getElementById("compraTelefono").value = "";
+            document.getElementById("compraCorreo").value = "";
             document.getElementById("compraMedioPago").value = "";
             document.getElementById("mensajeCompra").textContent = "";
 
@@ -356,8 +482,10 @@
 
             const cantidad = parseInt(document.getElementById("compraCantidad").value);
             const talla = document.getElementById("compraTalla").value;
+            const colorSeleccionado = obtenerColorCompra(productoSeleccionado);
             const cliente = document.getElementById("compraCliente").value.trim();
             const telefono = document.getElementById("compraTelefono").value.trim();
+            const correo = document.getElementById("compraCorreo").value.trim();
             const medioPago = document.getElementById("compraMedioPago").value;
             const tipoEntrega = document.getElementById("compraEntrega").value;
             const mensaje = document.getElementById("mensajeCompra");
@@ -372,7 +500,8 @@
                 return;
             }
 
-            const tallaSeleccionada = leerTallas(productoSeleccionado.tallas).find(function(item) {
+            const tallas = colorSeleccionado ? colorSeleccionado.tallas : productoSeleccionado.tallas;
+            const tallaSeleccionada = leerTallas(tallas).find(function(item) {
                 return item.talla === talla;
             });
 
@@ -388,10 +517,13 @@
 
             const datos = new FormData();
             datos.append("id_producto", productoSeleccionado.id_producto);
+            datos.append("id_producto_color", colorSeleccionado ? colorSeleccionado.id_producto_color : "");
+            datos.append("color", colorSeleccionado ? colorSeleccionado.color : document.getElementById("compraColor").selectedOptions[0]?.textContent || "");
             datos.append("talla", talla);
             datos.append("cantidad", cantidad);
             datos.append("cliente", cliente);
             datos.append("telefono", telefono);
+            datos.append("correo", correo);
             datos.append("medio_pago", medioPago);
             datos.append("canal_venta", "pagina_web");
             datos.append("tipo_entrega", tipoEntrega);
@@ -412,7 +544,7 @@
                 const idProductoComprado = productoSeleccionado.id_producto;
                 alert(resultado.mensaje + "\nEstado: " + resultado.estado + "\nTotal: " + formatoPrecio(resultado.total));
                 carrito = carrito.filter(function(item) {
-                    return !(Number(item.id_producto) === Number(idProductoComprado) && item.talla === talla);
+                    return !(Number(item.id_producto) === Number(idProductoComprado) && item.talla === talla && String(item.id_producto_color || "") === String(colorSeleccionado ? colorSeleccionado.id_producto_color : ""));
                 });
                 guardarCarrito();
                 cerrarModalCompra();
@@ -428,6 +560,7 @@
 
             const cantidad = parseInt(document.getElementById("compraCantidad").value);
             const talla = document.getElementById("compraTalla").value;
+            const colorSeleccionado = obtenerColorCompra(productoSeleccionado);
             const mensaje = document.getElementById("mensajeCompra");
 
             if (!talla) {
@@ -442,9 +575,11 @@
 
             carrito.push({
                 id_producto: productoSeleccionado.id_producto,
+                id_producto_color: colorSeleccionado ? colorSeleccionado.id_producto_color : "",
                 codigo: productoSeleccionado.codigo,
                 nombre: productoSeleccionado.nombre,
                 precio: productoSeleccionado.precio,
+                color: colorSeleccionado ? colorSeleccionado.color : document.getElementById("compraColor").selectedOptions[0]?.textContent || "",
                 talla: talla,
                 cantidad: cantidad
             });
@@ -553,13 +688,13 @@
                 card.className = "card producto-card";
                 card.innerHTML =
                     '<div class="producto-imagen-wrap">' +
-                        '<img src="' + rutaImagenProducto(producto.imagen) + '" alt="' + producto.nombre + '">' +
+                        '<img class="producto-img-click" src="' + rutaImagenProducto(imagenPrincipalProducto(producto)) + '" alt="' + producto.nombre + '">' +
                         '<span class="producto-badge ' + (agotado ? "agotado" : "disponible") + '">' + estadoTexto + '</span>' +
                     '</div>' +
                     '<div class="producto-card-body">' +
                         '<p class="producto-codigo">Codigo: ' + producto.codigo + '</p>' +
                         '<h3>' + producto.nombre + '</h3>' +
-                        '<p class="producto-meta">' + producto.marca + '  -  ' + formatearCategoria(producto.categoria) + '</p>' +
+                        '<p class="producto-meta">' + producto.marca + '  -  ' + formatearCategoria(producto.categoria) + (textoColores(producto) ? '  -  ' + textoColores(producto) : '') + '</p>' +
                         '<p class="producto-precio">' + formatoPrecio(producto.precio) + '</p>' +
                         '<p class="producto-stock">' + estadoTexto + '</p>' +
                         '<p class="producto-stock">' + textoTallas(producto.tallas) + '</p>' +
@@ -600,7 +735,13 @@
         document.getElementById("btnCancelarCompra").addEventListener("click", cerrarModalCompra);
         document.getElementById("btnAgregarCarrito").addEventListener("click", agregarProductoAlCarrito);
         document.getElementById("btnAbrirCarrito").addEventListener("click", abrirCarrito);
+        document.getElementById("compraColor").addEventListener("change", function() {
+            if (productoSeleccionado) {
+                llenarTallasCompra(productoSeleccionado);
+            }
+        });
         document.getElementById("btnCerrarCarrito").addEventListener("click", cerrarCarrito);
+        document.getElementById("btnCerrarImagenProducto").addEventListener("click", cerrarImagenProducto);
         document.getElementById("btnVaciarCarrito").addEventListener("click", function() {
             carrito = [];
             guardarCarrito();
@@ -614,6 +755,17 @@
         document.getElementById("modalCarrito").addEventListener("click", function(evento) {
             if (evento.target.id === "modalCarrito") {
                 cerrarCarrito();
+            }
+        });
+        document.getElementById("modalImagenProducto").addEventListener("click", function(evento) {
+            if (evento.target.id === "modalImagenProducto") {
+                cerrarImagenProducto();
+            }
+        });
+        contenedor.addEventListener("click", function(evento) {
+            const imagen = evento.target.closest(".producto-img-click");
+            if (imagen) {
+                abrirImagenProducto(imagen);
             }
         });
 
