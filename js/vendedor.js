@@ -20,7 +20,9 @@ function activarPanelVendedor(idPanel) {
 }
 
 function formatoPrecioVendedor(valor) {
-    return "$" + Number(valor || 0).toLocaleString("es-CO");
+    return "$" + Number(valor || 0).toLocaleString("es-CO", {
+        maximumFractionDigits: 0
+    }) + " COP";
 }
 
 function limpiarTextoVendedor(valor) {
@@ -101,6 +103,89 @@ function llenarSelectorProductos() {
     llenarSelectorColores();
 }
 
+function obtenerCodigoDesdeBarrasVendedor(valor) {
+    const texto = String(valor || "").trim();
+    if (!texto) return "";
+
+    const partes = texto.split("|");
+    return partes[partes.length - 1].trim().toUpperCase();
+}
+
+function buscarVariantePorCodigoVendedor(codigo) {
+    const codigoNormalizado = String(codigo || "").toUpperCase();
+
+    for (const producto of productosVendedor) {
+        const colores = leerColoresVendedor(producto.colores);
+
+        for (const color of colores) {
+            const tallas = leerTallasVendedor(color.tallas);
+
+            for (const talla of tallas) {
+                if (String(talla.codigo_barras || "").toUpperCase() === codigoNormalizado) {
+                    return {
+                        producto,
+                        color,
+                        talla
+                    };
+                }
+            }
+        }
+    }
+
+    return null;
+}
+
+function seleccionarProductoVentaPorCodigo(codigoLeido) {
+    const codigo = obtenerCodigoDesdeBarrasVendedor(codigoLeido);
+    const mensaje = document.getElementById("mensajeVenta");
+    const campoCodigo = document.getElementById("ventaCodigoBarras");
+    const selectorProducto = document.getElementById("ventaProducto");
+    const selectorColor = document.getElementById("ventaColor");
+    const selectorTalla = document.getElementById("ventaTalla");
+
+    if (campoCodigo) campoCodigo.value = codigo;
+
+    const variante = buscarVariantePorCodigoVendedor(codigo);
+
+    if (variante) {
+        selectorProducto.value = variante.producto.id_producto;
+        llenarSelectorColores();
+        if (selectorColor) selectorColor.value = variante.color.id_producto_color;
+        llenarSelectorTallas();
+        if (selectorTalla) selectorTalla.value = variante.talla.talla;
+        actualizarResumenVenta();
+
+        if (mensaje) {
+            mensaje.textContent = "Variante seleccionada: "
+                + variante.producto.nombre
+                + " / " + variante.color.color
+                + " / talla " + variante.talla.talla + ".";
+        }
+        return true;
+    }
+
+    const producto = productosVendedor.find(function(item) {
+        return String(item.codigo || "").toUpperCase() === codigo;
+    });
+
+    if (!producto) {
+        if (mensaje) mensaje.textContent = "No se encontró producto ni variante con el código " + codigo + ".";
+        return false;
+    }
+
+    selectorProducto.value = producto.id_producto;
+    llenarSelectorColores();
+    actualizarResumenVenta();
+
+    if (mensaje) mensaje.textContent = "Producto seleccionado por código de barras: " + producto.nombre + ".";
+    return true;
+}
+
+function buscarProductoVentaPorCodigo() {
+    const codigo = document.getElementById("ventaCodigoBarras")?.value || "";
+    seleccionarProductoVentaPorCodigo(codigo);
+}
+
 function leerTallasVendedor(tallas) {
     if (Array.isArray(tallas)) return tallas;
 
@@ -159,6 +244,19 @@ function textoTallasVendedor(tallas) {
     return lista.map(function(item) {
         return item.talla + " (" + item.cantidad + ")";
     }).join(", ");
+}
+
+function codigosBarrasVendedor(producto) {
+    const codigos = [];
+    const colores = leerColoresVendedor(producto ? producto.colores : []);
+
+    colores.forEach(function(color) {
+        leerTallasVendedor(color.tallas).forEach(function(talla) {
+            if (talla.codigo_barras) codigos.push(talla.codigo_barras);
+        });
+    });
+
+    return codigos.join(" ");
 }
 
 function llenarSelectorColores() {
@@ -252,8 +350,12 @@ function actualizarResumenVenta() {
         return item.talla === talla;
     });
 
+    const codigoResumen = tallaSeleccionada && tallaSeleccionada.codigo_barras
+        ? tallaSeleccionada.codigo_barras
+        : (producto ? producto.codigo : "-");
+
     document.getElementById("ventaNombreProducto").textContent = producto ? producto.nombre : "Sin producto seleccionado";
-    document.getElementById("ventaCodigoProducto").textContent = "Codigo: " + (producto ? producto.codigo : "-");
+    document.getElementById("ventaCodigoProducto").textContent = "Codigo: " + codigoResumen;
     document.getElementById("ventaColorProducto").textContent = "Color: " + (colorSeleccionado ? colorSeleccionado.color : (producto ? textoColoresVendedor(producto) : "-"));
     document.getElementById("ventaTallasProducto").textContent = "Tallas disponibles: " + (producto ? textoTallasVendedor(tallas) : "-");
     document.getElementById("ventaStockProducto").textContent = "Stock talla: " + (tallaSeleccionada ? tallaSeleccionada.cantidad : "-");
@@ -263,8 +365,21 @@ function actualizarResumenVenta() {
     const total = bruto - descuento;
     const base = total / 1.19;
     const iva = total - base;
+    const desglose = document.getElementById("ventaDesglose");
 
-    document.getElementById("ventaTotal").textContent = formatoPrecioVendedor(total) + " | IVA incluido: " + formatoPrecioVendedor(iva);
+    if (desglose) {
+        desglose.innerHTML = `
+            <div><span>Subtotal</span><strong>${formatoPrecioVendedor(bruto)}</strong></div>
+            <div><span>Descuento</span><strong>${formatoPrecioVendedor(descuento)}</strong></div>
+            <div><span>Base sin IVA</span><strong>${formatoPrecioVendedor(base)}</strong></div>
+            <div><span>IVA incluido</span><strong>${formatoPrecioVendedor(iva)}</strong></div>
+        `;
+    }
+
+    document.getElementById("ventaTotal").innerHTML = `
+        <span class="venta-total-monto">${formatoPrecioVendedor(total)}</span>
+        <span class="venta-total-iva">IVA incluido: ${formatoPrecioVendedor(iva)}</span>
+    `;
 }
 
 async function cargarInventarioVendedor() {
@@ -292,6 +407,7 @@ async function cargarInventarioVendedor() {
         const productosFiltrados = productos.filter(function(producto) {
             const texto = [
                 producto.codigo,
+                codigosBarrasVendedor(producto),
                 producto.nombre,
                 producto.marca,
                 textoColoresVendedor(producto),
@@ -342,6 +458,8 @@ async function registrarVentaVendedor(evento) {
     datos.append("cliente", document.getElementById("ventaCliente").value.trim());
     datos.append("telefono", document.getElementById("ventaTelefono").value.trim());
     datos.append("correo", document.getElementById("ventaCorreo").value.trim());
+    datos.append("tipo_documento", document.getElementById("ventaTipoDocumento")?.value || "CC");
+    datos.append("numero_documento", document.getElementById("ventaNumeroDocumento")?.value.trim() || "");
     datos.append("cantidad", document.getElementById("ventaCantidad").value);
     datos.append("descuento_tipo", document.getElementById("ventaDescuentoTipo").value);
     datos.append("descuento_valor", document.getElementById("ventaDescuentoValor").value);
@@ -351,6 +469,7 @@ async function registrarVentaVendedor(evento) {
     datos.append("id_producto_color", document.getElementById("ventaColor")?.value || "");
     datos.append("color", document.getElementById("ventaColor")?.selectedOptions[0]?.textContent || "");
     datos.append("talla", document.getElementById("ventaTalla").value);
+    datos.append("codigo_barras", document.getElementById("ventaCodigoBarras")?.value.trim() || "");
 
     mensaje.textContent = "";
 
@@ -372,6 +491,8 @@ async function registrarVentaVendedor(evento) {
 
         if (resultado.factura) {
             abrirFacturaVendedor(resultado.id_venta);
+        } else {
+            mensaje.textContent = "Pedido registrado como pendiente. La factura se emite cuando se confirme el pago.";
         }
 
         document.getElementById("formVenta").reset();
@@ -458,7 +579,7 @@ async function abrirFacturaVendedor(idVenta) {
             return;
         }
 
-        imprimirFacturaVendedor(resultado.factura, resultado.detalles);
+        imprimirFacturaVendedor(resultado.factura, resultado.detalles, resultado.empresa);
         await cargarHistorialVendedor();
     } catch (error) {
         alert("Error al abrir la factura.");
@@ -466,7 +587,8 @@ async function abrirFacturaVendedor(idVenta) {
     }
 }
 
-function imprimirFacturaVendedor(factura, detalles) {
+function imprimirFacturaVendedor(factura, detalles, empresa) {
+    empresa = empresa || {};
     const filas = detalles.map(function(detalle) {
         return `
             <tr>
@@ -508,21 +630,30 @@ function imprimirFacturaVendedor(factura, detalles) {
             <meta charset="UTF-8">
             <title>${limpiarTextoVendedor(factura.numero_factura)}</title>
             <style>
-                body { font-family: Arial, sans-serif; color: #2f2424; margin: 32px; }
-                header { display: flex; justify-content: space-between; gap: 24px; border-bottom: 2px solid #954053; padding-bottom: 18px; margin-bottom: 24px; }
-                h1 { margin: 0; color: #954053; font-family: Georgia, serif; font-weight: 400; }
-                h2 { margin: 0 0 6px; font-size: 18px; }
-                p { margin: 4px 0; }
-                table { width: 100%; border-collapse: collapse; margin-top: 22px; }
-                th, td { border-bottom: 1px solid #ead8d2; padding: 10px; text-align: left; }
-                th { background: #fff3ef; color: #5c353b; }
-                .totales { margin-left: auto; margin-top: 24px; width: 280px; }
-                .totales div { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ead8d2; }
-                .total { font-size: 18px; font-weight: 700; color: #954053; }
-                .acciones { display: flex; gap: 10px; margin-bottom: 18px; }
-                .acciones button, .acciones a { border: 0; background: #954053; color: #fff; padding: 10px 14px; text-decoration: none; cursor: pointer; font-size: 14px; }
+                * { box-sizing: border-box; }
+                body { margin: 0; background: #f6f1ed; color: #2f2424; font-family: Arial, sans-serif; }
+                .factura { width: min(960px, calc(100% - 36px)); margin: 24px auto; padding: 34px; background: #fffdfb; border: 1px solid #ead8d2; }
+                .acciones { display: flex; gap: 10px; width: min(960px, calc(100% - 36px)); margin: 24px auto 0; }
+                .acciones button, .acciones a { border: 0; border-radius: 8px; background: #954053; color: #fff; padding: 11px 16px; text-decoration: none; cursor: pointer; font-size: 14px; }
                 .acciones a.inactivo { background: #b8aaa5; pointer-events: none; }
-                @media print { .acciones { display: none; } body { margin: 18px; } }
+                header { display: grid; grid-template-columns: 1.4fr 0.8fr; gap: 24px; border-bottom: 3px solid #954053; padding-bottom: 22px; margin-bottom: 24px; }
+                h1 { margin: 0 0 8px; color: #954053; font-family: Georgia, serif; font-size: 34px; font-weight: 400; }
+                h2 { margin: 0 0 8px; color: #5c353b; font-size: 17px; }
+                p { margin: 4px 0; line-height: 1.45; }
+                .muted { color: #746760; font-size: 12px; }
+                .factura-box { border: 1px solid #ead8d2; border-radius: 12px; padding: 16px; background: #fff8f5; }
+                .factura-box strong { display: block; color: #954053; font-size: 22px; margin-bottom: 8px; }
+                .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 20px; }
+                .panel { border: 1px solid #ead8d2; border-radius: 12px; padding: 16px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 22px; }
+                th, td { border-bottom: 1px solid #ead8d2; padding: 11px 9px; text-align: left; font-size: 13px; }
+                th { background: #fff3ef; color: #5c353b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+                .totales { margin-left: auto; margin-top: 24px; width: min(360px, 100%); border: 1px solid #ead8d2; border-radius: 12px; padding: 14px 16px; background: #fff8f5; }
+                .totales div { display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; border-bottom: 1px solid #ead8d2; }
+                .totales div:last-child { border-bottom: 0; }
+                .total { font-size: 18px; font-weight: 700; color: #954053; }
+                .nota { margin-top: 24px; padding: 14px 16px; border-left: 4px solid #d6b890; background: #fff8f0; color: #6f5b4f; font-size: 12px; }
+                @media print { .acciones { display: none; } body { background: #fff; } .factura { width: 100%; margin: 0; border: 0; } }
             </style>
         </head>
         <body>
@@ -530,50 +661,69 @@ function imprimirFacturaVendedor(factura, detalles) {
                 <button onclick="window.print()">Imprimir</button>
                 <a class="${enlaceCorreo ? "" : "inactivo"}" href="${enlaceCorreo || "#"}">Enviar por correo</a>
             </div>
-            <header>
-                <div>
-                    <h1>Isa Boutique</h1>
-                    <p>Moda femenina</p>
+            <div class="factura">
+                <header>
+                    <div>
+                        <h1>${limpiarTextoVendedor(empresa.nombre_comercial || "Isa Boutique")}</h1>
+                        <p><strong>${limpiarTextoVendedor(empresa.razon_social || "Isa Boutique")}</strong></p>
+                        <p>NIT/Documento: ${limpiarTextoVendedor(empresa.nit || "Pendiente")}</p>
+                        <p>${limpiarTextoVendedor(empresa.regimen || "Régimen no definido")}</p>
+                        <p>${limpiarTextoVendedor(empresa.direccion || "Dirección pendiente")} - ${limpiarTextoVendedor(empresa.ciudad || "Colombia")}</p>
+                        <p>Tel: ${limpiarTextoVendedor(empresa.telefono || "Pendiente")} | ${limpiarTextoVendedor(empresa.correo || "contacto@isaboutique.com")}</p>
+                        <p class="muted">${limpiarTextoVendedor(empresa.actividad_economica || "Comercio al por menor")}</p>
+                    </div>
+                    <div class="factura-box">
+                        <strong>${limpiarTextoVendedor(factura.numero_factura)}</strong>
+                        <p>Venta: ${factura.id_venta}</p>
+                        <p>Fecha: ${new Date(factura.fecha_factura).toLocaleString()}</p>
+                        <p>Estado: ${limpiarTextoVendedor(factura.estado_factura)}</p>
+                        <p>IVA incluido: ${factura.precio_incluye_iva ? "Sí" : "No"}</p>
+                    </div>
+                </header>
+
+                <section class="grid">
+                    <div class="panel">
+                        <h2>Cliente</h2>
+                        <p><strong>${limpiarTextoVendedor(factura.cliente)}</strong></p>
+                        <p>Documento: ${limpiarTextoVendedor(factura.tipo_documento || "CC")} ${limpiarTextoVendedor(factura.numero_documento || "-")}</p>
+                        <p>Teléfono: ${limpiarTextoVendedor(factura.telefono)}</p>
+                        <p>Correo: ${limpiarTextoVendedor(factura.correo || "-")}</p>
+                        <p>Dirección: ${limpiarTextoVendedor(factura.direccion || "-")}</p>
+                    </div>
+                    <div class="panel">
+                        <h2>Operación</h2>
+                        <p>Canal: ${etiquetaCanalVendedor(factura.canal_venta)}</p>
+                        <p>Pago: ${limpiarTextoVendedor(factura.medio_pago)}</p>
+                        <p>Entrega: ${limpiarTextoVendedor(factura.tipo_entrega || "-")}</p>
+                        <p>Atendido por: ${limpiarTextoVendedor(factura.atendido_por)}</p>
+                    </div>
+                </section>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Producto</th>
+                            <th>Color</th>
+                            <th>Talla</th>
+                            <th>Cant.</th>
+                            <th>Precio</th>
+                            <th>IVA</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>${filas}</tbody>
+                </table>
+
+                <div class="totales">
+                    <div><span>Subtotal bruto</span><strong>${formatoPrecioVendedor(factura.subtotal)}</strong></div>
+                    <div><span>Descuento</span><strong>${formatoPrecioVendedor(factura.descuento)}</strong></div>
+                    <div><span>Base gravable</span><strong>${formatoPrecioVendedor(factura.base_gravable)}</strong></div>
+                    <div><span>IVA (${Number(factura.tarifa_iva || 19).toFixed(0)}%)</span><strong>${formatoPrecioVendedor(factura.iva)}</strong></div>
+                    <div class="total"><span>Total</span><strong>${formatoPrecioVendedor(factura.total)}</strong></div>
                 </div>
-                <div>
-                    <h2>Factura ${limpiarTextoVendedor(factura.numero_factura)}</h2>
-                    <p>Venta: ${factura.id_venta}</p>
-                    <p>Fecha: ${new Date(factura.fecha_factura).toLocaleString()}</p>
-                    <p>Estado: ${limpiarTextoVendedor(factura.estado_factura)}</p>
-                </div>
-            </header>
 
-            <section>
-                <h2>Cliente</h2>
-                <p>${limpiarTextoVendedor(factura.cliente)}</p>
-                <p>Teléfono: ${limpiarTextoVendedor(factura.telefono)}</p>
-                <p>Correo: ${limpiarTextoVendedor(factura.correo || "-")}</p>
-                <p>Canal: ${etiquetaCanalVendedor(factura.canal_venta)} | Pago: ${limpiarTextoVendedor(factura.medio_pago)}</p>
-                <p>Atendido por: ${limpiarTextoVendedor(factura.atendido_por)}</p>
-            </section>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Código</th>
-                        <th>Producto</th>
-                        <th>Color</th>
-                        <th>Talla</th>
-                        <th>Cantidad</th>
-                        <th>Precio</th>
-                        <th>IVA</th>
-                        <th>Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>${filas}</tbody>
-            </table>
-
-            <div class="totales">
-                <div><span>Subtotal bruto</span><strong>${formatoPrecioVendedor(factura.subtotal)}</strong></div>
-                <div><span>Descuento</span><strong>${formatoPrecioVendedor(factura.descuento)}</strong></div>
-                <div><span>Base gravable</span><strong>${formatoPrecioVendedor(factura.base_gravable)}</strong></div>
-                <div><span>IVA (${Number(factura.tarifa_iva || 19).toFixed(0)}%)</span><strong>${formatoPrecioVendedor(factura.iva)}</strong></div>
-                <div class="total"><span>Total</span><strong>${formatoPrecioVendedor(factura.total)}</strong></div>
+                <div class="nota">${limpiarTextoVendedor(empresa.nota_legal || "")}</div>
             </div>
         </body>
         </html>
@@ -703,7 +853,13 @@ document.getElementById("ventaCantidad")?.addEventListener("input", actualizarRe
 document.getElementById("ventaDescuentoTipo")?.addEventListener("change", actualizarResumenVenta);
 document.getElementById("ventaDescuentoValor")?.addEventListener("input", actualizarResumenVenta);
 document.getElementById("formVenta")?.addEventListener("submit", registrarVentaVendedor);
-
+document.getElementById("btnBuscarCodigoVenta")?.addEventListener("click", buscarProductoVentaPorCodigo);
+document.getElementById("ventaCodigoBarras")?.addEventListener("keydown", function(evento) {
+    if (evento.key === "Enter") {
+        evento.preventDefault();
+        buscarProductoVentaPorCodigo();
+    }
+});
 window.registrarDevolucionVendedor = registrarDevolucionVendedor;
 window.abrirFacturaVendedor = abrirFacturaVendedor;
 

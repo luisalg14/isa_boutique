@@ -6,6 +6,24 @@ require_once "factura_util.php";
 
 header("Content-Type: application/json; charset=UTF-8");
 
+function columna_existe_venta(PDO $conexion, $tabla, $columna) {
+    $consulta = $conexion->prepare("
+        SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+            AND table_name = :tabla
+            AND column_name = :columna
+        ) AS existe
+    ");
+    $consulta->execute([
+        ":tabla" => $tabla,
+        ":columna" => $columna
+    ]);
+
+    return filter_var($consulta->fetch()["existe"], FILTER_VALIDATE_BOOLEAN);
+}
+
 try {
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
         echo json_encode([
@@ -19,6 +37,8 @@ try {
     $cliente = trim($_POST["cliente"] ?? "");
     $telefono = trim($_POST["telefono"] ?? "");
     $correo = trim($_POST["correo"] ?? "");
+    $tipoDocumento = strtoupper(trim($_POST["tipo_documento"] ?? "CC"));
+    $numeroDocumento = trim($_POST["numero_documento"] ?? "");
     $cantidad = intval($_POST["cantidad"] ?? 0);
     $descuentoTipo = trim($_POST["descuento_tipo"] ?? "valor");
     $descuentoValor = floatval($_POST["descuento_valor"] ?? 0);
@@ -26,6 +46,7 @@ try {
     $idProductoColor = intval($_POST["id_producto_color"] ?? 0);
     $color = trim($_POST["color"] ?? "");
     $talla = strtoupper(trim($_POST["talla"] ?? ""));
+    $codigoBarras = strtoupper(trim($_POST["codigo_barras"] ?? ""));
     $usuarioActual = usuario_actual();
     $canal_venta = trim($_POST["canal_venta"] ?? ($usuarioActual ? "tienda_fisica" : "pagina_web"));
     $tipo_entrega = trim($_POST["tipo_entrega"] ?? ($usuarioActual ? "recoger_tienda" : "envio_local"));
@@ -51,12 +72,46 @@ try {
         "envio_nacional"
     ];
     $descuentosPermitidos = ["valor", "porcentaje"];
+    $tiposDocumentoPermitidos = ["CC", "CE", "NIT", "PASAPORTE", "OTRO"];
+
+    if ($codigoBarras !== "") {
+        $campoCodigoBarras = columna_existe_venta($conexion, "producto_color_talla", "codigo_barras")
+            ? "pct.codigo_barras"
+            : "(p.codigo || '-V' || LPAD(pct.id_producto_color_talla::TEXT, 4, '0'))";
+
+        $consultaVarianteCodigo = $conexion->prepare("
+            SELECT
+                p.id_producto,
+                pc.id_producto_color,
+                pc.nombre_color,
+                pct.talla
+            FROM producto_color_talla pct
+            INNER JOIN producto_color pc
+                ON pct.id_producto_color = pc.id_producto_color
+            INNER JOIN producto p
+                ON pc.id_producto = p.id_producto
+            WHERE UPPER($campoCodigoBarras) = :codigo_barras
+            LIMIT 1
+        ");
+        $consultaVarianteCodigo->execute([
+            ":codigo_barras" => $codigoBarras
+        ]);
+        $varianteCodigo = $consultaVarianteCodigo->fetch();
+
+        if ($varianteCodigo) {
+            $id_producto = intval($varianteCodigo["id_producto"]);
+            $idProductoColor = intval($varianteCodigo["id_producto_color"]);
+            $color = $varianteCodigo["nombre_color"];
+            $talla = strtoupper($varianteCodigo["talla"]);
+        }
+    }
 
     if (
         $id_producto <= 0 ||
         $cliente === "" ||
         $telefono === "" ||
         ($correo !== "" && !filter_var($correo, FILTER_VALIDATE_EMAIL)) ||
+        !in_array($tipoDocumento, $tiposDocumentoPermitidos, true) ||
         $cantidad <= 0 ||
         !in_array($descuentoTipo, $descuentosPermitidos, true) ||
         $descuentoValor < 0 ||
@@ -251,18 +306,22 @@ try {
             UPDATE cliente
             SET
                 nombre = :nombre,
-                correo = COALESCE(NULLIF(:correo, ''), correo)
+                correo = COALESCE(NULLIF(:correo, ''), correo),
+                tipo_documento = :tipo_documento,
+                numero_documento = COALESCE(NULLIF(:numero_documento, ''), numero_documento)
             WHERE id_cliente = :id_cliente
         ");
         $consultaActualizarCliente->execute([
             ":nombre" => $cliente,
             ":correo" => $correo,
+            ":tipo_documento" => $tipoDocumento,
+            ":numero_documento" => $numeroDocumento,
             ":id_cliente" => $idCliente
         ]);
     } else {
         $sqlInsertCliente = "
-            INSERT INTO cliente (nombre, telefono, correo)
-            VALUES (:nombre, :telefono, NULLIF(:correo, ''))
+            INSERT INTO cliente (nombre, telefono, correo, tipo_documento, numero_documento)
+            VALUES (:nombre, :telefono, NULLIF(:correo, ''), :tipo_documento, NULLIF(:numero_documento, ''))
             RETURNING id_cliente
         ";
 
@@ -270,7 +329,9 @@ try {
         $consultaInsertCliente->execute([
             ":nombre" => $cliente,
             ":telefono" => $telefono,
-            ":correo" => $correo
+            ":correo" => $correo,
+            ":tipo_documento" => $tipoDocumento,
+            ":numero_documento" => $numeroDocumento
         ]);
 
         $idCliente = $consultaInsertCliente->fetch()["id_cliente"];

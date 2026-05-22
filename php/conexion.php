@@ -10,7 +10,9 @@ if (file_exists($configLocal)) {
         "port" => getenv("ISA_DB_PORT") ?: "5432",
         "database" => getenv("ISA_DB_NAME") ?: "",
         "user" => getenv("ISA_DB_USER") ?: "",
-        "password" => getenv("ISA_DB_PASSWORD") ?: ""
+        "password" => getenv("ISA_DB_PASSWORD") ?: "",
+        "sslmode" => getenv("ISA_DB_SSLMODE") ?: "",
+        "options" => getenv("ISA_DB_OPTIONS") ?: ""
     ];
 }
 
@@ -24,14 +26,26 @@ if (
 }
 
 try {
+    $dsn = "pgsql:host={$config["host"]};port={$config["port"]};dbname={$config["database"]}";
+
+    if (!empty($config["sslmode"])) {
+        $dsn .= ";sslmode={$config["sslmode"]}";
+    }
+
+    if (!empty($config["options"])) {
+        $dsn .= ";options={$config["options"]}";
+    }
+
     $conexion = new PDO(
-        "pgsql:host={$config["host"]};port={$config["port"]};dbname={$config["database"]}",
+        $dsn,
         $config["user"],
         $config["password"]
     );
 
     $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $conexion->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    $conexion->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
+    $conexion->exec("SET search_path TO public");
 
 } catch (PDOException $e) {
     error_log("Error de conexion PostgreSQL: " . $e->getMessage());

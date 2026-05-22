@@ -83,6 +83,65 @@ function normalizar_variantes_producto($texto, $color, $tallas) {
     return array_values($variantes);
 }
 
+function generar_codigo_producto(PDO $conexion) {
+    $consulta = $conexion->query("
+        SELECT codigo
+        FROM producto
+        WHERE codigo ~ '^[0-9]{2}-[A-Z]$'
+    ");
+
+    $mayorIndice = 0;
+
+    foreach ($consulta as $fila) {
+        if (!preg_match("/^([0-9]{2})-([A-Z])$/", $fila["codigo"], $partes)) {
+            continue;
+        }
+
+        $numero = intval($partes[1]);
+        $letra = ord($partes[2]) - ord("A");
+
+        if ($numero < 1 || $numero > 99 || $letra < 0 || $letra > 25) {
+            continue;
+        }
+
+        $mayorIndice = max($mayorIndice, ($letra * 99) + $numero);
+    }
+
+    $siguienteIndice = $mayorIndice + 1;
+
+    if ($siguienteIndice > 99 * 26) {
+        throw new Exception("Se agotó la secuencia de códigos de producto.");
+    }
+
+    $letraIndice = intdiv($siguienteIndice - 1, 99);
+    $numero = (($siguienteIndice - 1) % 99) + 1;
+    $letra = chr(ord("A") + $letraIndice);
+
+    return str_pad((string) $numero, 2, "0", STR_PAD_LEFT) . "-" . $letra;
+}
+
+function columna_existe(PDO $conexion, $tabla, $columna) {
+    $consulta = $conexion->prepare("
+        SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+            AND table_name = :tabla
+            AND column_name = :columna
+        ) AS existe
+    ");
+    $consulta->execute([
+        ":tabla" => $tabla,
+        ":columna" => $columna
+    ]);
+
+    return filter_var($consulta->fetch()["existe"], FILTER_VALIDATE_BOOLEAN);
+}
+
+function generar_codigo_barras_variante($codigoProducto, $idProductoColorTalla) {
+    return strtoupper(trim($codigoProducto)) . "-V" . str_pad((string) $idProductoColorTalla, 4, "0", STR_PAD_LEFT);
+}
+
 try {
     exigir_roles(["admin"]);
 
@@ -113,7 +172,6 @@ try {
     }
 
     if (
-        $codigo === "" ||
         $nombre === "" ||
         $marca === "" ||
         $categoria === "" ||
@@ -124,6 +182,14 @@ try {
         echo json_encode([
             "error" => true,
             "mensaje" => "Datos incompletos o inválidos"
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    if ($codigo !== "" && !preg_match("/^[0-9]{2}-[A-Z]$/", $codigo)) {
+        echo json_encode([
+            "error" => true,
+            "mensaje" => "El código debe tener el formato 01-A."
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -191,6 +257,23 @@ try {
     $colorPrincipal = count($variantes) > 0 ? $variantes[0]["color"] : ($color !== "" ? $color : "Único");
 
     $conexion->beginTransaction();
+    $conexion->query("SELECT pg_advisory_xact_lock(20260521)");
+
+    if ($codigo === "") {
+        $codigo = generar_codigo_producto($conexion);
+    }
+
+    $consultaCodigo = $conexion->prepare("
+        SELECT id_producto
+        FROM producto
+        WHERE codigo = :codigo
+        LIMIT 1
+    ");
+    $consultaCodigo->execute([":codigo" => $codigo]);
+
+    if ($consultaCodigo->fetch()) {
+        throw new Exception("Ya existe un producto con ese código. Actualiza el código sugerido e intenta nuevamente.");
+    }
 
     $consultaInsertar = $conexion->prepare("
         INSERT INTO producto (
@@ -240,7 +323,7 @@ try {
         $consultaImagen->execute([
             ":id_producto" => $idProducto,
             ":ruta" => $rutaImagen,
-            ":es_principal" => $indice === 0,
+            ":es_principal" => $indice === 0 ? "true" : "false",
             ":orden" => $indice
         ]);
     }
@@ -253,7 +336,16 @@ try {
     $consultaColorTalla = $conexion->prepare("
         INSERT INTO producto_color_talla (id_producto_color, talla, cantidad)
         VALUES (:id_producto_color, :talla, :cantidad)
+        RETURNING id_producto_color_talla
     ");
+    $tallaTieneCodigoBarras = columna_existe($conexion, "producto_color_talla", "codigo_barras");
+    $consultaActualizarCodigoVariante = $tallaTieneCodigoBarras
+        ? $conexion->prepare("
+            UPDATE producto_color_talla
+            SET codigo_barras = :codigo_barras
+            WHERE id_producto_color_talla = :id_producto_color_talla
+        ")
+        : null;
     $consultaTalla = $conexion->prepare("
         INSERT INTO producto_talla (id_producto, talla, cantidad)
         VALUES (:id_producto, :talla, :cantidad)
@@ -277,6 +369,15 @@ try {
                 ":talla" => $talla,
                 ":cantidad" => $cantidadTalla
             ]);
+            $idProductoColorTalla = $consultaColorTalla->fetch()["id_producto_color_talla"];
+
+            if ($consultaActualizarCodigoVariante) {
+                $consultaActualizarCodigoVariante->execute([
+                    ":codigo_barras" => generar_codigo_barras_variante($codigo, $idProductoColorTalla),
+                    ":id_producto_color_talla" => $idProductoColorTalla
+                ]);
+            }
+
             $consultaTalla->execute([
                 ":id_producto" => $idProducto,
                 ":talla" => $talla,

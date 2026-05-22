@@ -13,8 +13,11 @@ function mostrarContenido(loginBox, contenido) {
 }
 
 function rutaApi(archivo) {
-    const esProduccion = window.location.hostname !== "localhost";
-    const base = esProduccion ? "/" : "/isa_boutique/";
+    const partesRuta = window.location.pathname.split("/").filter(Boolean);
+    const indiceHtml = partesRuta.indexOf("html");
+    const baseProyecto = indiceHtml > 0 ? "/" + partesRuta.slice(0, indiceHtml).join("/") + "/" : "/";
+    const base = window.location.hostname === "localhost" ? baseProyecto : "/";
+
     return base + "php/" + archivo;
 }
 
@@ -140,4 +143,3 @@ export async function cerrarSesion(loginBox, contenido) {
     aplicarRol(null);
     mostrarLogin(loginBox, contenido);
 }
-

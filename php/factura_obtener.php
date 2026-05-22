@@ -3,6 +3,7 @@
 require_once "conexion.php";
 require_once "auth_guard.php";
 require_once "factura_util.php";
+require_once "facturacion_config.php";
 
 header("Content-Type: application/json; charset=UTF-8");
 
@@ -52,6 +53,8 @@ try {
             cl.telefono,
             COALESCE(cl.correo, '') AS correo,
             COALESCE(cl.direccion, '') AS direccion,
+            COALESCE(cl.tipo_documento, 'CC') AS tipo_documento,
+            COALESCE(cl.numero_documento, '') AS numero_documento,
             u.nombre AS atendido_por
         FROM factura f
         INNER JOIN venta v
@@ -90,6 +93,7 @@ try {
 
     echo json_encode([
         "error" => false,
+        "empresa" => obtener_configuracion_facturacion($conexion),
         "factura" => $encabezado,
         "detalles" => $consultaDetalle->fetchAll()
     ], JSON_UNESCAPED_UNICODE);

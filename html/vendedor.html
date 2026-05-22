@@ -58,6 +58,15 @@
 
                     <div class="venta-layout">
                         <form id="formVenta" class="venta-form">
+                            <div class="campo venta-scan-field">
+                                <label>Código de barras</label>
+                                <div class="scan-code-row">
+                                    <input id="ventaCodigoBarras" placeholder="Escanea o escribe el código">
+                                    <button type="button" id="btnBuscarCodigoVenta">Buscar</button>
+                                </div>
+                                <small>El lector escribe el código y selecciona el producto automáticamente.</small>
+                            </div>
+
                             <div class="campo">
                                 <label>Producto</label>
                                 <select id="ventaProducto" required>
@@ -87,6 +96,22 @@
                             <div class="campo">
                                 <label>Teléfono</label>
                                 <input id="ventaTelefono" placeholder="Teléfono o WhatsApp" required>
+                            </div>
+
+                            <div class="campo">
+                                <label>Tipo de documento</label>
+                                <select id="ventaTipoDocumento">
+                                    <option value="CC">Cédula de ciudadanía</option>
+                                    <option value="CE">Cédula de extranjería</option>
+                                    <option value="NIT">NIT</option>
+                                    <option value="PASAPORTE">Pasaporte</option>
+                                    <option value="OTRO">Otro</option>
+                                </select>
+                            </div>
+
+                            <div class="campo">
+                                <label>Número de documento</label>
+                                <input id="ventaNumeroDocumento" placeholder="Documento del cliente">
                             </div>
 
                             <div class="campo">
@@ -150,6 +175,7 @@
                             <p id="ventaColorProducto">Color: -</p>
                             <p id="ventaTallasProducto">Tallas disponibles: -</p>
                             <p id="ventaStockProducto">Stock: -</p>
+                            <div id="ventaDesglose" class="venta-desglose"></div>
                             <strong id="ventaTotal">$0</strong>
                         </aside>
                     </div>
@@ -244,6 +270,7 @@
 
             </main>
         </div>
+
     </div>
 
     <script type="module" src="../js/script.js"></script>

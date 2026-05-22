@@ -5,28 +5,33 @@
 ================================ */
 
 .admin-page {
-    --sys-bg: #f7f2ed;
-    --sys-paper: #fffdfb;
+    --sys-bg: #faf7f5;
+    --sys-paper: #ffffff;
     --sys-card: #ffffff;
-    --sys-soft: #fff4ef;
-    --sys-soft-2: #fbebe4;
-    --sys-line: #e4d5cc;
-    --sys-text: #29231f;
-    --sys-muted: #746760;
-    --sys-rose: #9b4056;
-    --sys-rose-dark: #7d2f43;
-    --sys-gold: #bd9450;
-    --sys-brown: #2b2521;
-    --sys-shadow: 0 18px 42px rgba(58, 42, 34, 0.08);
+    --sys-soft: #fff5f6;
+    --sys-soft-2: #fdf0f2;
+    --sys-line: rgba(226, 232, 240, 0.8);
+    --sys-text: #334155;
+    --sys-muted: #64748b;
+    --sys-rose: #a3586d;
+    --sys-rose-dark: #8c4558;
+    --sys-gold: #d6b890;
+    --sys-brown: #475569;
+    --sys-shadow: 0 10px 30px -12px rgba(51, 65, 85, 0.08);
+    --sys-shadow-hover: 0 12px 20px -8px rgba(163, 88, 109, 0.12);
     background: var(--sys-bg);
     color: var(--sys-text);
     font-family: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .admin-page #contenido {
     min-height: 100vh;
     background:
-        linear-gradient(180deg, rgba(255, 253, 251, 0.92), rgba(247, 242, 237, 0.98)),
+        radial-gradient(circle at 5% 15%, rgba(214, 184, 144, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 95% 85%, rgba(163, 88, 109, 0.08) 0%, transparent 45%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(250, 247, 245, 0.98)),
         var(--sys-bg);
 }
 
@@ -105,44 +110,119 @@
 
 .admin-page .admin-shell {
     width: min(1440px, calc(100% - 28px));
-    grid-template-columns: 228px minmax(0, 1fr);
-    gap: 18px;
-    margin-top: 22px;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 28px;
+    margin-top: 28px;
 }
 
 .admin-page .admin-tabs {
-    top: 94px;
-    max-height: calc(100vh - 112px);
-    padding: 12px;
+    top: 98px;
+    max-height: calc(100vh - 120px);
+    padding: 20px 14px;
     border: 1px solid var(--sys-line);
     border-radius: 18px;
-    background: rgba(255, 253, 251, 0.94);
+    background: rgba(255, 255, 255, 0.98);
     box-shadow: var(--sys-shadow);
 }
 
 .admin-tabs-title {
-    padding: 3px 6px 9px;
+    margin-bottom: 14px;
+    padding: 0 12px 14px;
+    border-bottom: 1px solid var(--sys-line);
     color: var(--sys-gold);
     font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
     letter-spacing: 0.14em;
 }
 
 .admin-page .admin-tab {
-    min-height: 42px;
-    padding: 10px 11px;
-    border-radius: 12px;
+    --tab-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Cpath d='M8 8h8M8 12h8M8 16h5'/%3E%3C/svg%3E");
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 44px;
+    margin-bottom: 6px;
+    padding: 10px 16px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
     color: var(--sys-muted);
-    font-size: 13px;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-align: left;
+    position: relative;
+    transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.admin-page .admin-tab::before {
+    content: "";
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    background-color: currentColor;
+    -webkit-mask: var(--tab-icon) center / contain no-repeat;
+    mask: var(--tab-icon) center / contain no-repeat;
+    opacity: 0.82;
+    transition: opacity 0.25s ease;
 }
 
 .admin-page .admin-tab:hover {
     background: var(--sys-soft);
     color: var(--sys-rose);
+    transform: translateX(4px);
+}
+
+.admin-page .admin-tab:hover::before {
+    opacity: 1;
 }
 
 .admin-page .admin-tab.activo {
-    background: var(--sys-rose);
+    background: linear-gradient(135deg, var(--sys-rose) 0%, var(--sys-rose-dark) 100%);
     color: #fff;
+    font-weight: 700;
+    box-shadow: 0 8px 15px -3px rgba(163, 88, 109, 0.25);
+    transform: translateX(4px);
+}
+
+.admin-page .admin-tab.activo::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 8px;
+    bottom: 8px;
+    width: 4px;
+    border-radius: 0 4px 4px 0;
+    background: var(--sys-gold);
+}
+
+.admin-page .admin-tab[data-panel-target="panel-inicio"] {
+    --tab-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='7' height='9'/%3E%3Crect x='14' y='3' width='7' height='5'/%3E%3Crect x='14' y='12' width='7' height='9'/%3E%3Crect x='3' y='16' width='7' height='5'/%3E%3C/svg%3E");
+}
+
+.admin-page .admin-tab[data-panel-target="panel-menu-inventario"],
+.admin-page .admin-tab[data-panel-target="panel-inventario"] {
+    --tab-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E");
+}
+
+.admin-page .admin-tab[data-panel-target="panel-menu-ventas"],
+.admin-page .admin-tab[data-panel-target="panel-venta"],
+.admin-page .admin-tab[data-panel-target="panel-historial"] {
+    --tab-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z'/%3E%3Cline x1='7' y1='7' x2='7.01' y2='7'/%3E%3C/svg%3E");
+}
+
+.admin-page .admin-tab[data-panel-target="panel-menu-finanzas"],
+.admin-page .admin-tab[data-panel-target="panel-reportes"] {
+    --tab-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='20' x2='18' y2='10'/%3E%3Cline x1='12' y1='20' x2='12' y2='4'/%3E%3Cline x1='6' y1='20' x2='6' y2='14'/%3E%3C/svg%3E");
+}
+
+.admin-page .admin-tab[data-panel-target="panel-menu-personas"] {
+    --tab-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M23 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E");
+}
+
+.admin-page .admin-tab[data-panel-target="panel-menu-configuracion"] {
+    --tab-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3Cpath d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z'/%3E%3C/svg%3E");
 }
 
 .admin-page .admin-panel {
@@ -165,17 +245,48 @@
 
 .dashboard-hero,
 .vendedor-panel-header {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
+    gap: 24px;
+    margin-bottom: 24px;
+    padding: 24px;
     border: 1px solid var(--sys-line);
     border-radius: 18px;
     background:
         linear-gradient(135deg, #fffdfb 0%, #fff4ef 58%, #f1e5d9 100%);
     box-shadow: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-hero::before {
+    content: "";
+    position: absolute;
+    right: -26px;
+    top: -28px;
+    width: 150px;
+    height: 150px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(214, 184, 144, 0.18) 0%, transparent 70%);
+    pointer-events: none;
 }
 
 .dashboard-hero h2,
 .vendedor-panel-header h2 {
     font-size: clamp(28px, 3vw, 40px);
+    line-height: 1.1;
+}
+
+.vendedor-panel-header > div {
+    display: grid;
+    gap: 4px;
+}
+
+.vendedor-panel-header p {
+    max-width: 420px;
+    margin: 0;
+    text-align: right;
 }
 
 .dashboard-hero span,
@@ -221,8 +332,70 @@
 
 .dashboard-card,
 .admin-page .reporte-card {
+    --card-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Cpath d='M8 8h8M8 12h8M8 16h5'/%3E%3C/svg%3E");
     min-height: 108px;
     padding: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.dashboard-card:hover,
+.admin-page .reporte-card:hover,
+.dashboard-panel:hover {
+    border-color: rgba(163, 88, 109, 0.28);
+    box-shadow: var(--sys-shadow-hover);
+    transform: translateY(-3px);
+}
+
+.dashboard-card::after,
+.admin-page .reporte-card::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--sys-gold), var(--sys-rose));
+    opacity: 0.75;
+}
+
+.dashboard-card::before,
+.admin-page .reporte-card::before {
+    content: "";
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    width: 48px;
+    height: 48px;
+    background-color: var(--sys-rose);
+    opacity: 0.045;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    -webkit-mask: var(--card-icon) center / contain no-repeat;
+    mask: var(--card-icon) center / contain no-repeat;
+}
+
+.dashboard-card:hover::before,
+.admin-page .reporte-card:hover::before {
+    opacity: 0.08;
+    transform: scale(1.08) rotate(-4deg);
+}
+
+.dashboard-cards .dashboard-card:nth-child(1) {
+    --card-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='23 6 13.5 15.5 8.5 10.5 1 18'/%3E%3Cpolyline points='17 6 23 6 23 12'/%3E%3C/svg%3E");
+}
+
+.dashboard-cards .dashboard-card:nth-child(2) {
+    --card-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E");
+}
+
+.dashboard-cards .dashboard-card:nth-child(3) {
+    --card-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/%3E%3Cline x1='12' y1='9' x2='12' y2='13'/%3E%3Cline x1='12' y1='17' x2='12.01' y2='17'/%3E%3C/svg%3E");
+}
+
+.dashboard-cards .dashboard-card:nth-child(4) {
+    --card-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='12' y1='1' x2='12' y2='23'/%3E%3Cpath d='M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'/%3E%3C/svg%3E");
 }
 
 .dashboard-card span,
@@ -430,6 +603,55 @@
     color: var(--sys-muted);
 }
 
+.venta-resumen strong {
+    line-height: 1.1;
+}
+
+.venta-resumen .venta-total-monto {
+    display: block;
+}
+
+.venta-resumen .venta-total-iva {
+    display: block;
+    margin-top: 10px;
+    color: var(--sys-muted);
+    font-family: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.venta-resumen .venta-desglose {
+    margin-top: 16px;
+    padding: 12px;
+    border: 1px solid var(--sys-line);
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.venta-resumen .venta-desglose div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 4px 0;
+    color: var(--sys-muted);
+    font-size: 13px;
+}
+
+.venta-resumen .venta-desglose span {
+    margin: 0;
+    color: var(--sys-muted);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+}
+
+.venta-resumen .venta-desglose strong {
+    margin: 0;
+    color: var(--sys-text);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+}
+
 @media (max-width: 1000px) {
     .admin-page .admin-shell,
     .vendedor-page .admin-shell {
@@ -467,6 +689,16 @@
 
     .dashboard-hero {
         display: block;
+    }
+
+    .vendedor-panel-header {
+        display: block;
+    }
+
+    .vendedor-panel-header p {
+        max-width: none;
+        margin-top: 12px;
+        text-align: left;
     }
 
     .admin-page .admin-panel {

@@ -154,6 +154,15 @@
 
             <div class="venta-layout">
                 <form id="formVentaAdmin" class="venta-form">
+                    <div class="campo venta-scan-field">
+                        <label>Código de barras</label>
+                        <div class="scan-code-row">
+                            <input id="ventaAdminCodigoBarras" placeholder="Escanea o escribe el código">
+                            <button type="button" onclick="buscarProductoVentaAdminPorCodigo()">Buscar</button>
+                        </div>
+                        <small>El lector escribe el código y selecciona el producto automáticamente.</small>
+                    </div>
+
                     <div class="campo">
                         <label>Producto</label>
                         <select id="ventaAdminProducto" required>
@@ -183,6 +192,22 @@
                     <div class="campo">
                         <label>Teléfono</label>
                         <input id="ventaAdminTelefono" placeholder="Teléfono o WhatsApp" required>
+                    </div>
+
+                    <div class="campo">
+                        <label>Tipo de documento</label>
+                        <select id="ventaAdminTipoDocumento">
+                            <option value="CC">Cédula de ciudadanía</option>
+                            <option value="CE">Cédula de extranjería</option>
+                            <option value="NIT">NIT</option>
+                            <option value="PASAPORTE">Pasaporte</option>
+                            <option value="OTRO">Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Número de documento</label>
+                        <input id="ventaAdminNumeroDocumento" placeholder="Documento del cliente">
                     </div>
 
                     <div class="campo">
@@ -246,6 +271,7 @@
                     <p id="ventaAdminColorProducto">Color: -</p>
                     <p id="ventaAdminTallasProducto">Tallas disponibles: -</p>
                     <p id="ventaAdminStockProducto">Stock talla: -</p>
+                    <div id="ventaAdminDesglose" class="venta-desglose"></div>
                     <strong id="ventaAdminTotal">$0</strong>
                 </aside>
             </div>
@@ -258,13 +284,9 @@
                     <span>Ingresos, gastos y ganancias</span>
                     <strong>Resumen financiero del negocio</strong>
                 </button>
-                <button type="button" onclick="activarPanelAdmin('panel-proveedores')">
+                <button type="button" onclick="activarPanelConSubseccion('panel-proveedores', 'proveedores-compras', 'panel-menu-finanzas')">
                     <span>Compras de mercancía</span>
-                    <strong>Costos, envíos y compras</strong>
-                </button>
-                <button type="button" onclick="activarPanelAdmin('panel-reportes')">
-                    <span>Reporte por fechas</span>
-                    <strong>Utilidad y margen por periodo</strong>
+                    <strong>Registro de compras, costos y envíos</strong>
                 </button>
             </div>
         </section>
@@ -276,9 +298,9 @@
                     <span>Trabajadores</span>
                     <strong>Registro y pagos</strong>
                 </button>
-                <button type="button" onclick="activarPanelAdmin('panel-proveedores')">
+                <button type="button" onclick="activarPanelConSubseccion('panel-proveedores', 'proveedores-lista', 'panel-menu-personas')">
                     <span>Proveedores</span>
-                    <strong>Contactos y compras</strong>
+                    <strong>Contactos asociados a la mercancía</strong>
                 </button>
                 <button type="button" onclick="activarPanelAdmin('panel-clientes')">
                     <span>Clientes</span>
@@ -302,90 +324,165 @@
 
             <h2>Agregar Producto</h2>
 
-            <div class="campo">
-                <label>Código</label>
-                <input id="inp-codigo" placeholder="Ej: IB-001">
-            </div>
-
-            <div class="campo">
-                <label>Nombre</label>
-                <input id="inp-nombre" placeholder="Ej: Top corto negro">
-            </div>
-
-            <div class="campo">
-                <label>Marca</label>
-                <input id="inp-marca" placeholder="Ej: ANWND">
-            </div>
-
-            <div class="campo">
-                <label>Categoría</label>
-                <select id="inp-tipo">
-                    <option value="">Seleccionar</option>
-                </select>
-            </div>
-
-            <div class="campo">
-                <label>Cantidad total</label>
-                <input id="inp-cantidad" type="number" placeholder="0" readonly>
-                <small>Se calcula automáticamente con las tallas.</small>
-            </div>
-
-            <div class="campo">
-                <label>Variantes del producto</label>
-                <input id="inp-color" type="hidden">
-                <input id="inp-tallas" type="hidden">
-                <div class="variant-builder">
-                    <div class="variant-step">
-                        <strong>1. Color</strong>
-                        <div class="color-builder">
-                            <div id="colorOptions" class="color-options"></div>
-                            <div class="variant-custom-color">
-                                <input id="customColorInput" placeholder="Agregar otro color">
-                                <button type="button" onclick="agregarColorPersonalizado()">Agregar otro</button>
+            <div class="product-form-block">
+                <h3>1. Información básica</h3>
+                <div class="product-basic-grid">
+                    <div class="campo">
+                        <label>Código</label>
+                        <div class="code-field-row">
+                            <input id="inp-codigo" placeholder="Generando código..." readonly>
+                            <button type="button" class="btn-code-refresh" onclick="cargarCodigoSugeridoProducto()" title="Actualizar código sugerido">↻</button>
+                        </div>
+                        <small class="field-hint">Se asigna automáticamente en secuencia: 01-A, 02-A, 03-A...</small>
+                        <div class="product-barcode-preview">
+                            <svg id="codigoBarrasProducto" aria-label="Código de barras del producto"></svg>
+                            <div>
+                                <strong>Código de barras</strong>
+                                <span id="codigoBarrasTexto">Se genera con el código.</span>
+                                <button type="button" onclick="imprimirCodigoBarrasProductoActual()">Imprimir etiqueta</button>
                             </div>
-                            <small id="selectedColorLabel">Selecciona un color antes de agregar tallas</small>
                         </div>
                     </div>
 
-                    <div class="variant-step">
-                        <strong>2. Tallas de ese color</strong>
-                        <div class="size-builder">
-                            <div class="size-mode">
-                                <button type="button" class="size-mode-btn activo" data-size-mode="letras">Letras</button>
-                                <button type="button" class="size-mode-btn" data-size-mode="numeros">Números</button>
-                            </div>
-                            <div id="sizeOptions" class="size-options"></div>
-                            <div class="size-quantity-row">
-                                <span id="selectedSizeLabel">Selecciona una talla</span>
-                                <input id="selectedSizeQty" type="number" min="0" placeholder="Cantidad">
-                                <button type="button" onclick="agregarTallaSeleccionada()">Agregar al color</button>
-                            </div>
-                            <div id="selectedSizesList" class="selected-sizes-list"></div>
+                    <div class="product-basic-fields">
+                        <div class="campo product-name-field">
+                            <label>Nombre</label>
+                            <input id="inp-nombre" placeholder="Ej: Top corto negro">
                         </div>
-                    </div>
 
-                    <div class="variant-step">
-                        <strong>Resumen de colores y tallas</strong>
-                        <input id="inp-variantes" type="hidden">
-                        <div id="selectedVariantsList" class="selected-sizes-list"></div>
+                        <div class="campo">
+                            <label>Categoría</label>
+                            <select id="inp-tipo">
+                                <option value="">Seleccionar</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label>Marca</label>
+                            <input id="inp-marca" placeholder="Ej: ANWND">
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="campo">
-                <label>Precio</label>
-                <input id="inp-precio" type="number" placeholder="0">
+            <div class="product-form-block">
+                <h3>2. Variantes e inventario</h3>
+                <div class="campo">
+                    <label>Color, tallas y cantidades</label>
+                    <input id="inp-color" type="hidden">
+                    <input id="inp-tallas" type="hidden">
+                    <div class="variant-builder">
+                        <div class="variant-step">
+                            <strong>Color</strong>
+                            <div class="color-builder">
+                                <div id="colorOptions" class="color-options"></div>
+                                <div class="variant-custom-color">
+                                    <input id="customColorInput" placeholder="Agregar otro color">
+                                    <button type="button" onclick="agregarColorPersonalizado()">Agregar</button>
+                                </div>
+                                <small id="selectedColorLabel">Selecciona un color antes de agregar tallas</small>
+                            </div>
+                        </div>
+
+                        <div class="variant-step variant-size-step">
+                            <strong>Tallas del color seleccionado</strong>
+                            <div class="size-builder">
+                                <div class="size-mode">
+                                    <button type="button" class="size-mode-btn activo" data-size-mode="letras">Letras</button>
+                                    <button type="button" class="size-mode-btn" data-size-mode="numeros">Números</button>
+                                </div>
+                                <div id="sizeOptions" class="size-options compact-size-options"></div>
+                                <div class="size-quantity-row">
+                                    <span id="selectedSizeLabel">Selecciona una talla</span>
+                                    <input id="selectedSizeQty" type="number" min="0" placeholder="Cantidad">
+                                    <button type="button" onclick="agregarTallaSeleccionada()">Agregar</button>
+                                </div>
+                                <div id="selectedSizesList" class="selected-sizes-list compact-selected-list"></div>
+                            </div>
+                        </div>
+
+                        <input id="inp-variantes" type="hidden">
+                    </div>
+                </div>
+
+                <div class="variant-result-row">
+                    <div class="variant-step variant-summary-step">
+                        <strong>Resumen</strong>
+                        <div id="selectedVariantsList" class="selected-sizes-list compact-selected-list"></div>
+                    </div>
+
+                    <div class="campo compact-total-field">
+                        <label>Cantidad total</label>
+                        <input id="inp-cantidad" type="number" placeholder="0" readonly>
+                        <small>Se calcula automáticamente con las tallas.</small>
+                    </div>
+                </div>
             </div>
 
-            <div class="campo">
-                <label>Costo de compra</label>
-                <input id="inp-costo" type="number" placeholder="0">
+            <div class="product-form-block">
+                <h3>3. Costos y precio</h3>
+                <div class="product-form-grid">
+                    <div class="campo">
+                        <label>Costo de compra</label>
+                        <input id="inp-costo" type="number" step="1000" placeholder="Ej: 100000">
+                    </div>
+
+                    <div class="campo">
+                        <label>Precio de venta</label>
+                        <input id="inp-precio" type="number" step="1000" placeholder="Ej: 185000">
+                    </div>
+                </div>
+
+                <div class="pricing-helper">
+                    <div class="pricing-helper-head">
+                        <div>
+                            <strong>Calculadora de precio</strong>
+                            <small>Calcula con IVA colombiano incluido en el precio final.</small>
+                        </div>
+                        <label>
+                            Ganancia objetivo
+                            <input id="calcMargenObjetivo" type="number" min="1" max="95" value="35">
+                            <span>%</span>
+                        </label>
+                    </div>
+
+                    <div class="pricing-helper-grid">
+                        <div>
+                            <span>Precio sugerido</span>
+                            <strong id="calcPrecioSugerido">$0</strong>
+                        </div>
+                        <div>
+                            <span>IVA incluido</span>
+                            <strong id="calcIvaIncluido">$0</strong>
+                        </div>
+                        <div>
+                            <span>Ingreso sin IVA</span>
+                            <strong id="calcBaseSinIva">$0</strong>
+                        </div>
+                        <div>
+                            <span>Ganancia</span>
+                            <strong id="calcGanancia">$0</strong>
+                        </div>
+                        <div>
+                            <span>Margen actual</span>
+                            <strong id="calcMargenActual">0%</strong>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-price-suggest" onclick="aplicarPrecioSugerido()">
+                        Usar precio sugerido
+                    </button>
+                </div>
             </div>
 
-            <div class="campo">
-                <label>Imágenes</label>
-                <input id="inp-img" type="file" multiple accept="image/*">
-                <small>Puedes elegir varias fotos. La primera será la principal.</small>
+            <div class="product-form-block">
+                <h3>4. Imágenes</h3>
+                <div class="campo">
+                    <label>Fotos del producto</label>
+                    <input id="inp-img" type="file" multiple accept="image/*">
+                    <small>Puedes elegir varias fotos. La primera será la principal.</small>
+                    <div id="previewImagenesProducto" class="product-image-preview"></div>
+                </div>
             </div>
 
             <button class="btn btn-agregar" onclick="agregarProductoBD()">
@@ -443,8 +540,8 @@
             <table class="tabla-inventario">
                 <thead>
                     <tr>
-                        <th>Código</th>
                         <th>Producto</th>
+                        <th>Código</th>
                         <th>Marca</th>
                         <th>Color</th>
                         <th>Tipo</th>
@@ -454,6 +551,7 @@
                         <th>Cantidad</th>
                         <th>Tallas</th>
                         <th>Estado</th>
+                        <th>Código barras</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -591,7 +689,7 @@
 
             <div class="admin-subsection" data-subsection="reportes-productos">
             <div class="finance-grid reportes-productos-grid">
-                <div>
+                <div class="report-table-card compact-report-table">
                     <h3 class="finance-subtitle">Productos mas vendidos</h3>
                     <table class="tabla-inventario">
                         <thead>
@@ -607,7 +705,7 @@
                     </table>
                 </div>
 
-                <div>
+                <div class="report-table-card compact-report-table">
                     <h3 class="finance-subtitle">Menor rotacion</h3>
                     <table class="tabla-inventario">
                         <thead>
@@ -920,7 +1018,7 @@
         </section>
 
         <section id="panel-proveedores" class="admin-panel" data-admin-only>
-            <h2>Proveedores y compras de mercancia</h2>
+            <h2>Proveedores y compras de mercancía</h2>
 
             <div class="admin-section-menu" data-submenu="panel-proveedores">
                 <button type="button" class="activo" data-subsection-target="proveedores-registrar">Registrar</button>
@@ -1316,6 +1414,20 @@
                 </form>
             </div>
         </section>
+
+        <div id="modalCodigoBarrasProducto" class="modal-barcode-producto" aria-hidden="true">
+            <div class="barcode-producto-card">
+                <button type="button" class="barcode-close" onclick="cerrarCodigoBarrasProducto()" aria-label="Cerrar código de barras">&times;</button>
+                <span>Etiqueta interna</span>
+                <h3 id="barcodeModalNombre">Producto</h3>
+                <svg id="barcodeModalSvg"></svg>
+                <strong id="barcodeModalCodigo">Código</strong>
+                <p id="barcodeModalDetalle">Escanea esta etiqueta con el lector para ubicar el producto en la venta.</p>
+                <div id="barcodeModalVariantes" class="barcode-variant-list"></div>
+                <button type="button" class="btn btn-agregar" onclick="imprimirCodigoBarrasModal()">Imprimir etiqueta</button>
+            </div>
+        </div>
+
             </main>
         </div>
     </div>
@@ -1323,15 +1435,16 @@
 
   <!-- SCRIPTS -->
 <script type="module" src="../js/script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 
 
 <script>
-    function activarPanelAdmin(idPanel) {
+    function activarPanelAdmin(idPanel, panelPrincipalForzado) {
         document.querySelectorAll(".admin-panel").forEach(function(panel) {
             panel.classList.toggle("activo", panel.id === idPanel);
         });
 
-        const panelPrincipal = panelPrincipalAdmin(idPanel);
+        const panelPrincipal = panelPrincipalForzado || panelPrincipalAdmin(idPanel);
 
         document.querySelectorAll(".admin-tab").forEach(function(tab) {
             tab.classList.toggle("activo", tab.dataset.panelTarget === panelPrincipal);
@@ -1574,7 +1687,8 @@
     async function agregarProductoBD() {
         if (!exigirAdminFrontend()) return;
 
-        const codigo = document.getElementById("inp-codigo").value.trim().toUpperCase();
+        const codigoValor = document.getElementById("inp-codigo").value.trim().toUpperCase();
+        const codigo = /^[0-9]{2}-[A-Z]$/.test(codigoValor) ? codigoValor : "";
         const nombre = document.getElementById("inp-nombre").value.trim();
         const marca = document.getElementById("inp-marca").value.trim();
         const color = document.getElementById("inp-color").value.trim();
@@ -1588,9 +1702,15 @@
         const imagenes = document.getElementById("inp-img").files;
         const mensajeError = document.getElementById("error-msg");
 
-        if (!codigo || !nombre || !marca || !categoria || cantidad === "" || precio === "" || costo === "") {
+        if (!nombre || !marca || !categoria || cantidad === "" || precio === "" || costo === "") {
             mensajeError.style.display = "block";
             mensajeError.innerText = "Completa todos los campos";
+            return;
+        }
+
+        if (Number(precio) <= 0 || Number(costo) < 0) {
+            mensajeError.style.display = "block";
+            mensajeError.innerText = "Revisa el precio y el costo en pesos colombianos";
             return;
         }
 
@@ -1635,7 +1755,7 @@
             cargarReportesBD();
             cargarMovimientosBD();
 
-            document.getElementById("inp-codigo").value = "";
+            await cargarCodigoSugeridoProducto();
             document.getElementById("inp-nombre").value = "";
             document.getElementById("inp-marca").value = "";
             document.getElementById("inp-color").value = "";
@@ -1655,12 +1775,361 @@
             document.getElementById("inp-precio").value = "";
             document.getElementById("inp-costo").value = "";
             document.getElementById("inp-img").value = "";
+            actualizarPreviewImagenesProducto();
+            calcularPrecioProductoAdmin();
 
         } catch (error) {
             mensajeError.style.display = "block";
             mensajeError.innerText = "Error al guardar el producto";
             console.error(error);
         }  
+    }
+
+    async function cargarCodigoSugeridoProducto() {
+        const campoCodigo = document.getElementById("inp-codigo");
+        if (!campoCodigo) return;
+
+        campoCodigo.value = "Generando...";
+        actualizarCodigoBarrasProducto();
+
+        try {
+            const respuesta = await fetch("../php/producto_siguiente_codigo.php");
+            const resultado = await respuesta.json();
+
+            if (resultado.error) {
+                campoCodigo.value = "";
+                actualizarCodigoBarrasProducto();
+                console.error(resultado.mensaje);
+                return;
+            }
+
+            campoCodigo.value = resultado.codigo || "";
+            actualizarCodigoBarrasProducto();
+        } catch (error) {
+            campoCodigo.value = "";
+            actualizarCodigoBarrasProducto();
+            console.error("Error al generar código de producto", error);
+        }
+    }
+
+    function obtenerCodigoDesdeBarras(valor) {
+        const texto = String(valor || "").trim();
+        if (!texto) return "";
+
+        const partes = texto.split("|");
+        return partes[partes.length - 1].trim().toUpperCase();
+    }
+
+    function generarCodigoBarras(svg, codigo) {
+        if (!svg) return;
+
+        const codigoLimpio = String(codigo || "").trim();
+        svg.innerHTML = "";
+
+        if (!codigoLimpio) {
+            const texto = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            texto.setAttribute("x", "50%");
+            texto.setAttribute("y", "50%");
+            texto.setAttribute("text-anchor", "middle");
+            texto.setAttribute("dominant-baseline", "middle");
+            texto.setAttribute("fill", "#954053");
+            texto.setAttribute("font-size", "14");
+            texto.textContent = "Sin código";
+            svg.appendChild(texto);
+            return;
+        }
+
+        if (window.JsBarcode) {
+            try {
+                window.JsBarcode(svg, codigoLimpio, {
+                    format: "CODE128",
+                    lineColor: "#3b302a",
+                    width: 2,
+                    height: 64,
+                    displayValue: true,
+                    fontSize: 16,
+                    margin: 8
+                });
+                return;
+            } catch (error) {
+                console.error("Error al generar código de barras", error);
+            }
+        }
+
+        const texto = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        texto.setAttribute("x", "50%");
+        texto.setAttribute("y", "50%");
+        texto.setAttribute("text-anchor", "middle");
+        texto.setAttribute("dominant-baseline", "middle");
+        texto.setAttribute("fill", "#954053");
+        texto.setAttribute("font-size", "18");
+        texto.setAttribute("font-weight", "700");
+        texto.textContent = codigoLimpio;
+        svg.appendChild(texto);
+    }
+
+    function actualizarCodigoBarrasProducto() {
+        const campoCodigo = document.getElementById("inp-codigo");
+        const etiqueta = document.getElementById("codigoBarrasTexto");
+        const svg = document.getElementById("codigoBarrasProducto");
+        const codigo = campoCodigo ? campoCodigo.value.trim() : "";
+
+        if (etiqueta) {
+            etiqueta.textContent = codigo && codigo !== "Generando..."
+                ? "Código: " + codigo
+                : "Se genera con el código.";
+        }
+
+        generarCodigoBarras(svg, codigo === "Generando..." ? "" : codigo);
+    }
+
+    function pintarCodigoBarrasModal(variante) {
+        const modal = document.getElementById("modalCodigoBarrasProducto");
+        const etiquetaCodigo = document.getElementById("barcodeModalCodigo");
+        const detalle = document.getElementById("barcodeModalDetalle");
+
+        if (!modal || !variante) return;
+
+        modal.dataset.codigo = variante.codigo || "";
+        modal.dataset.nombre = variante.nombre || "Producto";
+        etiquetaCodigo.textContent = variante.codigo || "Sin código";
+        if (detalle) {
+            detalle.textContent = variante.detalle || "Escanea esta etiqueta con el lector para ubicar la variante en la venta.";
+        }
+
+        generarCodigoBarras(document.getElementById("barcodeModalSvg"), variante.codigo);
+    }
+
+    function abrirCodigosBarrasVariantesProducto(variantes, nombre) {
+        const modal = document.getElementById("modalCodigoBarrasProducto");
+        const titulo = document.getElementById("barcodeModalNombre");
+        const contenedorVariantes = document.getElementById("barcodeModalVariantes");
+
+        if (!modal) return;
+
+        modal.dataset.nombre = nombre || "Producto";
+        titulo.textContent = nombre || "Producto";
+        modal.dataset.variantes = JSON.stringify(variantes || []);
+
+        if (contenedorVariantes) {
+            contenedorVariantes.innerHTML = "";
+
+            (variantes || []).forEach(function(variante, indice) {
+                const boton = document.createElement("button");
+                boton.type = "button";
+                boton.textContent = variante.etiqueta || variante.codigo;
+                boton.className = indice === 0 ? "activo" : "";
+                boton.addEventListener("click", function() {
+                    contenedorVariantes.querySelectorAll("button").forEach(function(item) {
+                        item.classList.remove("activo");
+                    });
+                    boton.classList.add("activo");
+                    pintarCodigoBarrasModal(variante);
+                });
+                contenedorVariantes.appendChild(boton);
+            });
+        }
+
+        modal.classList.add("activo");
+        modal.setAttribute("aria-hidden", "false");
+
+        pintarCodigoBarrasModal((variantes || [])[0] || {
+            codigo: "",
+            nombre,
+            detalle: "Este producto todavía no tiene códigos de variantes."
+        });
+    }
+
+    function abrirCodigoBarrasProducto(codigo, nombre) {
+        abrirCodigosBarrasVariantesProducto([{
+            codigo,
+            nombre,
+            etiqueta: "Producto",
+            detalle: "Código general del producto."
+        }], nombre);
+    }
+
+    function cerrarCodigoBarrasProducto() {
+        const modal = document.getElementById("modalCodigoBarrasProducto");
+        if (!modal) return;
+
+        modal.classList.remove("activo");
+        modal.setAttribute("aria-hidden", "true");
+    }
+
+    function imprimirEtiquetaCodigoBarras(codigo, nombre, svg) {
+        if (!codigo || !svg) {
+            alert("No hay código de barras disponible para imprimir.");
+            return;
+        }
+
+        const serializado = new XMLSerializer().serializeToString(svg);
+        const imagen = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(serializado);
+        const ventana = window.open("", "_blank", "width=420,height=560");
+
+        if (!ventana) {
+            alert("Permite las ventanas emergentes para imprimir la etiqueta.");
+            return;
+        }
+
+        ventana.document.write(`
+            <html>
+                <head>
+                    <title>Etiqueta ${limpiarTextoBD(codigo)}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; display: grid; place-items: center; min-height: 100vh; margin: 0; color: #3b302a; }
+                        .label { width: 260px; border: 1px solid #d9c1c3; padding: 22px; text-align: center; }
+                        h1 { margin: 0 0 6px; color: #954053; font-size: 22px; }
+                        h2 { margin: 0 0 14px; font-size: 15px; font-weight: 600; }
+                        img { width: 240px; height: auto; }
+                        strong { display: block; margin-top: 12px; font-size: 22px; letter-spacing: 0.08em; }
+                        p { margin: 8px 0 0; font-size: 12px; color: #786b64; }
+                    </style>
+                </head>
+                <body>
+                    <div class="label">
+                        <h1>Isa Boutique</h1>
+                        <h2>${limpiarTextoBD(nombre || "Producto")}</h2>
+                        <img src="${imagen}" alt="Código de barras ${limpiarTextoBD(codigo)}">
+                        <strong>${limpiarTextoBD(codigo)}</strong>
+                        <p>Identificación interna de producto</p>
+                    </div>
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                        };
+                    <\/script>
+                </body>
+            </html>
+        `);
+        ventana.document.close();
+    }
+
+    function imprimirCodigoBarrasProductoActual() {
+        const codigo = document.getElementById("inp-codigo")?.value.trim();
+        const nombre = document.getElementById("inp-nombre")?.value.trim() || "Producto";
+        imprimirEtiquetaCodigoBarras(codigo, nombre, document.getElementById("codigoBarrasProducto"));
+    }
+
+    function imprimirCodigoBarrasModal() {
+        const modal = document.getElementById("modalCodigoBarrasProducto");
+        imprimirEtiquetaCodigoBarras(
+            modal?.dataset.codigo || "",
+            modal?.dataset.nombre || "Producto",
+            document.getElementById("barcodeModalSvg")
+        );
+    }
+
+    function buscarVariantePorCodigoAdmin(codigo) {
+        const codigoNormalizado = String(codigo || "").toUpperCase();
+
+        for (const producto of productosVentaAdmin) {
+            const colores = leerColoresBD(producto.colores);
+
+            for (const color of colores) {
+                const tallas = leerTallasBD(color.tallas);
+
+                for (const talla of tallas) {
+                    if (String(talla.codigo_barras || "").toUpperCase() === codigoNormalizado) {
+                        return {
+                            producto,
+                            color,
+                            talla
+                        };
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    function seleccionarProductoVentaAdminPorCodigo(codigoLeido) {
+        const codigo = obtenerCodigoDesdeBarras(codigoLeido);
+        const mensaje = document.getElementById("mensajeVentaAdmin");
+        const campoCodigo = document.getElementById("ventaAdminCodigoBarras");
+        const selectorProducto = document.getElementById("ventaAdminProducto");
+        const selectorColor = document.getElementById("ventaAdminColor");
+        const selectorTalla = document.getElementById("ventaAdminTalla");
+
+        if (campoCodigo) campoCodigo.value = codigo;
+
+        const variante = buscarVariantePorCodigoAdmin(codigo);
+
+        if (variante) {
+            selectorProducto.value = variante.producto.id_producto;
+            llenarColoresVentaAdmin();
+            if (selectorColor) selectorColor.value = variante.color.id_producto_color;
+            llenarTallasVentaAdmin();
+            if (selectorTalla) selectorTalla.value = variante.talla.talla;
+            actualizarResumenVentaAdmin();
+
+            if (mensaje) {
+                mensaje.textContent = "Variante seleccionada: "
+                    + variante.producto.nombre
+                    + " / " + variante.color.color
+                    + " / talla " + variante.talla.talla + ".";
+            }
+            return true;
+        }
+
+        const producto = productosVentaAdmin.find(function(item) {
+            return String(item.codigo || "").toUpperCase() === codigo;
+        });
+
+        if (!producto) {
+            if (mensaje) mensaje.textContent = "No se encontró producto ni variante con el código " + codigo + ".";
+            return false;
+        }
+
+        selectorProducto.value = producto.id_producto;
+        llenarColoresVentaAdmin();
+        actualizarResumenVentaAdmin();
+
+        if (mensaje) mensaje.textContent = "Producto seleccionado por código de barras: " + producto.nombre + ".";
+        return true;
+    }
+
+    function buscarProductoVentaAdminPorCodigo() {
+        const codigo = document.getElementById("ventaAdminCodigoBarras")?.value || "";
+        seleccionarProductoVentaAdminPorCodigo(codigo);
+    }
+
+    function actualizarPreviewImagenesProducto() {
+        const input = document.getElementById("inp-img");
+        const contenedor = document.getElementById("previewImagenesProducto");
+
+        if (!input || !contenedor) return;
+
+        contenedor.innerHTML = "";
+
+        const archivos = Array.from(input.files || []);
+
+        if (archivos.length === 0) {
+            contenedor.classList.remove("activo");
+            return;
+        }
+
+        contenedor.classList.add("activo");
+
+        archivos.forEach(function(archivo, indice) {
+            const tarjeta = document.createElement("div");
+            tarjeta.className = "product-image-preview-item";
+
+            const imagen = document.createElement("img");
+            imagen.src = URL.createObjectURL(archivo);
+            imagen.alt = archivo.name;
+            imagen.onload = function() {
+                URL.revokeObjectURL(imagen.src);
+            };
+
+            const etiqueta = document.createElement("span");
+            etiqueta.textContent = indice === 0 ? "Principal" : "Foto " + (indice + 1);
+
+            tarjeta.appendChild(imagen);
+            tarjeta.appendChild(etiqueta);
+            contenedor.appendChild(tarjeta);
+        });
     }
     
     async function cambiarEstadoProductoBD(idProducto, estadoActual) {
@@ -2024,6 +2493,17 @@
         });
     }
 
+    function activarPanelConSubseccion(idPanel, idSubseccion, panelPrincipalForzado) {
+        activarPanelAdmin(idPanel, panelPrincipalForzado);
+
+        const panel = document.getElementById(idPanel);
+        const menu = panel ? panel.querySelector(".admin-section-menu") : null;
+
+        if (menu && idSubseccion) {
+            activarSubseccionAdmin(menu, idSubseccion);
+        }
+    }
+
     function actualizarColorAdmin() {
         const input = document.getElementById("inp-color");
         const etiqueta = document.getElementById("selectedColorLabel");
@@ -2232,7 +2712,7 @@
                 return;
             }
 
-            imprimirFacturaBD(resultado.factura, resultado.detalles);
+            imprimirFacturaBD(resultado.factura, resultado.detalles, resultado.empresa);
             cargarFacturasBD();
             cargarHistorialVentasBD();
         } catch (error) {
@@ -2241,7 +2721,8 @@
         }
     }
 
-    function imprimirFacturaBD(factura, detalles) {
+    function imprimirFacturaBD(factura, detalles, empresa) {
+        empresa = empresa || {};
         const filas = detalles.map(function(detalle) {
             return `
                 <tr>
@@ -2283,21 +2764,30 @@
                 <meta charset="UTF-8">
                 <title>${limpiarTextoBD(factura.numero_factura)}</title>
                 <style>
-                    body { font-family: Arial, sans-serif; color: #2f2424; margin: 32px; }
-                    header { display: flex; justify-content: space-between; gap: 24px; border-bottom: 2px solid #954053; padding-bottom: 18px; margin-bottom: 24px; }
-                    h1 { margin: 0; color: #954053; font-family: Georgia, serif; font-weight: 400; }
-                    h2 { margin: 0 0 6px; font-size: 18px; }
-                    p { margin: 4px 0; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 22px; }
-                    th, td { border-bottom: 1px solid #ead8d2; padding: 10px; text-align: left; }
-                    th { background: #fff3ef; color: #5c353b; }
-                    .totales { margin-left: auto; margin-top: 24px; width: 280px; }
-                    .totales div { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ead8d2; }
-                    .total { font-size: 18px; font-weight: 700; color: #954053; }
-                    .acciones { display: flex; gap: 10px; margin-bottom: 18px; }
-                    .acciones button, .acciones a { border: 0; background: #954053; color: #fff; padding: 10px 14px; text-decoration: none; cursor: pointer; font-size: 14px; }
+                    * { box-sizing: border-box; }
+                    body { margin: 0; background: #f6f1ed; color: #2f2424; font-family: Arial, sans-serif; }
+                    .factura { width: min(960px, calc(100% - 36px)); margin: 24px auto; padding: 34px; background: #fffdfb; border: 1px solid #ead8d2; }
+                    .acciones { display: flex; gap: 10px; width: min(960px, calc(100% - 36px)); margin: 24px auto 0; }
+                    .acciones button, .acciones a { border: 0; border-radius: 8px; background: #954053; color: #fff; padding: 11px 16px; text-decoration: none; cursor: pointer; font-size: 14px; }
                     .acciones a.inactivo { background: #b8aaa5; pointer-events: none; }
-                    @media print { .acciones { display: none; } body { margin: 18px; } }
+                    header { display: grid; grid-template-columns: 1.4fr 0.8fr; gap: 24px; border-bottom: 3px solid #954053; padding-bottom: 22px; margin-bottom: 24px; }
+                    h1 { margin: 0 0 8px; color: #954053; font-family: Georgia, serif; font-size: 34px; font-weight: 400; }
+                    h2 { margin: 0 0 8px; color: #5c353b; font-size: 17px; }
+                    p { margin: 4px 0; line-height: 1.45; }
+                    .muted { color: #746760; font-size: 12px; }
+                    .factura-box { border: 1px solid #ead8d2; border-radius: 12px; padding: 16px; background: #fff8f5; }
+                    .factura-box strong { display: block; color: #954053; font-size: 22px; margin-bottom: 8px; }
+                    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 20px; }
+                    .panel { border: 1px solid #ead8d2; border-radius: 12px; padding: 16px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 22px; }
+                    th, td { border-bottom: 1px solid #ead8d2; padding: 11px 9px; text-align: left; font-size: 13px; }
+                    th { background: #fff3ef; color: #5c353b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+                    .totales { margin-left: auto; margin-top: 24px; width: min(360px, 100%); border: 1px solid #ead8d2; border-radius: 12px; padding: 14px 16px; background: #fff8f5; }
+                    .totales div { display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; border-bottom: 1px solid #ead8d2; }
+                    .totales div:last-child { border-bottom: 0; }
+                    .total { font-size: 18px; font-weight: 700; color: #954053; }
+                    .nota { margin-top: 24px; padding: 14px 16px; border-left: 4px solid #d6b890; background: #fff8f0; color: #6f5b4f; font-size: 12px; }
+                    @media print { .acciones { display: none; } body { background: #fff; } .factura { width: 100%; margin: 0; border: 0; } }
                 </style>
             </head>
             <body>
@@ -2305,50 +2795,69 @@
                     <button onclick="window.print()">Imprimir</button>
                     <a class="${enlaceCorreo ? "" : "inactivo"}" href="${enlaceCorreo || "#"}">Enviar por correo</a>
                 </div>
-                <header>
-                    <div>
-                        <h1>Isa Boutique</h1>
-                        <p>Moda femenina</p>
+                <div class="factura">
+                    <header>
+                        <div>
+                            <h1>${limpiarTextoBD(empresa.nombre_comercial || "Isa Boutique")}</h1>
+                            <p><strong>${limpiarTextoBD(empresa.razon_social || "Isa Boutique")}</strong></p>
+                            <p>NIT/Documento: ${limpiarTextoBD(empresa.nit || "Pendiente")}</p>
+                            <p>${limpiarTextoBD(empresa.regimen || "Régimen no definido")}</p>
+                            <p>${limpiarTextoBD(empresa.direccion || "Dirección pendiente")} - ${limpiarTextoBD(empresa.ciudad || "Colombia")}</p>
+                            <p>Tel: ${limpiarTextoBD(empresa.telefono || "Pendiente")} | ${limpiarTextoBD(empresa.correo || "contacto@isaboutique.com")}</p>
+                            <p class="muted">${limpiarTextoBD(empresa.actividad_economica || "Comercio al por menor")}</p>
+                        </div>
+                        <div class="factura-box">
+                            <strong>${limpiarTextoBD(factura.numero_factura)}</strong>
+                            <p>Venta: ${factura.id_venta}</p>
+                            <p>Fecha: ${new Date(factura.fecha_factura).toLocaleString()}</p>
+                            <p>Estado: ${limpiarTextoBD(factura.estado_factura)}</p>
+                            <p>IVA incluido: ${factura.precio_incluye_iva ? "Sí" : "No"}</p>
+                        </div>
+                    </header>
+
+                    <section class="grid">
+                        <div class="panel">
+                            <h2>Cliente</h2>
+                            <p><strong>${limpiarTextoBD(factura.cliente)}</strong></p>
+                            <p>Documento: ${limpiarTextoBD(factura.tipo_documento || "CC")} ${limpiarTextoBD(factura.numero_documento || "-")}</p>
+                            <p>Teléfono: ${limpiarTextoBD(factura.telefono)}</p>
+                            <p>Correo: ${limpiarTextoBD(factura.correo || "-")}</p>
+                            <p>Dirección: ${limpiarTextoBD(factura.direccion || "-")}</p>
+                        </div>
+                        <div class="panel">
+                            <h2>Operación</h2>
+                            <p>Canal: ${etiquetaCanalVenta(factura.canal_venta)}</p>
+                            <p>Pago: ${limpiarTextoBD(factura.medio_pago)}</p>
+                            <p>Entrega: ${limpiarTextoBD(factura.tipo_entrega || "-")}</p>
+                            <p>Atendido por: ${limpiarTextoBD(factura.atendido_por)}</p>
+                        </div>
+                    </section>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Producto</th>
+                                <th>Color</th>
+                                <th>Talla</th>
+                                <th>Cant.</th>
+                                <th>Precio</th>
+                                <th>IVA</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>${filas}</tbody>
+                    </table>
+
+                    <div class="totales">
+                        <div><span>Subtotal bruto</span><strong>${formatoPrecioBD(factura.subtotal)}</strong></div>
+                        <div><span>Descuento</span><strong>${formatoPrecioBD(factura.descuento)}</strong></div>
+                        <div><span>Base gravable</span><strong>${formatoPrecioBD(factura.base_gravable)}</strong></div>
+                        <div><span>IVA (${Number(factura.tarifa_iva || 19).toFixed(0)}%)</span><strong>${formatoPrecioBD(factura.iva)}</strong></div>
+                        <div class="total"><span>Total</span><strong>${formatoPrecioBD(factura.total)}</strong></div>
                     </div>
-                    <div>
-                        <h2>Factura ${limpiarTextoBD(factura.numero_factura)}</h2>
-                        <p>Venta: ${factura.id_venta}</p>
-                        <p>Fecha: ${new Date(factura.fecha_factura).toLocaleString()}</p>
-                        <p>Estado: ${limpiarTextoBD(factura.estado_factura)}</p>
-                    </div>
-                </header>
 
-                <section>
-                    <h2>Cliente</h2>
-                    <p>${limpiarTextoBD(factura.cliente)}</p>
-                    <p>Teléfono: ${limpiarTextoBD(factura.telefono)}</p>
-                    <p>Correo: ${limpiarTextoBD(factura.correo || "-")}</p>
-                    <p>Canal: ${etiquetaCanalVenta(factura.canal_venta)} | Pago: ${limpiarTextoBD(factura.medio_pago)}</p>
-                    <p>Atendido por: ${limpiarTextoBD(factura.atendido_por)}</p>
-                </section>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Código</th>
-                            <th>Producto</th>
-                            <th>Color</th>
-                            <th>Talla</th>
-                            <th>Cantidad</th>
-                            <th>Precio</th>
-                            <th>IVA</th>
-                            <th>Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody>${filas}</tbody>
-                </table>
-
-                <div class="totales">
-                    <div><span>Subtotal bruto</span><strong>${formatoPrecioBD(factura.subtotal)}</strong></div>
-                    <div><span>Descuento</span><strong>${formatoPrecioBD(factura.descuento)}</strong></div>
-                    <div><span>Base gravable</span><strong>${formatoPrecioBD(factura.base_gravable)}</strong></div>
-                    <div><span>IVA (${Number(factura.tarifa_iva || 19).toFixed(0)}%)</span><strong>${formatoPrecioBD(factura.iva)}</strong></div>
-                    <div class="total"><span>Total</span><strong>${formatoPrecioBD(factura.total)}</strong></div>
+                    <div class="nota">${limpiarTextoBD(empresa.nota_legal || "")}</div>
                 </div>
             </body>
             </html>
@@ -2689,7 +3198,7 @@
             if (productos.error) {
                 tabla.innerHTML = `
                 <tr>
-                    <td colspan="12">${productos.mensaje}</td>
+                    <td colspan="13">${productos.mensaje}</td>
                 </tr>
                 `;
                 return;
@@ -2697,6 +3206,9 @@
             
             const productosFiltrados = productos.filter(function(producto) {
                 const codigo = producto.codigo ? producto.codigo.toLowerCase() : "";
+                const codigosVariantes = codigosBarrasVariantesBD(producto).map(function(variante) {
+                    return variante.codigo;
+                }).join(" ").toLowerCase();
                 const nombre = producto.nombre ? producto.nombre.toLowerCase() : "";
                 const marca = producto.marca ? producto.marca.toLowerCase() : "";
                 const color = textoColoresBD(producto).toLowerCase();
@@ -2705,6 +3217,7 @@
                 
                 return (
                     codigo.includes(textoBusqueda) ||
+                    codigosVariantes.includes(textoBusqueda) ||
                     nombre.includes(textoBusqueda) ||
                     marca.includes(textoBusqueda) ||
                     color.includes(textoBusqueda) ||
@@ -2716,7 +3229,7 @@
             if (productosFiltrados.length === 0) {
                 tabla.innerHTML = `
                 <tr>
-                    <td colspan="12">No se encontraron productos</td>
+                    <td colspan="13">No se encontraron productos</td>
                 </tr>
                 `;
                 return;
@@ -2725,6 +3238,7 @@
             productosFiltrados.forEach(function(producto) {
                 let claseEstado = "stock-alto";
                 const nombreSeguro = String(producto.nombre || "").replace(/'/g, "\\'");
+                const variantesCodigo = codigosBarrasVariantesBD(producto);
                 const accionesAdmin = usuarioEsAdmin()
                     ? `
                         <button onclick="editarProductoBD(${producto.id_producto})">Editar</button>
@@ -2744,8 +3258,16 @@
                 
                 tabla.innerHTML += `
                 <tr>
-                    <td>${producto.codigo}</td>
-                    <td>${producto.nombre}</td>
+                    <td>
+                        <div class="inventory-product-cell">
+                            <img src="${rutaImagenAdmin(producto)}" alt="${limpiarTextoBD(producto.nombre)}">
+                            <div>
+                                <strong>${limpiarTextoBD(producto.nombre)}</strong>
+                                <span>${limpiarTextoBD(producto.categoria)}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="inventory-code-badge">${limpiarTextoBD(producto.codigo)}</span></td>
                     <td>${producto.marca}</td>
                     <td>${textoColoresBD(producto)}</td>
                     <td>${producto.categoria}</td>
@@ -2755,6 +3277,9 @@
                     <td>${producto.cantidad}</td>
                     <td>${textoTallasBD(producto.tallas) || "-"}</td>
                     <td class="${claseEstado}">${producto.estado}</td>
+                    <td>
+                        <button type="button" class="btn-barcode-producto" onclick='abrirCodigosBarrasVariantesProducto(${JSON.stringify(variantesCodigo)}, ${JSON.stringify(producto.nombre || "Producto")})'>Variantes</button>
+                    </td>
                     <td>${accionesAdmin}</td>
                 </tr>
                 `;
@@ -2763,7 +3288,7 @@
         } catch (error) {
             tabla.innerHTML = `
             <tr>
-                <td colspan="12">Error al cargar inventario desde PostgreSQL</td>
+                <td colspan="13">Error al cargar inventario desde PostgreSQL</td>
             </tr>
             `;
             console.error(error);
@@ -2771,7 +3296,43 @@
     }
     
     function formatoPrecioBD(valor) {
-        return "$" + Number(valor).toLocaleString("es-CO");
+        return "$" + Number(valor || 0).toLocaleString("es-CO", {
+            maximumFractionDigits: 0
+        }) + " COP";
+    }
+
+    function calcularPrecioProductoAdmin() {
+        const precio = Number(document.getElementById("inp-precio")?.value || 0);
+        const costo = Number(document.getElementById("inp-costo")?.value || 0);
+        const margenObjetivo = Number(document.getElementById("calcMargenObjetivo")?.value || 35);
+        const tarifaIva = 0.19;
+        const margenDecimal = Math.min(Math.max(margenObjetivo, 1), 95) / 100;
+        const precioSugerido = costo > 0 ? (costo / (1 - margenDecimal)) * (1 + tarifaIva) : 0;
+        const baseSinIva = precio > 0 ? precio / (1 + tarifaIva) : 0;
+        const ivaIncluido = precio > 0 ? precio - baseSinIva : 0;
+        const ganancia = baseSinIva - costo;
+        const margenActual = baseSinIva > 0 ? (ganancia / baseSinIva) * 100 : 0;
+
+        document.getElementById("calcPrecioSugerido").textContent = formatoPrecioBD(Math.ceil(precioSugerido / 100) * 100);
+        document.getElementById("calcIvaIncluido").textContent = formatoPrecioBD(ivaIncluido);
+        document.getElementById("calcBaseSinIva").textContent = formatoPrecioBD(baseSinIva);
+        document.getElementById("calcGanancia").textContent = formatoPrecioBD(ganancia);
+        document.getElementById("calcMargenActual").textContent = margenActual.toFixed(1) + "%";
+    }
+
+    function aplicarPrecioSugerido() {
+        const costo = Number(document.getElementById("inp-costo")?.value || 0);
+        const margenObjetivo = Number(document.getElementById("calcMargenObjetivo")?.value || 35);
+
+        if (costo <= 0) {
+            alert("Primero ingresa el costo de compra.");
+            return;
+        }
+
+        const margenDecimal = Math.min(Math.max(margenObjetivo, 1), 95) / 100;
+        const precioSugerido = (costo / (1 - margenDecimal)) * 1.19;
+        document.getElementById("inp-precio").value = Math.ceil(precioSugerido / 100) * 100;
+        calcularPrecioProductoAdmin();
     }
 
     function limpiarTextoBD(valor) {
@@ -3939,6 +4500,33 @@
         }).join(", ");
     }
 
+    function leerImagenesBD(imagenes) {
+        if (Array.isArray(imagenes)) return imagenes;
+
+        if (typeof imagenes === "string" && imagenes.trim() !== "") {
+            try {
+                return JSON.parse(imagenes);
+            } catch (error) {
+                return [];
+            }
+        }
+
+        return [];
+    }
+
+    function rutaImagenAdmin(producto) {
+        const imagenes = leerImagenesBD(producto ? producto.imagenes : []);
+        const principal = imagenes.find(function(item) {
+            return item.principal === true || item.principal === "t" || item.principal === 1;
+        });
+        const ruta = (principal && principal.ruta) || (imagenes[0] && imagenes[0].ruta) || (producto ? producto.imagen : "");
+
+        if (!ruta) return "../img/logo.png.png";
+        if (ruta.startsWith("http") || ruta.startsWith("../")) return ruta;
+        if (ruta.startsWith("img/")) return "../" + ruta;
+        return ruta;
+    }
+
     function textoTallasBD(tallas) {
         const lista = leerTallasBD(tallas);
 
@@ -3949,6 +4537,37 @@
         return lista.map(function(item) {
             return item.talla + ":" + item.cantidad;
         }).join(", ");
+    }
+
+    function codigosBarrasVariantesBD(producto) {
+        const variantes = [];
+        const colores = leerColoresBD(producto ? producto.colores : []);
+
+        colores.forEach(function(color) {
+            leerTallasBD(color.tallas).forEach(function(talla) {
+                if (!talla.codigo_barras) return;
+
+                variantes.push({
+                    codigo: talla.codigo_barras,
+                    nombre: producto.nombre || "Producto",
+                    etiqueta: (color.color || "Color") + " / " + (talla.talla || "Talla"),
+                    detalle: "Color: " + (color.color || "-")
+                        + " | Talla: " + (talla.talla || "-")
+                        + " | Stock: " + Number(talla.cantidad || 0)
+                });
+            });
+        });
+
+        if (variantes.length === 0 && producto && producto.codigo) {
+            variantes.push({
+                codigo: producto.codigo,
+                nombre: producto.nombre || "Producto",
+                etiqueta: "Producto",
+                detalle: "Código general del producto."
+            });
+        }
+
+        return variantes;
     }
 
     function productosVendiblesAdmin() {
@@ -4067,8 +4686,12 @@
             return item.talla === talla;
         });
 
+        const codigoResumen = tallaSeleccionada && tallaSeleccionada.codigo_barras
+            ? tallaSeleccionada.codigo_barras
+            : (producto ? producto.codigo : "-");
+
         document.getElementById("ventaAdminNombreProducto").textContent = producto ? producto.nombre : "Sin producto seleccionado";
-        document.getElementById("ventaAdminCodigoProducto").textContent = "Código: " + (producto ? producto.codigo : "-");
+        document.getElementById("ventaAdminCodigoProducto").textContent = "Código: " + codigoResumen;
         document.getElementById("ventaAdminColorProducto").textContent = "Color: " + (colorSeleccionado ? colorSeleccionado.color : (producto ? textoColoresBD(producto) : "-"));
         document.getElementById("ventaAdminTallasProducto").textContent = "Tallas disponibles: " + (producto ? textoTallasBD(tallas) : "-");
         document.getElementById("ventaAdminStockProducto").textContent = "Stock talla: " + (tallaSeleccionada ? tallaSeleccionada.cantidad : "-");
@@ -4078,8 +4701,21 @@
         const total = bruto - descuento;
         const base = total / 1.19;
         const iva = total - base;
+        const desglose = document.getElementById("ventaAdminDesglose");
 
-        document.getElementById("ventaAdminTotal").textContent = formatoPrecioBD(total) + " | IVA incluido: " + formatoPrecioBD(iva);
+        if (desglose) {
+            desglose.innerHTML = `
+                <div><span>Subtotal</span><strong>${formatoPrecioBD(bruto)}</strong></div>
+                <div><span>Descuento</span><strong>${formatoPrecioBD(descuento)}</strong></div>
+                <div><span>Base sin IVA</span><strong>${formatoPrecioBD(base)}</strong></div>
+                <div><span>IVA incluido</span><strong>${formatoPrecioBD(iva)}</strong></div>
+            `;
+        }
+
+        document.getElementById("ventaAdminTotal").innerHTML = `
+            <span class="venta-total-monto">${formatoPrecioBD(total)}</span>
+            <span class="venta-total-iva">IVA incluido: ${formatoPrecioBD(iva)}</span>
+        `;
     }
 
     async function cargarProductosVentaAdmin() {
@@ -4109,6 +4745,8 @@
         datos.append("cliente", document.getElementById("ventaAdminCliente").value.trim());
         datos.append("telefono", document.getElementById("ventaAdminTelefono").value.trim());
         datos.append("correo", document.getElementById("ventaAdminCorreo").value.trim());
+        datos.append("tipo_documento", document.getElementById("ventaAdminTipoDocumento")?.value || "CC");
+        datos.append("numero_documento", document.getElementById("ventaAdminNumeroDocumento")?.value.trim() || "");
         datos.append("cantidad", document.getElementById("ventaAdminCantidad").value);
         datos.append("descuento_tipo", document.getElementById("ventaAdminDescuentoTipo").value);
         datos.append("descuento_valor", document.getElementById("ventaAdminDescuentoValor").value);
@@ -4118,6 +4756,7 @@
         datos.append("id_producto_color", document.getElementById("ventaAdminColor")?.value || "");
         datos.append("color", document.getElementById("ventaAdminColor")?.selectedOptions[0]?.textContent || "");
         datos.append("talla", document.getElementById("ventaAdminTalla").value);
+        datos.append("codigo_barras", document.getElementById("ventaAdminCodigoBarras")?.value.trim() || "");
 
         mensaje.textContent = "";
 
@@ -4138,6 +4777,8 @@
 
             if (resultado.factura) {
                 abrirFacturaBD(resultado.id_venta);
+            } else {
+                mensaje.textContent = "Pedido registrado como pendiente. La factura se emite cuando se confirme el pago.";
             }
 
             document.getElementById("formVentaAdmin").reset();
@@ -4290,6 +4931,7 @@
         definirFechasFinanzas();
 
         if (usuarioEsAdmin()) {
+            cargarCodigoSugeridoProducto();
             cargarCambiosPrecioBD();
             cargarFinanzasBD();
             cargarResumenFinancieroBD();
@@ -4397,6 +5039,22 @@
     document.getElementById("ventaAdminCantidad")?.addEventListener("input", actualizarResumenVentaAdmin);
     document.getElementById("ventaAdminDescuentoTipo")?.addEventListener("change", actualizarResumenVentaAdmin);
     document.getElementById("ventaAdminDescuentoValor")?.addEventListener("input", actualizarResumenVentaAdmin);
+    document.getElementById("inp-precio")?.addEventListener("input", calcularPrecioProductoAdmin);
+    document.getElementById("inp-costo")?.addEventListener("input", calcularPrecioProductoAdmin);
+    document.getElementById("calcMargenObjetivo")?.addEventListener("input", calcularPrecioProductoAdmin);
+    document.getElementById("inp-img")?.addEventListener("change", actualizarPreviewImagenesProducto);
+    document.getElementById("ventaAdminCodigoBarras")?.addEventListener("keydown", function(evento) {
+        if (evento.key === "Enter") {
+            evento.preventDefault();
+            buscarProductoVentaAdminPorCodigo();
+        }
+    });
+    document.getElementById("modalCodigoBarrasProducto")?.addEventListener("click", function(evento) {
+        if (evento.target.id === "modalCodigoBarrasProducto") {
+            cerrarCodigoBarrasProducto();
+        }
+    });
+    calcularPrecioProductoAdmin();
 
     async function cargarCambiosPrecioBD() {
         const tabla = document.getElementById("tablaCambiosPrecio");

@@ -16,6 +16,20 @@ try {
     $campoColor = $productoTieneColor ? "p.color" : "'' AS color";
     $grupoColor = $productoTieneColor ? ", p.color" : "";
 
+    $consultaCodigoBarras = $conexion->query("
+        SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+            AND table_name = 'producto_color_talla'
+            AND column_name = 'codigo_barras'
+        ) AS existe
+    ");
+    $tallaTieneCodigoBarras = filter_var($consultaCodigoBarras->fetch()["existe"], FILTER_VALIDATE_BOOLEAN);
+    $campoCodigoBarrasTalla = $tallaTieneCodigoBarras
+        ? "pct.codigo_barras"
+        : "(p.codigo || '-V' || LPAD(pct.id_producto_color_talla::TEXT, 4, '0'))";
+
     $sql = "
         SELECT
             p.id_producto,
@@ -51,7 +65,8 @@ try {
                             SELECT json_agg(
                                 json_build_object(
                                     'talla', pct.talla,
-                                    'cantidad', pct.cantidad
+                                    'cantidad', pct.cantidad,
+                                    'codigo_barras', $campoCodigoBarrasTalla
                                 )
                                 ORDER BY pct.talla
                             )

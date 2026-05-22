@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -9,6 +9,10 @@
 
 <body class="public-page stitch-home">
 
+    <!-- Orbes flotantes de fondo premium -->
+    <div class="floating-glow glow-1"></div>
+    <div class="floating-glow glow-2"></div>
+
     <nav class="menu stitch-nav">
         <a class="nav-home-arrow" href="index.html" title="Volver al inicio">&larr;</a>
         <a class="brand-link" href="index.html">Isa Boutique</a>
@@ -18,24 +22,58 @@
         <a href="categoria.html?tipo=vestidos">Vestidos</a>
         <a href="categoria.html?tipo=conjuntos">Conjuntos</a>
         <a href="#contacto">Contacto</a>
-        <a class="cart-link" href="Producto.html">Carrito <span id="cartCount">0</span></a>
+        <a class="cart-link" href="Producto.html"><span class="cart-icon" aria-hidden="true">🛒</span> Carrito <span id="cartCount">0</span></a>
     </nav>
 
     <header class="stitch-hero">
-        <img src="../img/editorial/hero-boutique.png" alt="Moda femenina Isa Boutique">
-        <div class="stitch-hero-copy">
-            <span>Nueva colección</span>
-            <h1>Moda femenina</h1>
-            <p>Prendas modernas, delicadas y seleccionadas para acompañar tu estilo.</p>
-            <div class="hero-actions">
-                <a class="boton-comprar" href="Producto.html">Ver colección</a>
-                <a class="boton-secundario" href="#colecciones">Explorar más</a>
+        <div class="hero-slides">
+            <div class="hero-slide active slide-1">
+                <img src="../img/editorial/hero-boutique.png" alt="Moda femenina Isa Boutique">
+                <div class="stitch-hero-copy">
+                    <span>Nueva colección</span>
+                    <h1>Moda femenina</h1>
+                    <p>Prendas modernas, delicadas y seleccionadas para acompañar tu estilo.</p>
+                    <div class="hero-actions">
+                        <a class="boton-comprar" href="Producto.html">Ver colección</a>
+                        <a class="boton-secundario" href="#colecciones">Explorar más</a>
+                    </div>
+                </div>
             </div>
+            <div class="hero-slide slide-2">
+                <img src="../img/editorial/vestidos-editorial.png" alt="Vestidos elegantes Isa Boutique">
+                <div class="stitch-hero-copy">
+                    <span>Diseños exclusivos</span>
+                    <h1>Estilo & Elegancia</h1>
+                    <p>Luce espectacular en tus momentos especiales con nuestra selección de vestidos.</p>
+                    <div class="hero-actions">
+                        <a class="boton-comprar" href="Producto.html?tipo=vestidos">Ver vestidos</a>
+                        <a class="boton-secundario" href="#colecciones">Explorar más</a>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-slide slide-3">
+                <img src="../img/editorial/accesorios-editorial.png" alt="Accesorios elegantes Isa Boutique">
+                <div class="stitch-hero-copy">
+                    <span>Toque final</span>
+                    <h1>Accesorios</h1>
+                    <p>Bolsos, sombreros y complementos seleccionados para realzar cada uno de tus outfits.</p>
+                    <div class="hero-actions">
+                        <a class="boton-comprar" href="Producto.html?tipo=accesorios">Ver accesorios</a>
+                        <a class="boton-secundario" href="#colecciones">Explorar más</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="hero-indicators">
+            <span class="indicator active" data-slide="0"></span>
+            <span class="indicator" data-slide="1"></span>
+            <span class="indicator" data-slide="2"></span>
         </div>
     </header>
 
     <main>
-        <section id="colecciones" class="stitch-section">
+        <section id="colecciones" class="stitch-section reveal">
             <h2>Colecciones destacadas</h2>
 
             <div class="stitch-bento">
@@ -87,7 +125,7 @@
             </div>
         </section>
 
-        <section id="historia" class="stitch-story">
+        <section id="historia" class="stitch-story reveal">
             <div class="stitch-story-image">
                 <img src="../img/logo.png.png" alt="Isa Boutique">
             </div>
@@ -99,7 +137,7 @@
             </div>
         </section>
 
-        <section id="contacto" class="stitch-newsletter">
+        <section id="contacto" class="stitch-newsletter reveal">
             <h2>Contacta con Isa Boutique</h2>
             <p>Escríbenos para resolver dudas sobre disponibilidad, compras y entregas.</p>
             <div class="botones">
@@ -135,11 +173,73 @@
     </footer>
 
     <script>
+        // Lógica existente del carrito
         const carritoInicio = JSON.parse(localStorage.getItem("isa_carrito")) || [];
         const totalCarritoInicio = carritoInicio.reduce(function(suma, item) {
             return suma + Number(item.cantidad);
         }, 0);
         document.getElementById("cartCount").textContent = totalCarritoInicio;
+
+        // NUEVO: Lógica del Carrusel del Hero
+        const slides = document.querySelectorAll(".hero-slide");
+        const indicators = document.querySelectorAll(".hero-indicators .indicator");
+        let currentSlide = 0;
+        let slideInterval;
+
+        function showSlide(index) {
+            slides.forEach(slide => slide.classList.remove("active"));
+            indicators.forEach(ind => ind.classList.remove("active"));
+            
+            slides[index].classList.add("active");
+            indicators[index].classList.add("active");
+            currentSlide = index;
+        }
+
+        function nextSlide() {
+            let next = (currentSlide + 1) % slides.length;
+            showSlide(next);
+        }
+
+        function startSlideShow() {
+            slideInterval = setInterval(nextSlide, 6000); // 6 segundos por diapositiva
+        }
+
+        function resetSlideShow() {
+            clearInterval(slideInterval);
+            startSlideShow();
+        }
+
+        // Eventos para los indicadores
+        indicators.forEach((indicator, index) => {
+            indicator.addEventListener("click", () => {
+                showSlide(index);
+                resetSlideShow();
+            });
+        });
+
+        // Iniciar slideshow
+        startSlideShow();
+
+        // NUEVO: Lógica de Scroll Reveal
+        const revealElements = document.querySelectorAll(".reveal");
+        const observerOptions = {
+            root: null,
+            threshold: 0.12,
+            rootMargin: "0px 0px -50px 0px"
+        };
+
+        const revealObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("reveal-active");
+                    observer.unobserve(entry.target); // Solo revelar una vez
+                }
+            });
+        }, observerOptions);
+
+        revealElements.forEach(element => {
+            revealObserver.observe(element);
+        });
     </script>
 
 </body>

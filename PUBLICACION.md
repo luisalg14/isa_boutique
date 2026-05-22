@@ -19,8 +19,12 @@ En el servidor puedes usar variables de entorno:
 - `ISA_DB_NAME`
 - `ISA_DB_USER`
 - `ISA_DB_PASSWORD`
+- `ISA_DB_SSLMODE` (`require` en Neon)
+- `ISA_DB_OPTIONS` (`endpoint=...` en Neon cuando el host lo pida)
 
 Si el hosting no permite variables de entorno, copia `php/config.example.php` como `php/config.local.php` y llena los datos reales. Ese archivo no debe subirse a GitHub.
+
+Para Neon, `php/config.local.php` debe incluir `"sslmode" => "require"`. Si usas el host pooler y Neon muestra un error de endpoint/SNI, agrega `"options" => "endpoint=nombre-del-endpoint-pooler"`.
 
 ## Usuarios internos
 
