@@ -164,6 +164,27 @@
     </div>
 
     <script>
+        function configurarFlechaRegresoPublica() {
+            const flecha = document.querySelector(".nav-home-arrow");
+            if (!flecha) return;
+
+            let destino = "index.html";
+
+            try {
+                const regreso = JSON.parse(sessionStorage.getItem("isa_internal_return") || "null");
+                if (regreso && regreso.url && (regreso.tipo === "admin" || regreso.tipo === "vendedor")) {
+                    destino = regreso.url;
+                }
+            } catch (error) {
+                destino = "index.html";
+            }
+
+            flecha.href = destino;
+            flecha.title = destino === "index.html" ? "Volver al inicio" : "Volver al panel interno";
+        }
+
+        configurarFlechaRegresoPublica();
+
         let productoSeleccionado = null;
         let productosCatalogo = [];
         let categoriasCatalogo = [];

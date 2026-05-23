@@ -30,7 +30,8 @@ try {
             v.medio_pago,
             v.canal_venta,
             cl.nombre AS cliente,
-            cl.telefono
+            cl.telefono,
+            COALESCE(cl.numero_documento, '') AS numero_documento
         FROM factura f
         INNER JOIN venta v
             ON f.id_venta = v.id_venta

@@ -43,7 +43,10 @@
 
         <div class="admin-shell">
             <aside class="admin-tabs">
-                <div class="admin-tabs-title">Panel</div>
+                <div class="admin-tabs-title">
+                    <button type="button" class="btn-panel-back" onclick="volverPanelInternoAdmin()" title="Volver al panel anterior" aria-label="Volver al panel anterior">←</button>
+                    <span>Panel</span>
+                </div>
                 <button class="admin-tab activo" data-panel-target="panel-inicio">Inicio</button>
                 <button class="admin-tab" data-panel-target="panel-menu-inventario">Inventario</button>
                 <button class="admin-tab" data-panel-target="panel-menu-ventas">Ventas</button>
@@ -798,27 +801,25 @@
         <section id="panel-facturas" class="admin-panel">
             <h2>Facturas</h2>
 
-            <div class="filtros">
-                <input type="text" id="buscadorFacturas" placeholder="Buscar por factura, cliente, teléfono o canal...">
+            <div class="filtros facturas-filtros">
+                <input type="text" id="buscadorFacturas" placeholder="Buscar factura, venta, cliente, documento, teléfono, medio o canal...">
             </div>
 
-            <table class="tabla-inventario">
-                <thead>
-                    <tr>
-                        <th>Factura</th>
-                        <th>Venta</th>
-                        <th>Cliente</th>
-                        <th>Teléfono</th>
-                        <th>Medio</th>
-                        <th>Canal</th>
-                        <th>Total</th>
-                        <th>Estado</th>
-                        <th>Fecha</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaFacturas"></tbody>
-            </table>
+            <div class="facturas-table-wrap">
+                <table class="tabla-inventario tabla-facturas">
+                    <thead>
+                        <tr>
+                            <th>Factura</th>
+                            <th>Cliente</th>
+                            <th>Pago</th>
+                            <th>Total</th>
+                            <th>Fecha</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaFacturas"></tbody>
+                </table>
+            </div>
         </section>
 
 
@@ -1439,7 +1440,31 @@
 
 
 <script>
-    function activarPanelAdmin(idPanel, panelPrincipalForzado) {
+    const historialPanelesAdmin = [];
+
+    function panelActivoAdmin() {
+        const panel = document.querySelector(".admin-panel.activo");
+        return panel ? panel.id : "";
+    }
+
+    function guardarRegresoInternoAdmin(idPanel) {
+        if (!idPanel) return;
+
+        sessionStorage.setItem("isa_internal_return", JSON.stringify({
+            tipo: "admin",
+            url: "admin.html#" + idPanel,
+            panel: idPanel
+        }));
+    }
+
+    function activarPanelAdmin(idPanel, panelPrincipalForzado, opciones) {
+        opciones = opciones || {};
+        const panelActual = panelActivoAdmin();
+
+        if (!opciones.omitirHistorial && panelActual && panelActual !== idPanel) {
+            historialPanelesAdmin.push(panelActual);
+        }
+
         document.querySelectorAll(".admin-panel").forEach(function(panel) {
             panel.classList.toggle("activo", panel.id === idPanel);
         });
@@ -1449,6 +1474,30 @@
         document.querySelectorAll(".admin-tab").forEach(function(tab) {
             tab.classList.toggle("activo", tab.dataset.panelTarget === panelPrincipal);
         });
+
+        guardarRegresoInternoAdmin(idPanel);
+        if (window.location.hash !== "#" + idPanel) {
+            history.replaceState(null, "", "#" + idPanel);
+        }
+    }
+
+    function volverPanelInternoAdmin() {
+        const anterior = historialPanelesAdmin.pop();
+
+        if (anterior) {
+            activarPanelAdmin(anterior, null, { omitirHistorial: true });
+            return;
+        }
+
+        const actual = panelActivoAdmin();
+        const principal = panelPrincipalAdmin(actual);
+
+        if (actual && principal && actual !== principal) {
+            activarPanelAdmin(principal, null, { omitirHistorial: true });
+            return;
+        }
+
+        activarPanelAdmin("panel-inicio", null, { omitirHistorial: true });
     }
 
     function panelPrincipalAdmin(idPanel) {
@@ -2665,6 +2714,7 @@
                     factura.id_venta,
                     factura.cliente,
                     factura.telefono,
+                    factura.numero_documento,
                     factura.medio_pago,
                     factura.canal_venta,
                     factura.estado_factura
@@ -2674,7 +2724,7 @@
             });
 
             if (filtradas.length === 0) {
-                tabla.innerHTML = '<tr><td colspan="10">No hay facturas registradas</td></tr>';
+                tabla.innerHTML = '<tr><td colspan="6">No hay facturas registradas</td></tr>';
                 return;
             }
 
@@ -2683,14 +2733,23 @@
             filtradas.forEach(function(factura) {
                 tabla.innerHTML += `
                     <tr>
-                        <td>${factura.numero_factura}</td>
-                        <td>${factura.id_venta}</td>
-                        <td>${factura.cliente || "Sin nombre"}</td>
-                        <td>${factura.telefono || "-"}</td>
-                        <td>${factura.medio_pago}</td>
-                        <td>${etiquetaCanalVenta(factura.canal_venta)}</td>
-                        <td>${formatoPrecioBD(factura.total)}</td>
-                        <td>${factura.estado_factura}</td>
+                        <td>
+                            <strong>${limpiarTextoBD(factura.numero_factura)}</strong>
+                            <span>Venta #${limpiarTextoBD(factura.id_venta)}</span>
+                        </td>
+                        <td>
+                            <strong>${limpiarTextoBD(factura.cliente || "Sin nombre")}</strong>
+                            <span>${limpiarTextoBD(factura.telefono || "-")}</span>
+                            <span>Doc. ${limpiarTextoBD(factura.numero_documento || "-")}</span>
+                        </td>
+                        <td>
+                            <strong>${limpiarTextoBD(factura.medio_pago || "-")}</strong>
+                            <span>${etiquetaCanalVenta(factura.canal_venta)}</span>
+                        </td>
+                        <td>
+                            <strong>${formatoPrecioBD(factura.total)}</strong>
+                            <span>${limpiarTextoBD(factura.estado_factura || "-")}</span>
+                        </td>
                         <td>${new Date(factura.fecha).toLocaleString()}</td>
                         <td><button onclick="abrirFacturaBD(${factura.id_venta})">Abrir</button></td>
                     </tr>
@@ -4919,6 +4978,14 @@
     }
 
     function iniciarPanelBD() {
+        const panelInicial = window.location.hash ? window.location.hash.substring(1) : "";
+
+        if (panelInicial && document.getElementById(panelInicial)) {
+            activarPanelAdmin(panelInicial, null, { omitirHistorial: true });
+        } else {
+            guardarRegresoInternoAdmin(panelActivoAdmin() || "panel-inicio");
+        }
+
         cargarInicioAdmin();
         cargarCategoriasBD();
         cargarInventarioBD();

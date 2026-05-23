@@ -66,28 +66,28 @@ try {
         SELECT COALESCE(SUM(total), 0) AS total
         FROM venta
         WHERE estado IN ('pagada', 'devuelta')
-        AND fecha::date = CURRENT_DATE
+        AND fecha::date = (CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')::date
     ");
 
     $devolucionesHoy = escalar_reporte($conexion, "
         SELECT COALESCE(SUM(total_devuelto), 0) AS total
         FROM devolucion
         WHERE estado = 'aprobada'
-        AND fecha::date = CURRENT_DATE
+        AND fecha::date = (CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')::date
     ");
 
     $ventasMes = escalar_reporte($conexion, "
         SELECT COALESCE(SUM(total), 0) AS total
         FROM venta
         WHERE estado IN ('pagada', 'devuelta')
-        AND DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_DATE)
+        AND DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
     ");
 
     $devolucionesMes = escalar_reporte($conexion, "
         SELECT COALESCE(SUM(total_devuelto), 0) AS total
         FROM devolucion
         WHERE estado = 'aprobada'
-        AND DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_DATE)
+        AND DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
     ");
 
     $ventasRango = escalar_reporte($conexion, "

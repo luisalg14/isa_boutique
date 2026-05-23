@@ -57,26 +57,26 @@ try {
         SELECT COALESCE(SUM(total), 0) AS total
         FROM venta
         WHERE estado IN ('pagada', 'devuelta')
-        AND DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_DATE)
+        AND DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
     ")->fetch()["total"];
 
     $devolucionesMes = $conexion->query("
         SELECT COALESCE(SUM(total_devuelto), 0) AS total
         FROM devolucion
         WHERE estado = 'aprobada'
-        AND DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_DATE)
+        AND DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
     ")->fetch()["total"];
 
     $gastosMes = $conexion->query("
         SELECT COALESCE(SUM(valor), 0) AS total
         FROM gasto_negocio
-        WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_DATE)
+        WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
     ")->fetch()["total"];
 
     $pagosTrabajadoresMes = $conexion->query("
         SELECT COALESCE(SUM(valor), 0) AS total
         FROM pago_trabajador
-        WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_DATE)
+        WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
     ")->fetch()["total"];
 
     $costoMercanciaMes = $conexion->query("
@@ -84,7 +84,7 @@ try {
         FROM detalle_venta dv
         INNER JOIN venta v
             ON dv.id_venta = v.id_venta
-        WHERE DATE_TRUNC('month', v.fecha) = DATE_TRUNC('month', CURRENT_DATE)
+        WHERE DATE_TRUNC('month', v.fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
     ")->fetch()["total"];
 
     $costoDevueltoMes = $conexion->query("
@@ -93,19 +93,19 @@ try {
         INNER JOIN devolucion d
             ON dd.id_devolucion = d.id_devolucion
         WHERE d.estado = 'aprobada'
-        AND DATE_TRUNC('month', d.fecha) = DATE_TRUNC('month', CURRENT_DATE)
+        AND DATE_TRUNC('month', d.fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
     ")->fetch()["total"];
 
     $inversionesMes = $conexion->query("
         SELECT COALESCE(SUM(valor), 0) AS total
         FROM inversion_negocio
-        WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_DATE)
+        WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
     ")->fetch()["total"];
 
     $comprasMercanciaMes = $conexion->query("
         SELECT COALESCE(SUM(total_compra), 0) AS total
         FROM compra_mercancia
-        WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_DATE)
+        WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
     ")->fetch()["total"];
 
     $netoVentas = floatval($ventas) - floatval($devoluciones);

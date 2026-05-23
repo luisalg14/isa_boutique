@@ -2945,12 +2945,40 @@ button.cart-link {
 }
 
 .admin-tabs-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin-bottom: 8px;
     color: #954053;
     font-size: 12px;
     font-weight: 900;
     letter-spacing: 0.12em;
     text-transform: uppercase;
+}
+
+.admin-tabs-title .btn-panel-back {
+    width: 42px;
+    height: 42px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid #d6b174;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #a0445a 0%, #7a2b3e 100%);
+    color: #fffaf5;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(122, 43, 62, 0.24), inset 0 0 0 3px rgba(255, 255, 255, 0.12);
+    font-size: 24px;
+    font-weight: 900;
+    line-height: 1;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.admin-tabs-title .btn-panel-back:hover {
+    border-color: #e8c98e;
+    background: linear-gradient(135deg, #b85c6f 0%, #954053 100%);
+    color: #fff;
+    box-shadow: 0 12px 26px rgba(122, 43, 62, 0.32), inset 0 0 0 3px rgba(255, 255, 255, 0.16);
+    transform: translateX(-2px) scale(1.03);
 }
 
 .admin-page .admin-tab {

@@ -1,5 +1,7 @@
 ﻿let productosVendedor = [];
 
+const historialPanelesVendedor = [];
+
 function rutaApiVendedor(archivo) {
     const ruta = window.location.pathname;
     const base = ruta.includes("/html/")
@@ -9,7 +11,29 @@ function rutaApiVendedor(archivo) {
     return base + "php/" + archivo;
 }
 
-function activarPanelVendedor(idPanel) {
+function panelActivoVendedor() {
+    const panel = document.querySelector(".admin-panel.activo");
+    return panel ? panel.id : "";
+}
+
+function guardarRegresoInternoVendedor(idPanel) {
+    if (!idPanel) return;
+
+    sessionStorage.setItem("isa_internal_return", JSON.stringify({
+        tipo: "vendedor",
+        url: "vendedor.html#" + idPanel,
+        panel: idPanel
+    }));
+}
+
+function activarPanelVendedor(idPanel, opciones) {
+    opciones = opciones || {};
+    const panelActual = panelActivoVendedor();
+
+    if (!opciones.omitirHistorial && panelActual && panelActual !== idPanel) {
+        historialPanelesVendedor.push(panelActual);
+    }
+
     document.querySelectorAll(".admin-panel").forEach(function(panel) {
         panel.classList.toggle("activo", panel.id === idPanel);
     });
@@ -17,6 +41,22 @@ function activarPanelVendedor(idPanel) {
     document.querySelectorAll(".admin-tab").forEach(function(tab) {
         tab.classList.toggle("activo", tab.dataset.panelTarget === idPanel);
     });
+
+    guardarRegresoInternoVendedor(idPanel);
+    if (window.location.hash !== "#" + idPanel) {
+        history.replaceState(null, "", "#" + idPanel);
+    }
+}
+
+function volverPanelInternoVendedor() {
+    const anterior = historialPanelesVendedor.pop();
+
+    if (anterior) {
+        activarPanelVendedor(anterior, { omitirHistorial: true });
+        return;
+    }
+
+    activarPanelVendedor("panel-venta", { omitirHistorial: true });
 }
 
 function formatoPrecioVendedor(valor) {
@@ -832,6 +872,14 @@ async function registrarDevolucionVendedor(idVenta, idProducto) {
 }
 
 function iniciarPanelVendedor() {
+    const panelInicial = window.location.hash ? window.location.hash.substring(1) : "";
+
+    if (panelInicial && document.getElementById(panelInicial)) {
+        activarPanelVendedor(panelInicial, { omitirHistorial: true });
+    } else {
+        guardarRegresoInternoVendedor(panelActivoVendedor() || "panel-venta");
+    }
+
     cargarInventarioVendedor();
     cargarHistorialVendedor();
     cargarReportesVendedor();
@@ -853,6 +901,7 @@ document.getElementById("ventaCantidad")?.addEventListener("input", actualizarRe
 document.getElementById("ventaDescuentoTipo")?.addEventListener("change", actualizarResumenVenta);
 document.getElementById("ventaDescuentoValor")?.addEventListener("input", actualizarResumenVenta);
 document.getElementById("formVenta")?.addEventListener("submit", registrarVentaVendedor);
+document.getElementById("btnVolverPanelVendedor")?.addEventListener("click", volverPanelInternoVendedor);
 document.getElementById("btnBuscarCodigoVenta")?.addEventListener("click", buscarProductoVentaPorCodigo);
 document.getElementById("ventaCodigoBarras")?.addEventListener("keydown", function(evento) {
     if (evento.key === "Enter") {

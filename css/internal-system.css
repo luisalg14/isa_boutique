@@ -547,6 +547,78 @@
     background: var(--sys-soft);
 }
 
+.facturas-filtros input {
+    max-width: 620px;
+}
+
+.facturas-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--sys-line);
+    border-radius: 16px;
+    background: #fff;
+}
+
+.facturas-table-wrap .tabla-inventario {
+    min-width: 720px;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+}
+
+.tabla-facturas {
+    table-layout: fixed;
+}
+
+.tabla-facturas th,
+.tabla-facturas td {
+    padding: 10px 12px;
+    vertical-align: top;
+}
+
+.tabla-facturas th:nth-child(1),
+.tabla-facturas td:nth-child(1) {
+    width: 150px;
+}
+
+.tabla-facturas th:nth-child(2),
+.tabla-facturas td:nth-child(2) {
+    width: 220px;
+}
+
+.tabla-facturas th:nth-child(3),
+.tabla-facturas td:nth-child(3),
+.tabla-facturas th:nth-child(4),
+.tabla-facturas td:nth-child(4) {
+    width: 140px;
+}
+
+.tabla-facturas th:nth-child(5),
+.tabla-facturas td:nth-child(5) {
+    width: 170px;
+}
+
+.tabla-facturas th:nth-child(6),
+.tabla-facturas td:nth-child(6) {
+    width: 90px;
+}
+
+.tabla-facturas td strong {
+    display: block;
+    color: var(--sys-brown);
+    font-size: 13px;
+    line-height: 1.25;
+}
+
+.tabla-facturas td span {
+    display: block;
+    margin-top: 3px;
+    color: var(--sys-muted);
+    font-size: 11px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
 .admin-panel::-webkit-scrollbar,
 .purchase-items-scroll::-webkit-scrollbar {
     height: 10px;

@@ -1,5 +1,7 @@
 <?php
 
+date_default_timezone_set("America/Bogota");
+
 $configLocal = __DIR__ . "/config.local.php";
 
 if (file_exists($configLocal)) {
@@ -46,6 +48,7 @@ try {
     $conexion->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
     $conexion->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
     $conexion->exec("SET search_path TO public");
+    $conexion->exec("SET TIME ZONE 'America/Bogota'");
 
 } catch (PDOException $e) {
     error_log("Error de conexion PostgreSQL: " . $e->getMessage());
