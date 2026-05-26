@@ -32,6 +32,14 @@
 
             <div class="admin-userbar">
                 <span><strong id="nombreUsuario"></strong> <small id="rolUsuario"></small></span>
+                <button type="button" class="notification-button" id="btnNotificacionesVendedor" title="Pedidos web pendientes" aria-label="Pedidos web pendientes">
+                    <svg class="notification-bell" aria-hidden="true" viewBox="0 0 24 24">
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <strong id="contadorNotificacionesVendedor">0</strong>
+                </button>
+                <div class="notification-popover" id="panelNotificacionesVendedor" aria-live="polite"></div>
                 <a href="index.html">Ver tienda</a>
                 <button id="btnCerrar">Cerrar sesión</button>
             </div>
@@ -57,6 +65,17 @@
                             <h2>Registrar venta</h2>
                         </div>
                         <p>Selecciona un producto disponible y registra los datos del comprador.</p>
+                    </div>
+
+                    <div class="dashboard-panel pedidos-pendientes-panel vendedor-pending-panel">
+                        <div class="dashboard-panel-header">
+                            <div>
+                                <span>Pedidos online</span>
+                                <h3>Pedidos web pendientes</h3>
+                            </div>
+                            <button type="button" onclick="activarPanelVendedor('panel-historial')">Ver historial</button>
+                        </div>
+                        <div id="pedidosPendientesVendedor" class="pending-orders-list"></div>
                     </div>
 
                     <div class="venta-layout">

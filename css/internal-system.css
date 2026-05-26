@@ -83,6 +83,7 @@
 
 .admin-userbar {
     gap: 10px;
+    position: relative;
 }
 
 .admin-userbar span {
@@ -106,6 +107,158 @@
 .admin-page .tabla-inventario button {
     background: var(--sys-rose);
     color: #fff;
+}
+
+.admin-userbar .notification-button {
+    position: relative;
+    width: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    display: inline-grid;
+    place-items: center;
+    padding: 0;
+    border-color: rgba(149, 64, 83, 0.22);
+    border-radius: 999px;
+    background: #fffaf7;
+    color: var(--sys-rose);
+    box-shadow: 0 8px 20px rgba(58, 42, 34, 0.06);
+}
+
+.notification-bell {
+    width: 20px;
+    height: 20px;
+    display: block;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.admin-userbar .notification-button .notification-bell {
+    transform-origin: 50% 0;
+}
+
+.admin-userbar .notification-button strong {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    min-width: 20px;
+    height: 20px;
+    display: inline-grid;
+    place-items: center;
+    padding: 0 5px;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    background: #8f7b72;
+    color: #fff;
+    font-size: 11px;
+    line-height: 1;
+}
+
+.admin-userbar .notification-button.tiene-alerta {
+    background: var(--sys-rose);
+    color: #fff;
+    border-color: var(--sys-rose);
+    box-shadow: 0 12px 24px rgba(149, 64, 83, 0.22);
+}
+
+.admin-userbar .notification-button.tiene-alerta strong {
+    background: var(--sys-gold);
+    color: var(--sys-brown);
+}
+
+.admin-userbar .notification-button.tiene-alerta .notification-bell {
+    animation: bell-soft-ring 1.7s ease-in-out infinite;
+}
+
+.notification-popover {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 110px;
+    z-index: 80;
+    width: min(340px, calc(100vw - 32px));
+    max-height: 420px;
+    overflow: auto;
+    display: none;
+    padding: 14px;
+    border: 1px solid rgba(163, 88, 109, 0.18);
+    border-radius: 18px;
+    background: rgba(255, 253, 251, 0.98);
+    box-shadow: 0 20px 45px rgba(58, 42, 34, 0.16);
+}
+
+.notification-popover.abierto {
+    display: grid;
+    gap: 10px;
+}
+
+.notification-popover h4 {
+    margin: 0;
+    color: var(--sys-rose);
+    font-size: 15px;
+}
+
+.notification-popover p {
+    margin: 0;
+    color: var(--sys-muted);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.notification-item {
+    display: grid;
+    gap: 7px;
+    padding: 11px;
+    border: 1px solid var(--sys-line);
+    border-radius: 14px;
+    background: #fffaf7;
+}
+
+.notification-item strong,
+.notification-item span,
+.notification-item small {
+    display: block;
+}
+
+.notification-item strong {
+    color: var(--sys-brown);
+    font-size: 13px;
+}
+
+.notification-item span,
+.notification-item small {
+    color: var(--sys-muted);
+    font-size: 12px;
+}
+
+.notification-item button {
+    justify-self: start;
+    min-height: 32px;
+    padding: 7px 10px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--sys-rose);
+    color: #fff;
+    cursor: pointer;
+}
+
+@keyframes bell-soft-ring {
+    0%, 70%, 100% {
+        transform: rotate(0deg);
+    }
+
+    76% {
+        transform: rotate(9deg);
+    }
+
+    84% {
+        transform: rotate(-8deg);
+    }
+
+    92% {
+        transform: rotate(5deg);
+    }
 }
 
 .admin-page .admin-shell {
@@ -453,6 +606,120 @@
     font-size: 13px;
 }
 
+.pedidos-pendientes-panel {
+    margin-bottom: 16px;
+}
+
+.pending-orders-list {
+    display: grid;
+    gap: 10px;
+}
+
+.pending-order-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid var(--sys-line);
+    border-radius: 14px;
+    background: #fffaf7;
+}
+
+.pending-order-card strong,
+.pending-order-card span,
+.pending-order-card small {
+    display: block;
+}
+
+.pending-order-card strong {
+    color: var(--sys-brown);
+    font-size: 14px;
+}
+
+.pending-order-card span,
+.pending-order-card small {
+    margin-top: 3px;
+    color: var(--sys-muted);
+    font-size: 12px;
+}
+
+.pending-order-card p {
+    margin: 0;
+    color: var(--sys-rose);
+    font-weight: 800;
+}
+
+.pending-order-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.pending-order-actions button {
+    min-height: 34px;
+    padding: 8px 11px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--sys-rose);
+    color: #fff;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.pending-order-actions button:last-child {
+    background: #8f7b72;
+}
+
+.pending-order-detail {
+    grid-column: 1 / -1;
+    display: none;
+    grid-template-columns: repeat(4, minmax(120px, 1fr));
+    gap: 10px;
+    padding: 12px;
+    border: 1px dashed rgba(163, 88, 109, 0.25);
+    border-radius: 12px;
+    background: #fff;
+}
+
+.pending-order-card.detalle-abierto .pending-order-detail {
+    display: grid;
+}
+
+.pending-order-detail div {
+    display: grid;
+    gap: 3px;
+}
+
+.pending-order-detail span {
+    color: var(--sys-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.pending-order-detail strong {
+    color: var(--sys-brown);
+    font-size: 13px;
+}
+
+@media (max-width: 780px) {
+    .pending-order-card {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+
+    .pending-order-detail {
+        grid-template-columns: 1fr;
+    }
+
+    .pending-order-actions {
+        justify-content: flex-start;
+    }
+}
+
 .admin-section-menu {
     gap: 8px;
     padding: 10px;
@@ -757,6 +1024,11 @@
 
     .admin-userbar {
         justify-content: flex-start;
+    }
+
+    .notification-popover {
+        right: 0;
+        left: auto;
     }
 
     .dashboard-hero {

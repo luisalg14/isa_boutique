@@ -36,6 +36,14 @@
 
             <div class="admin-userbar">
                 <span><strong id="nombreUsuario"></strong> <small id="rolUsuario"></small></span>
+                <button type="button" class="notification-button" id="btnNotificacionesAdmin" title="Pedidos web pendientes" aria-label="Pedidos web pendientes">
+                    <svg class="notification-bell" aria-hidden="true" viewBox="0 0 24 24">
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <strong id="contadorNotificacionesAdmin">0</strong>
+                </button>
+                <div class="notification-popover" id="panelNotificacionesAdmin" aria-live="polite"></div>
                 <a href="index.html">Ver tienda</a>
                 <button id="btnCerrar">Cerrar sesión</button>
             </div>
@@ -84,6 +92,17 @@
                     <span>Ganancia del mes</span>
                     <strong id="inicioGananciaMes">$0</strong>
                 </div>
+            </div>
+
+            <div class="dashboard-panel pedidos-pendientes-panel">
+                <div class="dashboard-panel-header">
+                    <div>
+                        <span>Pedidos online</span>
+                        <h3>Pedidos web pendientes</h3>
+                    </div>
+                    <button type="button" onclick="activarPanelAdmin('panel-historial')">Ver historial</button>
+                </div>
+                <div id="inicioPedidosPendientes" class="pending-orders-list"></div>
             </div>
 
             <div class="dashboard-panel">
@@ -4918,7 +4937,8 @@
             const solicitudes = [
                 fetch("../php/reportes_admin.php"),
                 fetch("../php/productos_listar.php"),
-                fetch("../php/movimientos_listar.php")
+                fetch("../php/movimientos_listar.php"),
+                fetch("../php/historial_listar.php")
             ];
 
             if (usuarioEsAdmin()) {
@@ -4929,13 +4949,15 @@
             const reportes = await respuestas[0].json();
             const productos = await respuestas[1].json();
             const movimientos = await respuestas[2].json();
-            const finanzas = respuestas[3] ? await respuestas[3].json() : null;
+            const ventas = await respuestas[3].json();
+            const finanzas = respuestas[4] ? await respuestas[4].json() : null;
 
             if (!reportes.error) {
                 document.getElementById("inicioVentasHoy").textContent = formatoPrecioBD(reportes.ventas_hoy || 0);
             }
 
             if (Array.isArray(productos)) {
+                productosVentaAdmin = productos;
                 const activos = productos.filter(function(producto) {
                     return producto.estado !== "inactivo";
                 });
@@ -4949,6 +4971,48 @@
 
             if (finanzas && !finanzas.error) {
                 document.getElementById("inicioGananciaMes").textContent = formatoPrecioBD(finanzas.utilidad_neta_mes || 0);
+            }
+
+            const contenedorPedidos = document.getElementById("inicioPedidosPendientes");
+            if (contenedorPedidos && Array.isArray(ventas)) {
+                const todosPendientes = ventas.filter(function(venta) {
+                    return venta.tipo === "Venta" && venta.estado === "pendiente";
+                });
+                const pendientes = todosPendientes.slice(0, 5);
+                window.pedidosPendientesAdmin = todosPendientes;
+                actualizarNotificacionAdmin(todosPendientes.length);
+                renderizarNotificacionesAdmin(todosPendientes);
+
+                if (pendientes.length === 0) {
+                    contenedorPedidos.innerHTML = '<p class="empty-dashboard">No hay pedidos web pendientes.</p>';
+                } else {
+                    contenedorPedidos.innerHTML = "";
+                    pendientes.forEach(function(venta) {
+                        contenedorPedidos.innerHTML += `
+                            <div class="pending-order-card" data-pending-id="${venta.id_venta}">
+                                <div>
+                                    <strong>${limpiarTextoBD(venta.cliente || "Cliente sin nombre")}</strong>
+                                    <span>${limpiarTextoBD(venta.producto || "Producto")} | ${limpiarTextoBD(venta.color || "Sin color")} | Talla ${limpiarTextoBD(venta.talla || "-")}</span>
+                                    <span>${limpiarTextoBD(etiquetaCanalVenta(venta.canal_venta))} | ${limpiarTextoBD(etiquetaEntregaVenta(venta.tipo_entrega))}</span>
+                                    <small>${limpiarTextoBD(venta.telefono || "Sin telefono")} | ${new Date(venta.fecha).toLocaleString()}</small>
+                                </div>
+                                <p>${formatoPrecioBD(venta.total || venta.subtotal || 0)}</p>
+                                <div class="pending-order-actions">
+                                    <button type="button" onclick="alternarDetallePedidoAdmin(${venta.id_venta})">Ver detalle</button>
+                                    <button type="button" onclick="actualizarEstadoVentaBD(${venta.id_venta}, 'pagada')">Confirmar</button>
+                                    <button type="button" onclick="actualizarEstadoVentaBD(${venta.id_venta}, 'cancelada')">Cancelar</button>
+                                </div>
+                                <div class="pending-order-detail" id="detallePedidoAdmin${venta.id_venta}">
+                                    ${detallePedidoPendienteAdmin(venta)}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            } else {
+                window.pedidosPendientesAdmin = [];
+                actualizarNotificacionAdmin(0);
+                renderizarNotificacionesAdmin([]);
             }
 
             const contenedor = document.getElementById("inicioUltimosMovimientos");
@@ -4975,6 +5039,145 @@
         } catch (error) {
             console.error("Error al cargar inicio del administrador", error);
         }
+    }
+
+    function actualizarNotificacionAdmin(totalPendientes) {
+        const boton = document.getElementById("btnNotificacionesAdmin");
+        const contador = document.getElementById("contadorNotificacionesAdmin");
+
+        if (!boton || !contador) return;
+
+        contador.textContent = totalPendientes;
+        boton.classList.toggle("tiene-alerta", totalPendientes > 0);
+        boton.title = totalPendientes > 0
+            ? totalPendientes + " pedidos web pendientes"
+            : "Sin pedidos web pendientes";
+    }
+
+    function renderizarNotificacionesAdmin(pedidos) {
+        const panel = document.getElementById("panelNotificacionesAdmin");
+        if (!panel) return;
+
+        const pendientes = Array.isArray(pedidos) ? pedidos.slice(0, 5) : [];
+
+        if (pendientes.length === 0) {
+            panel.innerHTML = `
+                <h4>Notificaciones</h4>
+                <p>No hay pedidos web pendientes por revisar.</p>
+            `;
+            return;
+        }
+
+        panel.innerHTML = `<h4>Pedidos web pendientes</h4>`;
+        pendientes.forEach(function(venta) {
+            panel.innerHTML += `
+                <div class="notification-item">
+                    <strong>${limpiarTextoBD(venta.cliente || "Cliente sin nombre")}</strong>
+                    <span>${limpiarTextoBD(venta.producto || "Producto")} | ${limpiarTextoBD(venta.color || "Sin color")} | Talla ${limpiarTextoBD(venta.talla || "-")}</span>
+                    <small>${formatoPrecioBD(venta.total || venta.subtotal || 0)} | ${new Date(venta.fecha).toLocaleString()}</small>
+                    <button type="button" onclick="verPedidoPendienteAdmin(${venta.id_venta})">Revisar pedido</button>
+                </div>
+            `;
+        });
+    }
+
+    function verPedidoPendienteAdmin(idVenta) {
+        const panel = document.getElementById("panelNotificacionesAdmin");
+        if (panel) panel.classList.remove("abierto");
+
+        activarPanelAdmin("panel-inicio");
+        setTimeout(function() {
+            alternarDetallePedidoAdmin(idVenta, true);
+            const tarjeta = document.querySelector('[data-pending-id="' + idVenta + '"]');
+            (tarjeta || document.getElementById("inicioPedidosPendientes"))?.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+        }, 80);
+    }
+
+    function buscarProductoPendienteAdmin(venta) {
+        return productosVentaAdmin.find(function(producto) {
+            return Number(producto.id_producto) === Number(venta.id_producto);
+        });
+    }
+
+    function buscarVariantePendienteAdmin(venta, producto) {
+        const colorPedido = String(venta.color || "").toLowerCase();
+        const tallaPedido = String(venta.talla || "").toUpperCase();
+        const colores = leerColoresBD(producto ? producto.colores : []);
+
+        for (const color of colores) {
+            const coincideColor = colorPedido === "" || String(color.color || "").toLowerCase() === colorPedido;
+            if (!coincideColor) continue;
+
+            const talla = leerTallasBD(color.tallas).find(function(item) {
+                return String(item.talla || "").toUpperCase() === tallaPedido;
+            });
+
+            if (talla) {
+                return {
+                    color,
+                    talla
+                };
+            }
+        }
+
+        return null;
+    }
+
+    function detallePedidoPendienteAdmin(venta) {
+        const producto = buscarProductoPendienteAdmin(venta);
+        const variante = buscarVariantePendienteAdmin(venta, producto);
+        const stockActual = variante ? variante.talla.cantidad : "Validar";
+        const codigoVariante = variante && variante.talla.codigo_barras ? variante.talla.codigo_barras : (venta.codigo || "-");
+
+        return `
+            <div>
+                <span>Código</span>
+                <strong>${limpiarTextoBD(codigoVariante)}</strong>
+            </div>
+            <div>
+                <span>Producto</span>
+                <strong>${limpiarTextoBD(venta.producto || "-")}</strong>
+            </div>
+            <div>
+                <span>Color y talla</span>
+                <strong>${limpiarTextoBD(venta.color || "Sin color")} / ${limpiarTextoBD(venta.talla || "-")}</strong>
+            </div>
+            <div>
+                <span>Pedido</span>
+                <strong>${Number(venta.cantidad || 0)} unidad(es)</strong>
+            </div>
+            <div>
+                <span>Stock actual</span>
+                <strong>${limpiarTextoBD(stockActual)}</strong>
+            </div>
+            <div>
+                <span>Entrega</span>
+                <strong>${limpiarTextoBD(etiquetaEntregaVenta(venta.tipo_entrega))}</strong>
+            </div>
+            <div>
+                <span>Pago</span>
+                <strong>${limpiarTextoBD(venta.medio_pago || "-")}</strong>
+            </div>
+            <div>
+                <span>Contacto</span>
+                <strong>${limpiarTextoBD(venta.telefono || "Sin telefono")}</strong>
+            </div>
+        `;
+    }
+
+    function alternarDetallePedidoAdmin(idVenta, abrir) {
+        const tarjeta = document.getElementById("detallePedidoAdmin" + idVenta)?.closest(".pending-order-card");
+        if (!tarjeta) return;
+
+        if (abrir) {
+            tarjeta.classList.add("detalle-abierto");
+            return;
+        }
+
+        tarjeta.classList.toggle("detalle-abierto");
     }
 
     function iniciarPanelBD() {
@@ -5012,6 +5215,19 @@
     }
 
     window.addEventListener("sesion-lista", iniciarPanelBD);
+
+    document.getElementById("btnNotificacionesAdmin")?.addEventListener("click", function(evento) {
+        evento.stopPropagation();
+        document.getElementById("panelNotificacionesAdmin")?.classList.toggle("abierto");
+    });
+
+    document.addEventListener("click", function(evento) {
+        const panel = document.getElementById("panelNotificacionesAdmin");
+        const boton = document.getElementById("btnNotificacionesAdmin");
+
+        if (!panel || !boton || panel.contains(evento.target) || boton.contains(evento.target)) return;
+        panel.classList.remove("abierto");
+    });
     
     const buscadorBD = document.getElementById("buscador");
     

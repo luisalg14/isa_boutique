@@ -50,7 +50,8 @@ try {
     $usuarioActual = usuario_actual();
     $canal_venta = trim($_POST["canal_venta"] ?? ($usuarioActual ? "tienda_fisica" : "pagina_web"));
     $tipo_entrega = trim($_POST["tipo_entrega"] ?? ($usuarioActual ? "recoger_tienda" : "envio_local"));
-    $estadoVenta = $usuarioActual ? "pagada" : "pendiente";
+    $esPedidoWeb = $canal_venta === "pagina_web";
+    $estadoVenta = ($usuarioActual && !$esPedidoWeb) ? "pagada" : "pendiente";
 
     $mediosPermitidos = [
         "efectivo",
@@ -491,7 +492,7 @@ try {
 
     echo json_encode([
         "error" => false,
-        "mensaje" => $usuarioActual ? "Venta registrada correctamente" : "Pedido registrado correctamente. Queda pendiente de confirmación.",
+        "mensaje" => $estadoVenta === "pagada" ? "Venta registrada correctamente" : "Pedido registrado correctamente. Queda pendiente de confirmación.",
         "id_venta" => $idVenta,
         "total" => $subtotal,
         "estado" => $estadoVenta,

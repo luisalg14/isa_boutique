@@ -1,5 +1,7 @@
 ﻿let productosVendedor = [];
 
+let pedidosPendientesVendedor = [];
+
 const historialPanelesVendedor = [];
 
 function rutaApiVendedor(archivo) {
@@ -549,21 +551,27 @@ async function registrarVentaVendedor(evento) {
 
 async function cargarHistorialVendedor() {
     const tabla = document.getElementById("tablaHistorialVendedor");
-    if (!tabla) return;
+    const panelPendientes = document.getElementById("pedidosPendientesVendedor");
+    if (!tabla && !panelPendientes) return;
 
     try {
         const respuesta = await fetch(rutaApiVendedor("historial_listar.php"));
         const historial = await respuesta.json();
 
         if (historial.error) {
-            tabla.innerHTML = `<tr><td colspan="14">${historial.mensaje}</td></tr>`;
+            if (tabla) tabla.innerHTML = `<tr><td colspan="14">${historial.mensaje}</td></tr>`;
+            if (panelPendientes) panelPendientes.innerHTML = `<p class="empty-dashboard">${historial.mensaje}</p>`;
             return;
         }
 
-        if (historial.length === 0) {
+        renderizarPedidosPendientesVendedor(historial);
+
+        if (tabla && historial.length === 0) {
             tabla.innerHTML = '<tr><td colspan="14">No hay ventas registradas</td></tr>';
             return;
         }
+
+        if (!tabla) return;
 
         tabla.innerHTML = "";
 
@@ -604,9 +612,193 @@ async function cargarHistorialVendedor() {
             `;
         });
     } catch (error) {
-        tabla.innerHTML = '<tr><td colspan="14">Error al cargar historial</td></tr>';
+        if (tabla) tabla.innerHTML = '<tr><td colspan="14">Error al cargar historial</td></tr>';
+        if (panelPendientes) panelPendientes.innerHTML = '<p class="empty-dashboard">Error al cargar pedidos pendientes.</p>';
         console.error(error);
     }
+}
+
+function renderizarPedidosPendientesVendedor(historial) {
+    const contenedor = document.getElementById("pedidosPendientesVendedor");
+    const botonNotificacion = document.getElementById("btnNotificacionesVendedor");
+    const contadorNotificacion = document.getElementById("contadorNotificacionesVendedor");
+
+    const todosPendientes = Array.isArray(historial)
+        ? historial.filter(function(registro) {
+            return registro.tipo === "Venta" && registro.estado === "pendiente";
+        })
+        : [];
+    const pendientes = todosPendientes.slice(0, 5);
+    pedidosPendientesVendedor = todosPendientes;
+
+    if (contadorNotificacion) {
+        contadorNotificacion.textContent = todosPendientes.length;
+    }
+
+    if (botonNotificacion) {
+        botonNotificacion.classList.toggle("tiene-alerta", todosPendientes.length > 0);
+        botonNotificacion.title = todosPendientes.length > 0
+            ? todosPendientes.length + " pedidos web pendientes"
+            : "Sin pedidos web pendientes";
+    }
+
+    renderizarNotificacionesVendedor(todosPendientes);
+
+    if (!contenedor) return;
+
+    if (pendientes.length === 0) {
+        contenedor.innerHTML = '<p class="empty-dashboard">No hay pedidos web pendientes.</p>';
+        return;
+    }
+
+    contenedor.innerHTML = "";
+
+    pendientes.forEach(function(registro) {
+        contenedor.innerHTML += `
+            <div class="pending-order-card">
+                <div>
+                    <strong>${limpiarTextoVendedor(registro.cliente || "Cliente sin nombre")}</strong>
+                    <span>${limpiarTextoVendedor(registro.producto || "Producto")} | ${limpiarTextoVendedor(registro.color || "Sin color")} | Talla ${limpiarTextoVendedor(registro.talla || "-")}</span>
+                    <span>${limpiarTextoVendedor(etiquetaCanalVendedor(registro.canal_venta))} | ${limpiarTextoVendedor(etiquetaEntregaVendedor(registro.tipo_entrega))}</span>
+                    <small>${limpiarTextoVendedor(registro.telefono || "Sin telefono")} | ${new Date(registro.fecha).toLocaleString()}</small>
+                </div>
+                <p>${formatoPrecioVendedor(registro.total || registro.subtotal || 0)}</p>
+                <div class="pending-order-actions">
+                    <button type="button" onclick="alternarDetallePedidoVendedor(${registro.id_venta})">Ver detalle</button>
+                    <button type="button" onclick="actualizarEstadoVentaVendedor(${registro.id_venta}, 'pagada')">Confirmar</button>
+                    <button type="button" onclick="actualizarEstadoVentaVendedor(${registro.id_venta}, 'cancelada')">Cancelar</button>
+                </div>
+                <div class="pending-order-detail" id="detallePedidoVendedor${registro.id_venta}">
+                    ${detallePedidoPendienteVendedor(registro)}
+                </div>
+            </div>
+        `;
+    });
+}
+
+function renderizarNotificacionesVendedor(pedidos) {
+    const panel = document.getElementById("panelNotificacionesVendedor");
+    if (!panel) return;
+
+    const pendientes = Array.isArray(pedidos) ? pedidos.slice(0, 5) : [];
+
+    if (pendientes.length === 0) {
+        panel.innerHTML = `
+            <h4>Notificaciones</h4>
+            <p>No hay pedidos web pendientes por revisar.</p>
+        `;
+        return;
+    }
+
+    panel.innerHTML = `<h4>Pedidos web pendientes</h4>`;
+    pendientes.forEach(function(registro) {
+        panel.innerHTML += `
+            <div class="notification-item">
+                <strong>${limpiarTextoVendedor(registro.cliente || "Cliente sin nombre")}</strong>
+                <span>${limpiarTextoVendedor(registro.producto || "Producto")} | ${limpiarTextoVendedor(registro.color || "Sin color")} | Talla ${limpiarTextoVendedor(registro.talla || "-")}</span>
+                <small>${formatoPrecioVendedor(registro.total || registro.subtotal || 0)} | ${new Date(registro.fecha).toLocaleString()}</small>
+                <button type="button" onclick="revisarPedidoPendienteVendedor(${registro.id_venta})">Revisar pedido</button>
+            </div>
+        `;
+    });
+}
+
+function buscarProductoPendienteVendedor(registro) {
+    return productosVendedor.find(function(producto) {
+        return Number(producto.id_producto) === Number(registro.id_producto);
+    });
+}
+
+function buscarVariantePendienteVendedor(registro, producto) {
+    const colorPedido = String(registro.color || "").toLowerCase();
+    const tallaPedido = String(registro.talla || "").toUpperCase();
+    const colores = leerColoresVendedor(producto ? producto.colores : []);
+
+    for (const color of colores) {
+        const coincideColor = colorPedido === "" || String(color.color || "").toLowerCase() === colorPedido;
+        if (!coincideColor) continue;
+
+        const talla = leerTallasVendedor(color.tallas).find(function(item) {
+            return String(item.talla || "").toUpperCase() === tallaPedido;
+        });
+
+        if (talla) {
+            return {
+                color,
+                talla
+            };
+        }
+    }
+
+    return null;
+}
+
+function detallePedidoPendienteVendedor(registro) {
+    const producto = buscarProductoPendienteVendedor(registro);
+    const variante = buscarVariantePendienteVendedor(registro, producto);
+    const stockActual = variante ? variante.talla.cantidad : "Validar";
+    const codigoVariante = variante && variante.talla.codigo_barras ? variante.talla.codigo_barras : (registro.codigo || "-");
+
+    return `
+        <div>
+            <span>Código</span>
+            <strong>${limpiarTextoVendedor(codigoVariante)}</strong>
+        </div>
+        <div>
+            <span>Producto</span>
+            <strong>${limpiarTextoVendedor(registro.producto || "-")}</strong>
+        </div>
+        <div>
+            <span>Color y talla</span>
+            <strong>${limpiarTextoVendedor(registro.color || "Sin color")} / ${limpiarTextoVendedor(registro.talla || "-")}</strong>
+        </div>
+        <div>
+            <span>Pedido</span>
+            <strong>${Number(registro.cantidad || 0)} unidad(es)</strong>
+        </div>
+        <div>
+            <span>Stock actual</span>
+            <strong>${limpiarTextoVendedor(stockActual)}</strong>
+        </div>
+        <div>
+            <span>Entrega</span>
+            <strong>${limpiarTextoVendedor(etiquetaEntregaVendedor(registro.tipo_entrega))}</strong>
+        </div>
+        <div>
+            <span>Pago</span>
+            <strong>${limpiarTextoVendedor(registro.medio_pago || "-")}</strong>
+        </div>
+        <div>
+            <span>Contacto</span>
+            <strong>${limpiarTextoVendedor(registro.telefono || "Sin telefono")}</strong>
+        </div>
+    `;
+}
+
+function alternarDetallePedidoVendedor(idVenta, abrir) {
+    const tarjeta = document.getElementById("detallePedidoVendedor" + idVenta)
+        ?.closest(".pending-order-card")
+    if (!tarjeta) return;
+
+    if (abrir) {
+        tarjeta.classList.add("detalle-abierto");
+        return;
+    }
+
+    tarjeta.classList.toggle("detalle-abierto");
+}
+
+function revisarPedidoPendienteVendedor(idVenta) {
+    document.getElementById("panelNotificacionesVendedor")?.classList.remove("abierto");
+    activarPanelVendedor("panel-venta");
+
+    setTimeout(function() {
+        alternarDetallePedidoVendedor(idVenta, true);
+        document.getElementById("detallePedidoVendedor" + idVenta)?.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+    }, 80);
 }
 
 async function abrirFacturaVendedor(idVenta) {
@@ -902,6 +1094,17 @@ document.getElementById("ventaDescuentoTipo")?.addEventListener("change", actual
 document.getElementById("ventaDescuentoValor")?.addEventListener("input", actualizarResumenVenta);
 document.getElementById("formVenta")?.addEventListener("submit", registrarVentaVendedor);
 document.getElementById("btnVolverPanelVendedor")?.addEventListener("click", volverPanelInternoVendedor);
+document.getElementById("btnNotificacionesVendedor")?.addEventListener("click", function(evento) {
+    evento.stopPropagation();
+    document.getElementById("panelNotificacionesVendedor")?.classList.toggle("abierto");
+});
+document.addEventListener("click", function(evento) {
+    const panel = document.getElementById("panelNotificacionesVendedor");
+    const boton = document.getElementById("btnNotificacionesVendedor");
+
+    if (!panel || !boton || panel.contains(evento.target) || boton.contains(evento.target)) return;
+    panel.classList.remove("abierto");
+});
 document.getElementById("btnBuscarCodigoVenta")?.addEventListener("click", buscarProductoVentaPorCodigo);
 document.getElementById("ventaCodigoBarras")?.addEventListener("keydown", function(evento) {
     if (evento.key === "Enter") {
@@ -911,6 +1114,8 @@ document.getElementById("ventaCodigoBarras")?.addEventListener("keydown", functi
 });
 window.registrarDevolucionVendedor = registrarDevolucionVendedor;
 window.abrirFacturaVendedor = abrirFacturaVendedor;
+window.alternarDetallePedidoVendedor = alternarDetallePedidoVendedor;
+window.revisarPedidoPendienteVendedor = revisarPedidoPendienteVendedor;
 
 
 

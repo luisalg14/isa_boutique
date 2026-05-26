@@ -353,6 +353,12 @@
             actualizarContadorCarrito();
         }
 
+        function colorTieneStock(color) {
+            return leerTallas(color ? color.tallas : []).some(function(item) {
+                return Number(item.cantidad) > 0;
+            });
+        }
+
         function llenarColoresCompra(producto) {
             const selector = document.getElementById("compraColor");
             selector.innerHTML = '<option value="">Seleccionar color</option>';
@@ -369,11 +375,19 @@
             colores.forEach(function(item) {
                 const opcion = document.createElement("option");
                 opcion.value = item.id_producto_color;
-                opcion.textContent = item.color;
+                const disponible = colorTieneStock(item);
+                opcion.textContent = disponible ? item.color : item.color + " - agotado";
+                opcion.disabled = !disponible;
                 selector.appendChild(opcion);
             });
 
-            if (selector.options.length === 2) {
+            const primeraDisponible = Array.from(selector.options).find(function(opcion) {
+                return opcion.value !== "" && !opcion.disabled;
+            });
+
+            if (primeraDisponible) {
+                selector.value = primeraDisponible.value;
+            } else if (selector.options.length === 2) {
                 selector.selectedIndex = 1;
             }
 
@@ -609,7 +623,7 @@
                             (agotado ? "Agotado" : "Comprar") +
                         '</button>';
 
-                    card.querySelector("button").addEventListener("click", function() {
+                    card.querySelector(".boton-comprar").addEventListener("click", function() {
                         abrirModalCompra(producto);
                     });
 
