@@ -31,6 +31,24 @@ function porcentaje_reporte($valor, $base) {
     return round((floatval($valor) / $base) * 100, 2);
 }
 
+function division_reporte($valor, $base) {
+    $base = floatval($base);
+
+    if ($base <= 0) {
+        return 0;
+    }
+
+    return floatval($valor) / $base;
+}
+
+function meta_mensual_operativa($base, $margenBruto) {
+    $metaMinimaMensual = 7000000;
+    $margenReferencia = $margenBruto > 0 ? $margenBruto : 0.45;
+    $metaCalculada = $base > 0 ? $base / $margenReferencia : 0;
+
+    return max($metaMinimaMensual, $metaCalculada);
+}
+
 try {
     exigir_roles(["admin", "vendedor"]);
 
@@ -90,6 +108,36 @@ try {
         AND DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
     ");
 
+    $costoVendidoMes = escalar_reporte($conexion, "
+        SELECT COALESCE(SUM(dv.subtotal_costo), 0) AS total
+        FROM detalle_venta dv
+        INNER JOIN venta v
+            ON dv.id_venta = v.id_venta
+        WHERE v.estado IN ('pagada', 'devuelta')
+        AND DATE_TRUNC('month', v.fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
+    ");
+
+    $costoDevueltoMes = escalar_reporte($conexion, "
+        SELECT COALESCE(SUM(dd.subtotal_costo_devuelto), 0) AS total
+        FROM detalle_devolucion dd
+        INNER JOIN devolucion d
+            ON dd.id_devolucion = d.id_devolucion
+        WHERE d.estado = 'aprobada'
+        AND DATE_TRUNC('month', d.fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
+    ");
+
+    $gastosMes = escalar_reporte($conexion, "
+        SELECT COALESCE(SUM(valor), 0) AS total
+        FROM gasto_negocio
+        WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
+    ");
+
+    $nominaMes = escalar_reporte($conexion, "
+        SELECT COALESCE(SUM(valor), 0) AS total
+        FROM pago_trabajador
+        WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
+    ");
+
     $ventasRango = escalar_reporte($conexion, "
         SELECT COALESCE(SUM(total), 0) AS total
         FROM venta
@@ -140,11 +188,23 @@ try {
         WHERE fecha BETWEEN :fecha_inicio AND :fecha_fin
     ", $paramsRango);
 
+    $inversionesMes = escalar_reporte($conexion, "
+        SELECT COALESCE(SUM(valor), 0) AS total
+        FROM inversion_negocio
+        WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
+    ");
+
     $comprasMercanciaRango = escalar_reporte($conexion, "
         SELECT COALESCE(SUM(total_compra), 0) AS total
         FROM compra_mercancia
         WHERE fecha BETWEEN :fecha_inicio AND :fecha_fin
     ", $paramsRango);
+
+    $comprasMercanciaMes = escalar_reporte($conexion, "
+        SELECT COALESCE(SUM(total_compra), 0) AS total
+        FROM compra_mercancia
+        WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
+    ");
 
     $consultaProductoTop = $conexion->prepare("
         SELECT
@@ -249,6 +309,19 @@ try {
     $utilidadBrutaRango = $netoRango - $costoNetoRango;
     $gastosOperativosRango = $gastosRango + $nominaRango;
     $utilidadNetaRango = $utilidadBrutaRango - $gastosOperativosRango;
+    $netoHoy = $ventasHoy - $devolucionesHoy;
+    $netoMes = $ventasMes - $devolucionesMes;
+    $costoNetoMes = $costoVendidoMes - $costoDevueltoMes;
+    $utilidadBrutaMes = $netoMes - $costoNetoMes;
+    $gastosOperativosMes = $gastosMes + $nominaMes;
+    $margenBrutoMes = division_reporte($utilidadBrutaMes, $netoMes);
+    $baseMetaMensual = $gastosOperativosMes + $comprasMercanciaMes + $inversionesMes;
+    $gananciaObjetivoMes = max(1500000, $gastosOperativosMes * 0.30);
+    $metaMensualConGanancia = meta_mensual_operativa($baseMetaMensual + $gananciaObjetivoMes, $margenBrutoMes);
+    $diasMes = intval(date("t"));
+    $metaDiaria = $diasMes > 0 ? $metaMensualConGanancia / $diasMes : 0;
+    $avanceMetaDiaria = porcentaje_reporte($netoHoy, $metaDiaria);
+    $faltanteMetaDiaria = max(0, $metaDiaria - $netoHoy);
 
     $productoTop = count($productosTop) > 0 ? $productosTop[0] : null;
     $menorRotacion = count($menorRotacionLista) > 0 ? $menorRotacionLista[0] : null;
@@ -258,10 +331,17 @@ try {
         "total_neto" => floatval($totalVentas) - floatval($totalDevoluciones),
         "ventas_hoy" => $ventasHoy,
         "devoluciones_hoy" => $devolucionesHoy,
-        "neto_hoy" => $ventasHoy - $devolucionesHoy,
+        "neto_hoy" => $netoHoy,
         "ventas_mes" => $ventasMes,
         "devoluciones_mes" => $devolucionesMes,
-        "neto_mes" => $ventasMes - $devolucionesMes,
+        "neto_mes" => $netoMes,
+        "meta_diaria" => [
+            "objetivo" => $metaDiaria,
+            "avance" => min(100, $avanceMetaDiaria),
+            "faltante" => $faltanteMetaDiaria,
+            "ventas_hoy" => $netoHoy,
+            "meta_mensual" => $metaMensualConGanancia
+        ],
         "producto_top" => $productoTop ? $productoTop["producto"] . " (" . $productoTop["cantidad"] . ")" : "Sin ventas",
         "menor_rotacion" => $menorRotacion ? $menorRotacion["producto"] . " (" . $menorRotacion["cantidad"] . ")" : "Sin productos",
         "rango" => [

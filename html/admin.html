@@ -94,6 +94,18 @@
                 </div>
             </div>
 
+            <div class="daily-goal-panel">
+                <div>
+                    <span>Meta diaria</span>
+                    <h3 id="inicioMetaDiaria">$0</h3>
+                    <p id="inicioMetaDiariaTexto">Calculando avance del día...</p>
+                </div>
+                <div class="daily-goal-progress">
+                    <strong id="inicioMetaDiariaAvance">0%</strong>
+                    <span><i id="inicioMetaDiariaBarra"></i></span>
+                </div>
+            </div>
+
             <div class="dashboard-panel pedidos-pendientes-panel">
                 <div class="dashboard-panel-header">
                     <div>
@@ -348,6 +360,7 @@
 
             <div class="product-form-block pending-merchandise-box">
                 <h3>Mercancía comprada pendiente</h3>
+                <div id="mercanciaPendienteVariantes" class="pending-variants-preview" hidden></div>
                 <div class="pending-merchandise-grid">
                     <div class="campo">
                         <label>Crear desde compra registrada</label>
@@ -361,11 +374,10 @@
                         <span>Selecciona una compra pendiente para cargar categoría, costo y tallas.</span>
                     </div>
                 </div>
-                <div id="mercanciaPendienteVariantes" class="pending-variants-preview" hidden></div>
-                <button type="button" class="btn" onclick="limpiarMercanciaPendienteProducto()">Crear producto manual</button>
+                <button type="button" class="btn" onclick="activarRegistroManualProducto()">Usar registro manual</button>
             </div>
 
-            <div class="product-form-block">
+            <div id="bloqueInformacionComercialProducto" class="product-form-block">
                 <h3>1. Información comercial</h3>
                 <div class="product-basic-grid">
                     <div class="campo">
@@ -472,7 +484,7 @@
                 </div>
             </div>
 
-            <details class="product-form-block manual-variant-block">
+            <details id="bloqueInventarioManual" class="product-form-block manual-variant-block">
                 <summary>
                     <div>
                         <h3>Registro manual opcional de inventario</h3>
@@ -810,22 +822,17 @@
         <section id="panel-historial" class="admin-panel">
             <h2>Ventas y devoluciones</h2>
 
-            <table class="tabla-inventario">
+            <div class="filtros historial-search">
+                <input type="text" id="buscadorHistorial" placeholder="Buscar por producto, código, cliente, teléfono, factura o estado...">
+            </div>
+
+            <table class="tabla-inventario tabla-historial-ventas">
                 <thead>
                     <tr>
                         <th>Cliente</th>
-                        <th>Teléfono</th>
-                        <th>Tipo</th>
-                        <th>Código</th>
                         <th>Producto</th>
-                        <th>Marca</th>
-                        <th>Talla</th>
-                        <th>Cantidad</th>
-                        <th>Precio Unitario</th>
                         <th>Total</th>
-                        <th>Medio de Pago</th>
-                        <th>Canal</th>
-                        <th>Entrega</th>
+                        <th>Pago y entrega</th>
                         <th>Estado</th>
                         <th>Fecha</th>
                         <th>Acciones</th>
@@ -835,7 +842,7 @@
                 <tbody id="tablaHistorial"></tbody>
             </table>
 
-            <button data-admin-only onclick="limpiarHistorialAntiguo()">
+            <button class="btn-limpiar-historial" data-admin-only onclick="limpiarHistorialAntiguo()">
                 Limpiar historial antiguo
             </button>
         </section>
@@ -868,6 +875,10 @@
         <!-- HISTORIAL DE MOVIMIENTOS DEL INVENTARIO -->
 <section id="panel-movimientos" class="admin-panel">
     <h2>Movimientos de Inventario</h2>
+
+    <div class="filtros movimientos-search">
+        <input type="text" id="buscadorMovimientos" placeholder="Buscar por producto, código, tipo, fecha, marca o detalle...">
+    </div>
     
     <table class="tabla-inventario">
         <thead>
@@ -885,14 +896,14 @@
         <tbody id="tablaMovimientos"></tbody>
     </table>
 
-    <div class="filtros">
+    <div class="filtros movimientos-actions acciones-movimientos-inventario">
         <input type="date" id="fechaMovimientoEliminar">
         
-        <button data-admin-only onclick="eliminarMovimientosPorFecha()">
+        <button class="btn-eliminar movement-delete-btn" data-admin-only onclick="eliminarMovimientosPorFecha()">
             Eliminar movimientos de esa fecha
         </button>
 
-        <button data-admin-only onclick="limpiarMovimientosAntiguos()">
+        <button class="btn-eliminar movement-delete-btn" data-admin-only onclick="limpiarMovimientosAntiguos()">
             Eliminar movimientos antiguos
         </button>
     </div>
@@ -907,55 +918,102 @@
                 <button type="button" data-subsection-target="finanzas-movimientos">Movimientos</button>
             </div>
 
-            <div class="admin-subsection activo" data-subsection="finanzas-resumen">
-            <div class="reportes finanzas-resumen">
-                <div class="reporte-card">
-                    <h4>Ventas netas</h4>
-                    <p id="finVentasNetas">$0</p>
+            <div class="admin-subsection activo finance-summary-view" data-subsection="finanzas-resumen">
+            <div class="finance-summary-shell">
+                <aside class="finance-summary-menu" aria-label="Secciones del resumen financiero">
+                    <button type="button" class="activo" data-finance-summary-target="resultado">Resultado</button>
+                    <button type="button" data-finance-summary-target="caja">Caja inteligente</button>
+                    <button type="button" data-finance-summary-target="rentabilidad">Rentabilidad</button>
+                    <button type="button" data-finance-summary-target="detalle">Detalle</button>
+                </aside>
+
+                <div class="finance-summary-content">
+            <div class="finance-summary-section activo" data-finance-summary="resultado">
+            <div class="finance-executive-summary">
+                <div class="finance-result-card">
+                    <span>Resultado del negocio</span>
+                    <h3>Utilidad neta</h3>
+                    <strong id="finUtilidad">$0</strong>
+                    <p>Resultado después de descontar costo de mercancía y gastos operativos.</p>
                 </div>
 
-                <div class="reporte-card">
-                    <h4>Costo mercancia vendida</h4>
-                    <p id="finCostoMercancia">$0</p>
-                </div>
-
-                <div class="reporte-card">
-                    <h4>Utilidad bruta</h4>
-                    <p id="finUtilidadBruta">$0</p>
-                </div>
-
-                <div class="reporte-card">
-                    <h4>Gastos registrados</h4>
-                    <p id="finGastos">$0</p>
-                </div>
-
-                <div class="reporte-card">
-                    <h4>Inversiones</h4>
-                    <p id="finInversiones">$0</p>
-                </div>
-
-                <div class="reporte-card">
-                    <h4>Compras de mercancia</h4>
-                    <p id="finComprasMercancia">$0</p>
-                </div>
-
-                <div class="reporte-card">
-                    <h4>Utilidad neta</h4>
-                    <p id="finUtilidad">$0</p>
-                </div>
-
-                <div class="reporte-card">
-                    <h4>Margen de ganancia</h4>
-                    <p id="finMargen">0%</p>
-                </div>
-
-                <div class="reporte-card">
-                    <h4>Capital + utilidad neta</h4>
-                    <p id="finSaldo">$0</p>
+                <div class="finance-kpi-list">
+                    <div>
+                        <span>Margen de ganancia</span>
+                        <strong id="finMargen">0%</strong>
+                    </div>
+                    <div>
+                        <span>Saldo de caja estimado</span>
+                        <strong id="finSaldo">$0</strong>
+                    </div>
                 </div>
             </div>
+            </div>
 
+            <div class="finance-summary-section" data-finance-summary="caja">
+            <div class="cash-intelligence-panel">
+                <div class="cash-intelligence-header">
+                    <div>
+                        <span>Caja inteligente</span>
+                        <h3>Clasificación del dinero vendido este mes</h3>
+                    </div>
+                    <strong id="finSaldoCajaMes">$0</strong>
+                </div>
+
+                <div class="cash-classification-grid" id="finClasificacionCaja"></div>
+            </div>
+            </div>
+
+            <div class="finance-summary-section" data-finance-summary="detalle">
             <div class="finance-breakdown finanzas-detalle" id="finGastosDetalle"></div>
+            </div>
+
+            <div class="finance-summary-section" data-finance-summary="rentabilidad">
+            <div class="profitability-panel" id="finRentabilidadPanel">
+                <div class="profitability-header">
+                    <div>
+                        <span>Rentabilidad del mes</span>
+                        <h3>Meta para cubrir gastos y generar ganancia</h3>
+                    </div>
+                    <p id="finDiagnosticoRentabilidad">Calculando rentabilidad...</p>
+                </div>
+
+                <div class="profitability-grid">
+                    <div>
+                        <span>Punto de equilibrio</span>
+                        <strong id="finPuntoEquilibrio">$0</strong>
+                        <small>Venta mínima estimada para cubrir gastos operativos.</small>
+                    </div>
+                    <div>
+                        <span>Meta con ganancia</span>
+                        <strong id="finMetaGanancia">$0</strong>
+                        <small>Incluye una utilidad objetivo del 30% sobre los gastos del mes.</small>
+                    </div>
+                    <div>
+                        <span>Falta para equilibrio</span>
+                        <strong id="finFaltanteEquilibrio">$0</strong>
+                        <small id="finVentaDiariaEquilibrio">$0 diarios restantes.</small>
+                    </div>
+                    <div>
+                        <span>Falta para meta</span>
+                        <strong id="finFaltanteMeta">$0</strong>
+                        <small id="finVentaDiariaMeta">$0 diarios restantes.</small>
+                    </div>
+                </div>
+
+                <div class="profitability-progress">
+                    <div>
+                        <label>Avance punto de equilibrio <strong id="finAvanceEquilibrioTexto">0%</strong></label>
+                        <span><i id="finAvanceEquilibrioBarra"></i></span>
+                    </div>
+                    <div>
+                        <label>Avance meta con ganancia <strong id="finAvanceMetaTexto">0%</strong></label>
+                        <span><i id="finAvanceMetaBarra"></i></span>
+                </div>
+            </div>
+            </div>
+                </div>
+            </div>
             </div>
 
             <div class="admin-subsection" data-subsection="finanzas-registrar">
@@ -2175,6 +2233,24 @@
         renderizarMercanciaPendienteProducto();
     }
 
+    function activarRegistroManualProducto() {
+        limpiarMercanciaPendienteProducto();
+
+        const resumen = document.getElementById("mercanciaPendienteResumen");
+        const bloqueComercial = document.getElementById("bloqueInformacionComercialProducto");
+
+        if (resumen) {
+            resumen.innerHTML = `
+                <strong>Registro manual activo</strong>
+                <span>Agrega colores, tallas y cantidades desde el bloque manual de inventario.</span>
+            `;
+        }
+
+        if (bloqueComercial) {
+            bloqueComercial.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    }
+
     function exigirAdminFrontend() {
         if (!usuarioEsAdmin()) {
             alert("Solo el administrador puede realizar esta acción.");
@@ -2895,6 +2971,7 @@
 
     async function cargarHistorialVentasBD() {
         const tabla = document.getElementById("tablaHistorial");
+        const buscador = document.getElementById("buscadorHistorial");
         
         if (!tabla) return;
 
@@ -2907,7 +2984,7 @@
             if (ventas.error) {
                 tabla.innerHTML = `
                 <tr>
-                    <td colspan="16">${ventas.mensaje}</td>
+                    <td colspan="7">${ventas.mensaje}</td>
                 </tr>
                 `;
                 return;
@@ -2916,14 +2993,50 @@
             if (ventas.length === 0) {
                 tabla.innerHTML = `
                 <tr>
-                    <td colspan="16">No hay ventas registradas</td>
+                    <td colspan="7">No hay ventas registradas</td>
+                </tr>
+                `;
+                ocultarPaginacionAdmin("historial", tabla);
+                return;
+            }
+
+            const textoBusqueda = buscador ? buscador.value.toLowerCase().trim() : "";
+            const ventasFiltradas = textoBusqueda
+                ? ventas.filter(function(venta) {
+                    const texto = [
+                        venta.cliente,
+                        venta.telefono,
+                        venta.tipo,
+                        venta.codigo,
+                        venta.producto,
+                        venta.marca,
+                        venta.talla,
+                        venta.medio_pago,
+                        venta.canal_venta,
+                        etiquetaCanalVenta(venta.canal_venta),
+                        venta.tipo_entrega,
+                        etiquetaEntregaVenta(venta.tipo_entrega),
+                        venta.estado,
+                        etiquetaEstadoVenta(venta.estado),
+                        venta.numero_factura,
+                        venta.id_venta
+                    ].join(" ").toLowerCase();
+
+                    return texto.includes(textoBusqueda);
+                })
+                : ventas;
+
+            if (ventasFiltradas.length === 0) {
+                tabla.innerHTML = `
+                <tr>
+                    <td colspan="7">No hay registros que coincidan con la búsqueda</td>
                 </tr>
                 `;
                 ocultarPaginacionAdmin("historial", tabla);
                 return;
             }
             
-            prepararPaginaAdmin(ventas, "historial", 20, tabla, cargarHistorialVentasBD).forEach(function(venta) {
+            prepararPaginaAdmin(ventasFiltradas, "historial", 20, tabla, cargarHistorialVentasBD).forEach(function(venta) {
                 let accion = `<span>Registrada</span>`;
                 let botonFactura = "";
 
@@ -2942,22 +3055,36 @@
 
                 tabla.innerHTML += `
                 <tr>
-                    <td>${venta.cliente || "Sin nombre"}</td>
-                    <td>${venta.telefono || "Sin teléfono"}</td>
-                    <td>${venta.tipo}</td>
-                    <td>${venta.codigo || "Sin código"}</td>
-                    <td>${venta.producto}</td>
-                    <td>${venta.marca || "Sin marca"}</td>
-                    <td>${venta.talla || "-"}</td>
-                    <td>${venta.cantidad}</td>
-                    <td>${formatoPrecioBD(venta.precio_unitario)}</td>
-                    <td>${formatoPrecioBD(venta.subtotal)}</td>
-                    <td>${venta.medio_pago}</td>
-                    <td>${etiquetaCanalVenta(venta.canal_venta)}</td>
-                    <td>${etiquetaEntregaVenta(venta.tipo_entrega)}</td>
+                    <td>
+                        <div class="historial-main-cell">
+                            <strong>${limpiarTextoBD(venta.cliente || "Sin nombre")}</strong>
+                            <span>${limpiarTextoBD(venta.telefono || "Sin teléfono")}</span>
+                            <small>${limpiarTextoBD(venta.tipo)}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="historial-main-cell">
+                            <strong>${limpiarTextoBD(venta.producto || "Producto")}</strong>
+                            <span>${limpiarTextoBD(venta.codigo || "Sin código")} | ${limpiarTextoBD(venta.marca || "Sin marca")}</span>
+                            <small>Talla ${limpiarTextoBD(venta.talla || "-")} | Cant. ${venta.cantidad}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="historial-main-cell">
+                            <strong>${formatoPrecioBD(venta.subtotal)}</strong>
+                            <span>Unit. ${formatoPrecioBD(venta.precio_unitario)}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="historial-main-cell">
+                            <strong>${limpiarTextoBD(venta.medio_pago || "-")}</strong>
+                            <span>${limpiarTextoBD(etiquetaCanalVenta(venta.canal_venta))}</span>
+                            <small>${limpiarTextoBD(etiquetaEntregaVenta(venta.tipo_entrega))}</small>
+                        </div>
+                    </td>
                     <td>${etiquetaEstadoVenta(venta.estado)}</td>
                     <td>${new Date(venta.fecha).toLocaleString()}</td>
-                    <td>
+                    <td class="historial-actions-cell">
                       ${
                         false && venta.tipo === "Venta"
                         ? `<button onclick="registrarDevolucionBD(${venta.id_venta}, ${venta.id_producto})">Devolución</button>`
@@ -2971,7 +3098,7 @@
         } catch (error) {
             tabla.innerHTML = `
             <tr>
-                <td colspan="16">Error al cargar historial de ventas</td>
+                <td colspan="7">Error al cargar historial de ventas</td>
             </tr>
             `;
             console.error(error);
@@ -3647,6 +3774,7 @@
 
     async function cargarMovimientosBD() {
         const tabla = document.getElementById("tablaMovimientos");
+        const buscador = document.getElementById("buscadorMovimientos");
 
         if (!tabla) return;
 
@@ -3674,8 +3802,37 @@
                 ocultarPaginacionAdmin("movimientos", tabla);
                 return;
             }
+
+            const textoBusqueda = buscador ? buscador.value.toLowerCase().trim() : "";
+            const movimientosFiltrados = textoBusqueda
+                ? movimientos.filter(function(movimiento) {
+                    const fecha = movimiento.fecha ? new Date(movimiento.fecha).toLocaleString() : "";
+                    const texto = [
+                        fecha,
+                        movimiento.tipo,
+                        movimiento.codigo,
+                        movimiento.producto,
+                        movimiento.marca,
+                        movimiento.cantidad,
+                        movimiento.detalle,
+                        movimiento.usuario
+                    ].join(" ").toLowerCase();
+
+                    return texto.includes(textoBusqueda);
+                })
+                : movimientos;
+
+            if (movimientosFiltrados.length === 0) {
+                tabla.innerHTML = `
+                <tr>
+                    <td colspan="7">No hay movimientos que coincidan con la búsqueda</td>
+                </tr>
+                `;
+                ocultarPaginacionAdmin("movimientos", tabla);
+                return;
+            }
             
-            prepararPaginaAdmin(movimientos, "movimientos", 30, tabla, cargarMovimientosBD).forEach(function(movimiento) {
+            prepararPaginaAdmin(movimientosFiltrados, "movimientos", 30, tabla, cargarMovimientosBD).forEach(function(movimiento) {
                 tabla.innerHTML += `
                 <tr>
                     <td>${new Date(movimiento.fecha).toLocaleString()}</td>
@@ -4317,16 +4474,19 @@
                 return;
             }
 
-            document.getElementById("finVentasNetas").innerText = formatoPrecioBD(resumen.ventas_netas);
-            document.getElementById("finCostoMercancia").innerText = formatoPrecioBD(resumen.costo_mercancia);
-            document.getElementById("finUtilidadBruta").innerText = formatoPrecioBD(resumen.utilidad_bruta);
-            document.getElementById("finGastos").innerText = formatoPrecioBD(resumen.gastos);
-            document.getElementById("finInversiones").innerText = formatoPrecioBD(resumen.inversiones);
-            document.getElementById("finComprasMercancia").innerText = formatoPrecioBD(resumen.compras_mercancia || 0);
+            if (document.getElementById("finVentasNetas")) document.getElementById("finVentasNetas").innerText = formatoPrecioBD(resumen.ventas_netas);
+            if (document.getElementById("finCostoMercancia")) document.getElementById("finCostoMercancia").innerText = formatoPrecioBD(resumen.costo_mercancia);
+            if (document.getElementById("finUtilidadBruta")) document.getElementById("finUtilidadBruta").innerText = formatoPrecioBD(resumen.utilidad_bruta);
+            if (document.getElementById("finGastos")) document.getElementById("finGastos").innerText = formatoPrecioBD(resumen.gastos);
+            if (document.getElementById("finInversiones")) document.getElementById("finInversiones").innerText = formatoPrecioBD(resumen.inversiones);
+            if (document.getElementById("finComprasMercancia")) document.getElementById("finComprasMercancia").innerText = formatoPrecioBD(resumen.compras_mercancia || 0);
             document.getElementById("finUtilidad").innerText = formatoPrecioBD(resumen.utilidad_neta);
             document.getElementById("finMargen").innerText = Number(resumen.margen_ganancia).toFixed(2) + "%";
-            document.getElementById("finSaldo").innerText = formatoPrecioBD(resumen.saldo_estimado);
+            document.getElementById("finSaldo").innerText = formatoPrecioBD(resumen.saldo_caja_estimado_mes || resumen.saldo_caja_estimado || 0);
+            actualizarEstadoResumenFinanciero(resumen);
+            renderizarClasificacionCaja(resumen);
             renderizarDetalleGastosFinancieros(resumen);
+            renderizarRentabilidadFinanciera(resumen);
         } catch (error) {
             console.error("Error al cargar resumen financiero", error);
         }
@@ -5207,6 +5367,72 @@
         return etiquetas[tipo] || tipo;
     }
 
+    function renderizarClasificacionCaja(resumen) {
+        const clasificacion = resumen.clasificacion_mes || {};
+        const contenedor = document.getElementById("finClasificacionCaja");
+        const ventasContenedor = document.getElementById("finVentasClasificadas");
+        const saldoCaja = document.getElementById("finSaldoCajaMes");
+
+        if (saldoCaja) {
+            saldoCaja.textContent = formatoPrecioBD(clasificacion.saldo_caja || resumen.saldo_caja_estimado_mes || 0);
+        }
+
+        if (contenedor) {
+            const tarjetas = [
+                ["Ventas netas", clasificacion.ventas_netas, "Dinero que entró por ventas pagadas."],
+                ["IVA", clasificacion.iva, "Valor separado para impuesto."],
+                ["Costo mercancía vendida", clasificacion.para_mercancia_vendida, "Costo que salió del inventario."],
+                ["Compras de mercancía", clasificacion.compras_mercancia_mes, "Salida de caja para reponer o comprar prendas."],
+                ["Trabajadores", clasificacion.trabajadores, "Pagos de nómina, comisiones o bonos."],
+                ["Servicios y renta", clasificacion.servicios_renta, "Gastos primarios y servicios del negocio."],
+                ["Bolsas, publicidad y envíos", clasificacion.bolsas_publicidad_envios, "Costos de operación ligados a vender."],
+                ["Otros gastos", clasificacion.otros_gastos, "Gastos que no pertenecen a las categorías principales."],
+                ["Ganancia libre estimada", clasificacion.ganancia_libre_estimada, "Resultado después de separar costos y gastos del mes."]
+            ];
+
+            contenedor.innerHTML = tarjetas.map(function(tarjeta) {
+                const valor = Number(tarjeta[1] || 0);
+                const clase = valor < 0 ? "negativo" : "positivo";
+
+                return `
+                    <div class="cash-classification-card ${clase}">
+                        <span>${tarjeta[0]}</span>
+                        <strong>${formatoPrecioBD(valor)}</strong>
+                        <small>${tarjeta[2]}</small>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        if (!ventasContenedor) return;
+
+        const ventas = Array.isArray(resumen.ventas_clasificadas_mes)
+            ? resumen.ventas_clasificadas_mes
+            : [];
+
+        if (ventas.length === 0) {
+            ventasContenedor.innerHTML = "<p>No hay ventas pagadas este mes para clasificar.</p>";
+            return;
+        }
+
+        ventasContenedor.innerHTML = ventas.map(function(venta) {
+            const total = Number(venta.total || 0);
+            const iva = Number(venta.iva || 0);
+            const costo = Number(venta.costo_mercancia || 0);
+            const utilidad = Number(venta.utilidad_bruta || 0);
+
+            return `
+                <article>
+                    <div>
+                        <strong>Venta #${venta.id_venta}</strong>
+                        <span>${formatoPrecioBD(total)}</span>
+                    </div>
+                    <p>IVA ${formatoPrecioBD(iva)} · Mercancía ${formatoPrecioBD(costo)} · Utilidad bruta ${formatoPrecioBD(utilidad)}</p>
+                </article>
+            `;
+        }).join("");
+    }
+
     function renderizarDetalleGastosFinancieros(resumen) {
         const contenedor = document.getElementById("finGastosDetalle");
         if (!contenedor) return;
@@ -5241,6 +5467,98 @@
             `;
             contenedor.appendChild(item);
         });
+    }
+
+    function actualizarEstadoResumenFinanciero(resumen) {
+        const tarjeta = document.querySelector(".finance-result-card");
+        if (!tarjeta) return;
+
+        const utilidad = Number(resumen.utilidad_neta_mes || resumen.utilidad_neta || 0);
+        const margen = Number(resumen.margen_ganancia_mes || resumen.margen_ganancia || 0);
+
+        tarjeta.classList.remove("estado-saludable", "estado-alerta", "estado-perdida");
+
+        if (utilidad < 0) {
+            tarjeta.classList.add("estado-perdida");
+        } else if (margen < 10) {
+            tarjeta.classList.add("estado-alerta");
+        } else {
+            tarjeta.classList.add("estado-saludable");
+        }
+    }
+
+    function activarVistaResumenFinanzas(vista) {
+        document.querySelectorAll("[data-finance-summary]").forEach(function(seccion) {
+            seccion.classList.toggle("activo", seccion.dataset.financeSummary === vista);
+        });
+
+        document.querySelectorAll("[data-finance-summary-target]").forEach(function(boton) {
+            boton.classList.toggle("activo", boton.dataset.financeSummaryTarget === vista);
+        });
+    }
+
+    function actualizarMetaDiariaAdmin(meta) {
+        if (!meta) return;
+
+        const objetivo = Number(meta.objetivo || 0);
+        const avance = Math.max(0, Math.min(100, Number(meta.avance || 0)));
+        const faltante = Number(meta.faltante || 0);
+        const ventasHoy = Number(meta.ventas_hoy || 0);
+        const texto = faltante <= 0
+            ? "Meta cumplida. Ventas netas de hoy: " + formatoPrecioBD(ventasHoy) + "."
+            : "Faltan " + formatoPrecioBD(faltante) + " para cumplir la meta de hoy.";
+
+        const valor = document.getElementById("inicioMetaDiaria");
+        const detalle = document.getElementById("inicioMetaDiariaTexto");
+        const porcentaje = document.getElementById("inicioMetaDiariaAvance");
+        const barra = document.getElementById("inicioMetaDiariaBarra");
+
+        if (valor) valor.textContent = formatoPrecioBD(objetivo);
+        if (detalle) detalle.textContent = texto;
+        if (porcentaje) porcentaje.textContent = avance.toFixed(0) + "%";
+        if (barra) barra.style.width = avance + "%";
+    }
+
+    function actualizarBarraRentabilidad(idBarra, porcentaje) {
+        const barra = document.getElementById(idBarra);
+        if (!barra) return;
+
+        barra.style.width = Math.max(0, Math.min(100, Number(porcentaje || 0))) + "%";
+    }
+
+    function renderizarRentabilidadFinanciera(resumen) {
+        const diagnostico = document.getElementById("finDiagnosticoRentabilidad");
+        const ventasMes = Number(resumen.ventas_netas_mes || 0);
+        const utilidadMes = Number(resumen.utilidad_neta_mes || 0);
+        const faltanteEquilibrio = Number(resumen.faltante_equilibrio_mes || 0);
+        const faltanteMeta = Number(resumen.faltante_meta_ganancia_mes || 0);
+        const avanceEquilibrio = Number(resumen.avance_equilibrio_mes || 0);
+        const avanceMeta = Number(resumen.avance_meta_ganancia_mes || 0);
+        const diasRestantes = Number(resumen.dias_restantes_mes || 1);
+
+        document.getElementById("finPuntoEquilibrio").innerText = formatoPrecioBD(resumen.punto_equilibrio_mes || 0);
+        document.getElementById("finMetaGanancia").innerText = formatoPrecioBD(resumen.meta_ventas_ganancia_mes || 0);
+        document.getElementById("finFaltanteEquilibrio").innerText = formatoPrecioBD(faltanteEquilibrio);
+        document.getElementById("finFaltanteMeta").innerText = formatoPrecioBD(faltanteMeta);
+        document.getElementById("finVentaDiariaEquilibrio").innerText = formatoPrecioBD(resumen.venta_diaria_equilibrio_mes || 0) + " diarios por " + diasRestantes + " días.";
+        document.getElementById("finVentaDiariaMeta").innerText = formatoPrecioBD(resumen.venta_diaria_meta_mes || 0) + " diarios por " + diasRestantes + " días.";
+        document.getElementById("finAvanceEquilibrioTexto").innerText = avanceEquilibrio.toFixed(2) + "%";
+        document.getElementById("finAvanceMetaTexto").innerText = avanceMeta.toFixed(2) + "%";
+
+        actualizarBarraRentabilidad("finAvanceEquilibrioBarra", avanceEquilibrio);
+        actualizarBarraRentabilidad("finAvanceMetaBarra", avanceMeta);
+
+        if (diagnostico) {
+            if (ventasMes <= 0) {
+                diagnostico.textContent = "Aún no hay ventas pagadas este mes para estimar la meta.";
+            } else if (faltanteEquilibrio <= 0 && faltanteMeta <= 0) {
+                diagnostico.textContent = "El negocio ya cubrió gastos estimados y alcanzó la meta de ganancia mensual.";
+            } else if (faltanteEquilibrio <= 0) {
+                diagnostico.textContent = "Ya se cubrieron los gastos estimados. Falta " + formatoPrecioBD(faltanteMeta) + " para la meta con ganancia.";
+            } else {
+                diagnostico.textContent = "Falta " + formatoPrecioBD(faltanteEquilibrio) + " para cubrir gastos. Utilidad neta actual: " + formatoPrecioBD(utilidadMes) + ".";
+            }
+        }
     }
 
     function definirFechasFinanzas() {
@@ -5699,6 +6017,7 @@
 
             if (!reportes.error) {
                 document.getElementById("inicioVentasHoy").textContent = formatoPrecioBD(reportes.ventas_hoy || 0);
+                actualizarMetaDiariaAdmin(reportes.meta_diaria);
             }
 
             if (Array.isArray(productos)) {
@@ -6010,10 +6329,28 @@
         buscadorBD.addEventListener("input", cargarInventarioBD);
     }
 
+    const buscadorMovimientos = document.getElementById("buscadorMovimientos");
+
+    if (buscadorMovimientos) {
+        buscadorMovimientos.addEventListener("input", function() {
+            paginacionAdmin.movimientos = 1;
+            cargarMovimientosBD();
+        });
+    }
+
     const buscadorFacturas = document.getElementById("buscadorFacturas");
 
     if (buscadorFacturas) {
         buscadorFacturas.addEventListener("input", cargarFacturasBD);
+    }
+
+    const buscadorHistorial = document.getElementById("buscadorHistorial");
+
+    if (buscadorHistorial) {
+        buscadorHistorial.addEventListener("input", function() {
+            paginacionAdmin.historial = 1;
+            cargarHistorialVentasBD();
+        });
     }
 
     const buscadorClientes = document.getElementById("buscadorClientes");
@@ -6123,6 +6460,11 @@
     document.getElementById("ventaAdminCantidad")?.addEventListener("input", actualizarResumenVentaAdmin);
     document.getElementById("ventaAdminDescuentoTipo")?.addEventListener("change", actualizarResumenVentaAdmin);
     document.getElementById("ventaAdminDescuentoValor")?.addEventListener("input", actualizarResumenVentaAdmin);
+    document.querySelectorAll("[data-finance-summary-target]").forEach(function(boton) {
+        boton.addEventListener("click", function() {
+            activarVistaResumenFinanzas(boton.dataset.financeSummaryTarget);
+        });
+    });
     document.getElementById("inp-precio")?.addEventListener("input", calcularPrecioProductoAdmin);
     document.getElementById("inp-costo")?.addEventListener("input", calcularPrecioProductoAdmin);
     document.getElementById("calcMargenObjetivo")?.addEventListener("input", calcularPrecioProductoAdmin);
@@ -6197,5 +6539,3 @@
 
 </body>
 </html>
-
-

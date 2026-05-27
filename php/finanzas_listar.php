@@ -10,6 +10,38 @@ try {
 
     $sql = "
         SELECT
+            'Venta' AS clase,
+            v.id_venta AS id_movimiento,
+            v.canal_venta AS tipo,
+            'Venta #' || v.id_venta || ' - ' || c.nombre AS concepto,
+            v.total AS valor,
+            v.fecha,
+            'Ingreso por venta ' || v.medio_pago AS detalle,
+            u.nombre AS usuario
+        FROM venta v
+        INNER JOIN cliente c
+            ON v.id_cliente = c.id_cliente
+        LEFT JOIN usuario_sistema u
+            ON v.id_usuario = u.id_usuario
+        WHERE v.estado IN ('pagada', 'devuelta')
+
+        UNION ALL
+
+        SELECT
+            'Devolucion' AS clase,
+            d.id_devolucion AS id_movimiento,
+            d.estado AS tipo,
+            'Devolucion venta #' || d.id_venta AS concepto,
+            -d.total_devuelto AS valor,
+            d.fecha,
+            d.motivo AS detalle,
+            NULL AS usuario
+        FROM devolucion d
+        WHERE d.estado = 'aprobada'
+
+        UNION ALL
+
+        SELECT
             'Gasto' AS clase,
             g.id_gasto AS id_movimiento,
             g.tipo,

@@ -175,6 +175,43 @@ function formatoPrecioVendedor(valor) {
     }) + " COP";
 }
 
+function actualizarMetaDiariaVendedor(meta) {
+    if (!meta) return;
+
+    const objetivo = Number(meta.objetivo || 0);
+    const avance = Math.max(0, Math.min(100, Number(meta.avance || 0)));
+    const faltante = Number(meta.faltante || 0);
+    const ventasHoy = Number(meta.ventas_hoy || 0);
+    const texto = faltante <= 0
+        ? "Meta cumplida. Ventas netas de hoy: " + formatoPrecioVendedor(ventasHoy) + "."
+        : "Faltan " + formatoPrecioVendedor(faltante) + " para cumplir la meta de hoy.";
+
+    [
+        {
+            valor: "vendedorMetaDiaria",
+            detalle: "vendedorMetaDiariaTexto",
+            porcentaje: "vendedorMetaDiariaAvance",
+            barra: "vendedorMetaDiariaBarra"
+        },
+        {
+            valor: "vendedorMetaDiariaVenta",
+            detalle: "vendedorMetaDiariaTextoVenta",
+            porcentaje: "vendedorMetaDiariaAvanceVenta",
+            barra: "vendedorMetaDiariaBarraVenta"
+        }
+    ].forEach(function(ids) {
+        const valor = document.getElementById(ids.valor);
+        const detalle = document.getElementById(ids.detalle);
+        const porcentaje = document.getElementById(ids.porcentaje);
+        const barra = document.getElementById(ids.barra);
+
+        if (valor) valor.textContent = formatoPrecioVendedor(objetivo);
+        if (detalle) detalle.textContent = texto;
+        if (porcentaje) porcentaje.textContent = avance.toFixed(0) + "%";
+        if (barra) barra.style.width = avance + "%";
+    });
+}
+
 function limpiarTextoVendedor(valor) {
     return String(valor || "")
         .replaceAll("&", "&amp;")
@@ -1120,6 +1157,7 @@ async function cargarReportesVendedor() {
         document.getElementById("ventasMes").textContent = formatoPrecioVendedor(reportes.ventas_mes);
         document.getElementById("netoMes").textContent = formatoPrecioVendedor(reportes.neto_mes);
         document.getElementById("productoTop").textContent = reportes.producto_top;
+        actualizarMetaDiariaVendedor(reportes.meta_diaria);
     } catch (error) {
         console.error("Error al cargar reportes", error);
     }

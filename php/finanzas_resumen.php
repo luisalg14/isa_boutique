@@ -5,8 +5,29 @@ require_once "auth_guard.php";
 
 header("Content-Type: application/json; charset=UTF-8");
 
+function columna_existe_finanzas(PDO $conexion, $tabla, $columna) {
+    $consulta = $conexion->prepare("
+        SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+            AND table_name = :tabla
+            AND column_name = :columna
+        ) AS existe
+    ");
+
+    $consulta->execute([
+        ":tabla" => $tabla,
+        ":columna" => $columna
+    ]);
+
+    return filter_var($consulta->fetch()["existe"] ?? false, FILTER_VALIDATE_BOOLEAN);
+}
+
 try {
     exigir_roles(["admin"]);
+
+    $ventaTieneIva = columna_existe_finanzas($conexion, "venta", "iva");
 
     $ventas = $conexion->query("
         SELECT COALESCE(SUM(total), 0) AS total
@@ -108,6 +129,44 @@ try {
         WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
     ")->fetch()["total"];
 
+    $ivaVentas = $ventaTieneIva
+        ? $conexion->query("
+            SELECT COALESCE(SUM(iva), 0) AS total
+            FROM venta
+            WHERE estado IN ('pagada', 'devuelta')
+        ")->fetch()["total"]
+        : 0;
+
+    $ivaVentasMes = $ventaTieneIva
+        ? $conexion->query("
+            SELECT COALESCE(SUM(iva), 0) AS total
+            FROM venta
+            WHERE estado IN ('pagada', 'devuelta')
+            AND DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
+        ")->fetch()["total"]
+        : 0;
+
+    $serviciosYRentaMes = $conexion->query("
+        SELECT COALESCE(SUM(valor), 0) AS total
+        FROM gasto_negocio
+        WHERE tipo IN ('servicio', 'primario')
+        AND DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
+    ")->fetch()["total"];
+
+    $operacionVentaMes = $conexion->query("
+        SELECT COALESCE(SUM(valor), 0) AS total
+        FROM gasto_negocio
+        WHERE tipo IN ('empaque', 'publicidad', 'transporte')
+        AND DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
+    ")->fetch()["total"];
+
+    $otrosGastosMes = $conexion->query("
+        SELECT COALESCE(SUM(valor), 0) AS total
+        FROM gasto_negocio
+        WHERE tipo NOT IN ('servicio', 'primario', 'empaque', 'publicidad', 'transporte', 'nomina')
+        AND DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
+    ")->fetch()["total"];
+
     $netoVentas = floatval($ventas) - floatval($devoluciones);
     $netoVentasMes = floatval($ventasMes) - floatval($devolucionesMes);
     $costoNetoMercancia = floatval($costoMercancia) - floatval($costoDevuelto);
@@ -146,6 +205,66 @@ try {
         return round((floatval($valor) / $base) * 100, 2);
     }
 
+    function division_financiera($valor, $base) {
+        $base = floatval($base);
+
+        if ($base <= 0) {
+            return 0;
+        }
+
+        return floatval($valor) / $base;
+    }
+
+    function meta_mensual_financiera($base, $margenBruto) {
+        $metaMinimaMensual = 7000000;
+        $margenReferencia = $margenBruto > 0 ? $margenBruto : 0.45;
+        $metaCalculada = $base > 0 ? $base / $margenReferencia : 0;
+
+        return max($metaMinimaMensual, $metaCalculada);
+    }
+
+    $margenBrutoRatioMes = division_financiera($utilidadBrutaMes, $netoVentasMes);
+    $baseOperativaMes = $totalGastosOperativosMes + floatval($comprasMercanciaMes) + floatval($inversionesMes);
+    $puntoEquilibrioMes = meta_mensual_financiera($baseOperativaMes, $margenBrutoRatioMes);
+    $gananciaObjetivoMes = max(1500000, $totalGastosOperativosMes * 0.30);
+    $metaVentasConGananciaMes = meta_mensual_financiera($baseOperativaMes + $gananciaObjetivoMes, $margenBrutoRatioMes);
+    $avancePuntoEquilibrioMes = porcentaje_financiero($netoVentasMes, $puntoEquilibrioMes);
+    $avanceMetaGananciaMes = porcentaje_financiero($netoVentasMes, $metaVentasConGananciaMes);
+    $faltanteEquilibrioMes = max(0, $puntoEquilibrioMes - $netoVentasMes);
+    $faltanteMetaGananciaMes = max(0, $metaVentasConGananciaMes - $netoVentasMes);
+    $diasDelMes = intval(date("t"));
+    $diaActual = intval(date("j"));
+    $diasRestantes = max(1, $diasDelMes - $diaActual + 1);
+    $ventaDiariaNecesariaEquilibrio = $faltanteEquilibrioMes / $diasRestantes;
+    $ventaDiariaNecesariaMeta = $faltanteMetaGananciaMes / $diasRestantes;
+    $saldoCajaRealEstimado = floatval($inversiones) + $netoVentas - $totalGastosOperativos - floatval($comprasMercancia);
+    $saldoCajaMesEstimado = floatval($inversionesMes) + $netoVentasMes - $totalGastosOperativosMes - floatval($comprasMercanciaMes);
+    $gananciaLibreMes = $netoVentasMes
+        - floatval($ivaVentasMes)
+        - $costoNetoMercanciaMes
+        - floatval($pagosTrabajadoresMes)
+        - floatval($serviciosYRentaMes)
+        - floatval($operacionVentaMes)
+        - floatval($otrosGastosMes);
+
+    $consultaVentasClasificadas = $conexion->query("
+        SELECT
+            v.id_venta,
+            v.fecha,
+            v.total,
+            " . ($ventaTieneIva ? "COALESCE(v.iva, 0)" : "0") . " AS iva,
+            COALESCE(SUM(dv.subtotal_costo), 0) AS costo_mercancia,
+            v.total - " . ($ventaTieneIva ? "COALESCE(v.iva, 0)" : "0") . " - COALESCE(SUM(dv.subtotal_costo), 0) AS utilidad_bruta
+        FROM venta v
+        LEFT JOIN detalle_venta dv
+            ON v.id_venta = dv.id_venta
+        WHERE v.estado IN ('pagada', 'devuelta')
+        AND DATE_TRUNC('month', v.fecha) = DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
+        GROUP BY v.id_venta, v.fecha, v.total" . ($ventaTieneIva ? ", v.iva" : "") . "
+        ORDER BY v.fecha DESC, v.id_venta DESC
+        LIMIT 8
+    ");
+
     echo json_encode([
         "error" => false,
         "ventas_netas" => $netoVentas,
@@ -159,7 +278,7 @@ try {
         "utilidad_estimada" => $utilidadNeta,
         "utilidad_neta" => $utilidadNeta,
         "saldo_estimado" => floatval($inversiones) + $utilidadNeta,
-        "saldo_caja_estimado" => floatval($inversiones) + $netoVentas - $totalGastosOperativos - floatval($comprasMercancia),
+        "saldo_caja_estimado" => $saldoCajaRealEstimado,
         "margen_ganancia" => porcentaje_financiero($utilidadNeta, $netoVentas),
         "porcentaje_costo_mercancia" => porcentaje_financiero($costoNetoMercancia, $netoVentas),
         "porcentaje_gastos" => porcentaje_financiero($totalGastosOperativos, $netoVentas),
@@ -177,8 +296,32 @@ try {
         "utilidad_estimada_mes" => $utilidadNetaMes,
         "utilidad_neta_mes" => $utilidadNetaMes,
         "saldo_estimado_mes" => floatval($inversionesMes) + $utilidadNetaMes,
-        "saldo_caja_estimado_mes" => floatval($inversionesMes) + $netoVentasMes - $totalGastosOperativosMes - floatval($comprasMercanciaMes),
-        "margen_ganancia_mes" => porcentaje_financiero($utilidadNetaMes, $netoVentasMes)
+        "saldo_caja_estimado_mes" => $saldoCajaMesEstimado,
+        "clasificacion_mes" => [
+            "ventas_netas" => $netoVentasMes,
+            "iva" => floatval($ivaVentasMes),
+            "para_mercancia_vendida" => $costoNetoMercanciaMes,
+            "compras_mercancia_mes" => floatval($comprasMercanciaMes),
+            "trabajadores" => floatval($pagosTrabajadoresMes),
+            "servicios_renta" => floatval($serviciosYRentaMes),
+            "bolsas_publicidad_envios" => floatval($operacionVentaMes),
+            "otros_gastos" => floatval($otrosGastosMes),
+            "ganancia_libre_estimada" => $gananciaLibreMes,
+            "saldo_caja" => $saldoCajaMesEstimado
+        ],
+        "ventas_clasificadas_mes" => $consultaVentasClasificadas->fetchAll(),
+        "margen_ganancia_mes" => porcentaje_financiero($utilidadNetaMes, $netoVentasMes),
+        "margen_bruto_mes" => porcentaje_financiero($utilidadBrutaMes, $netoVentasMes),
+        "punto_equilibrio_mes" => $puntoEquilibrioMes,
+        "ganancia_objetivo_mes" => $gananciaObjetivoMes,
+        "meta_ventas_ganancia_mes" => $metaVentasConGananciaMes,
+        "avance_equilibrio_mes" => min(100, $avancePuntoEquilibrioMes),
+        "avance_meta_ganancia_mes" => min(100, $avanceMetaGananciaMes),
+        "faltante_equilibrio_mes" => $faltanteEquilibrioMes,
+        "faltante_meta_ganancia_mes" => $faltanteMetaGananciaMes,
+        "venta_diaria_equilibrio_mes" => $ventaDiariaNecesariaEquilibrio,
+        "venta_diaria_meta_mes" => $ventaDiariaNecesariaMeta,
+        "dias_restantes_mes" => $diasRestantes
     ], JSON_UNESCAPED_UNICODE);
 
 } catch (PDOException $e) {
