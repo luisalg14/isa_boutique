@@ -695,6 +695,155 @@ h2 {
     font-size: 15px;
 }
 
+.pending-merchandise-box {
+    border-color: #e8d6d0;
+    background: linear-gradient(135deg, #fff, #fff7f3);
+}
+
+.pending-merchandise-grid {
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr);
+    gap: 12px;
+    align-items: stretch;
+}
+
+.pending-merchandise-summary {
+    display: grid;
+    align-content: center;
+    gap: 5px;
+    padding: 13px 15px;
+    border: 1px solid #ead8d2;
+    border-radius: 14px;
+    background: #fff;
+}
+
+.pending-merchandise-summary strong {
+    color: #954053;
+    font-size: 15px;
+}
+
+.pending-merchandise-summary span {
+    color: #7b6f68;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.pending-variants-preview {
+    display: grid;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid #ead8d2;
+    border-radius: 14px;
+    background: #fff;
+}
+
+.pending-variants-preview[hidden] {
+    display: none;
+}
+
+.pending-variants-preview > div:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pending-variants-preview span {
+    color: #7b6f68;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.pending-variants-preview strong {
+    color: #954053;
+    font-size: 16px;
+}
+
+.pending-variant-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.pending-variant-chip-list span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid rgba(163, 67, 94, 0.22);
+    border-radius: 999px;
+    background: #fff8f5;
+    color: #954053;
+    font-size: 12px;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.pending-variant-chip-list small {
+    color: #6f625d;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.manual-variant-block {
+    background: #fffaf7;
+}
+
+.manual-variant-block summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.manual-variant-block summary::-webkit-details-marker {
+    display: none;
+}
+
+.manual-variant-block summary h3 {
+    margin: 0 0 4px;
+}
+
+.manual-variant-block summary span {
+    color: #7b6f68;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.manual-variant-block summary > strong {
+    min-width: 76px;
+    padding: 8px 12px;
+    border: 1px solid #d6b174;
+    border-radius: 999px;
+    color: #954053;
+    font-size: 12px;
+    text-align: center;
+}
+
+.manual-variant-block[open] summary {
+    padding-bottom: 12px;
+    border-bottom: 1px solid #ead8d2;
+}
+
+.manual-variant-block[open] summary > strong {
+    background: #954053;
+    border-color: #954053;
+    color: #fff;
+}
+
+.manual-variant-block[open] summary > strong::before {
+    content: "Cerrar";
+    font-size: 12px;
+}
+
+.manual-variant-block[open] summary > strong {
+    font-size: 0;
+}
+
 .product-form-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1934,6 +2083,7 @@ footer {
     .product-form-grid,
     .product-basic-grid,
     .product-basic-fields,
+    .pending-merchandise-grid,
     .variant-builder,
     .variant-result-row {
         grid-template-columns: 1fr;
@@ -2319,6 +2469,51 @@ button.cart-link {
 .public-page .producto-badge.agotado {
     background: #eee0d8;
     color: #544245;
+}
+
+.pagination-control {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 30px 0 12px;
+    padding: 6px 0;
+}
+
+.pagination-control[hidden] {
+    display: none;
+}
+
+.pagination-control button {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    color: #7d6866;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.pagination-control button:hover:not(:disabled),
+.pagination-control button.activo {
+    border-color: #c9a46a;
+    background: #fff4ed;
+    color: #954053;
+}
+
+.pagination-control button:disabled {
+    cursor: not-allowed;
+    color: #d2c7c3;
+}
+
+.pagination-control span {
+    color: #b4a4a0;
+    font-weight: 700;
 }
 
 .public-page .contacto {

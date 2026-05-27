@@ -4,6 +4,114 @@ let pedidosPendientesVendedor = [];
 
 const historialPanelesVendedor = [];
 
+const paginacionVendedor = {};
+
+function obtenerPaginaVendedor(clave) {
+    return Number(paginacionVendedor[clave] || 1);
+}
+
+function cambiarPaginaVendedor(clave, pagina, renderizar) {
+    paginacionVendedor[clave] = pagina;
+    renderizar();
+}
+
+function prepararPaginaVendedor(datos, clave, porPagina, cuerpoTabla, renderizar) {
+    const totalPaginas = Math.max(1, Math.ceil(datos.length / porPagina));
+    let paginaActual = obtenerPaginaVendedor(clave);
+
+    if (paginaActual > totalPaginas) {
+        paginaActual = totalPaginas;
+        paginacionVendedor[clave] = paginaActual;
+    }
+
+    if (paginaActual < 1) {
+        paginaActual = 1;
+        paginacionVendedor[clave] = paginaActual;
+    }
+
+    renderizarPaginacionVendedor(clave, datos.length, porPagina, paginaActual, cuerpoTabla, renderizar);
+
+    const inicio = (paginaActual - 1) * porPagina;
+    return datos.slice(inicio, inicio + porPagina);
+}
+
+function renderizarPaginacionVendedor(clave, totalRegistros, porPagina, paginaActual, cuerpoTabla, renderizar) {
+    if (!cuerpoTabla) return;
+
+    const tabla = cuerpoTabla.closest("table");
+    if (!tabla) return;
+
+    let contenedor = tabla.nextElementSibling;
+
+    if (!contenedor || contenedor.dataset.pagination !== clave) {
+        contenedor = document.createElement("div");
+        contenedor.className = "pagination-control";
+        contenedor.dataset.pagination = clave;
+        tabla.insertAdjacentElement("afterend", contenedor);
+    }
+
+    const totalPaginas = Math.ceil(totalRegistros / porPagina);
+    contenedor.innerHTML = "";
+
+    if (totalPaginas <= 1) {
+        contenedor.hidden = true;
+        return;
+    }
+
+    contenedor.hidden = false;
+
+    const crearBoton = function(texto, pagina, activo, deshabilitado) {
+        const boton = document.createElement("button");
+        boton.type = "button";
+        boton.textContent = texto;
+        boton.className = activo ? "activo" : "";
+        boton.disabled = deshabilitado;
+        boton.addEventListener("click", function() {
+            cambiarPaginaVendedor(clave, pagina, renderizar);
+        });
+        contenedor.appendChild(boton);
+    };
+
+    crearBoton("‹", paginaActual - 1, false, paginaActual === 1);
+
+    const inicio = Math.max(1, paginaActual - 2);
+    const fin = Math.min(totalPaginas, paginaActual + 2);
+
+    if (inicio > 1) {
+        crearBoton("1", 1, paginaActual === 1, false);
+        if (inicio > 2) {
+            const puntos = document.createElement("span");
+            puntos.textContent = "...";
+            contenedor.appendChild(puntos);
+        }
+    }
+
+    for (let pagina = inicio; pagina <= fin; pagina++) {
+        crearBoton(String(pagina), pagina, pagina === paginaActual, false);
+    }
+
+    if (fin < totalPaginas) {
+        if (fin < totalPaginas - 1) {
+            const puntos = document.createElement("span");
+            puntos.textContent = "...";
+            contenedor.appendChild(puntos);
+        }
+        crearBoton(String(totalPaginas), totalPaginas, paginaActual === totalPaginas, false);
+    }
+
+    crearBoton("Next ›", paginaActual + 1, false, paginaActual === totalPaginas);
+}
+
+function ocultarPaginacionVendedor(clave, cuerpoTabla) {
+    const tabla = cuerpoTabla ? cuerpoTabla.closest("table") : null;
+    const contenedor = tabla ? tabla.nextElementSibling : null;
+
+    if (contenedor && contenedor.dataset.pagination === clave) {
+        contenedor.hidden = true;
+        contenedor.innerHTML = "";
+    }
+}
+
 function rutaApiVendedor(archivo) {
     const ruta = window.location.pathname;
     const base = ruta.includes("/html/")
@@ -462,12 +570,13 @@ async function cargarInventarioVendedor() {
 
         if (productosFiltrados.length === 0) {
             tabla.innerHTML = '<tr><td colspan="9">No se encontraron productos</td></tr>';
+            ocultarPaginacionVendedor("inventario-vendedor", tabla);
             return;
         }
 
         tabla.innerHTML = "";
 
-        productosFiltrados.forEach(function(producto) {
+        prepararPaginaVendedor(productosFiltrados, "inventario-vendedor", 20, tabla, cargarInventarioVendedor).forEach(function(producto) {
             tabla.innerHTML += `
                 <tr>
                     <td>${producto.codigo}</td>
@@ -568,6 +677,7 @@ async function cargarHistorialVendedor() {
 
         if (tabla && historial.length === 0) {
             tabla.innerHTML = '<tr><td colspan="14">No hay ventas registradas</td></tr>';
+            ocultarPaginacionVendedor("historial-vendedor", tabla);
             return;
         }
 
@@ -575,7 +685,7 @@ async function cargarHistorialVendedor() {
 
         tabla.innerHTML = "";
 
-        historial.forEach(function(registro) {
+        prepararPaginaVendedor(historial, "historial-vendedor", 20, tabla, cargarHistorialVendedor).forEach(function(registro) {
             let accion = "<span>Registrada</span>";
             let botonFactura = "";
 

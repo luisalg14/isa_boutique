@@ -162,6 +162,16 @@ try {
     $costo = floatval($_POST["costo"] ?? 0);
     $tallasTexto = trim($_POST["tallas"] ?? "");
     $variantesTexto = trim($_POST["variantes"] ?? "");
+    $detallesCompraTexto = trim($_POST["detalles_compra_mercancia"] ?? "[]");
+    $detallesCompra = json_decode($detallesCompraTexto, true);
+
+    if (!is_array($detallesCompra)) {
+        $detallesCompra = [];
+    }
+
+    $detallesCompra = array_values(array_unique(array_filter(array_map("intval", $detallesCompra), function($idDetalle) {
+        return $idDetalle > 0;
+    })));
 
     $tallas = normalizar_tallas_producto($tallasTexto);
     $variantes = normalizar_variantes_producto($variantesTexto, $color, $tallas);
@@ -313,6 +323,39 @@ try {
     ]);
 
     $idProducto = $consultaInsertar->fetch()["id_producto"];
+
+    if (count($detallesCompra) > 0) {
+        $marcadoresDetalle = implode(",", array_fill(0, count($detallesCompra), "?"));
+        $consultaMarcarMercancia = $conexion->prepare("
+            UPDATE detalle_compra_mercancia
+            SET estado_registro = 'registrado',
+                id_producto = ?
+            WHERE id_detalle_compra IN ($marcadoresDetalle)
+            AND tipo_item = 'mercancia_nueva'
+            AND estado_registro = 'pendiente'
+        ");
+        $consultaMarcarMercancia->execute(array_merge([$idProducto], $detallesCompra));
+
+        $consultaActualizarCompra = $conexion->prepare("
+            UPDATE compra_mercancia c
+            SET estado = CASE
+                WHEN EXISTS (
+                    SELECT 1
+                    FROM detalle_compra_mercancia d
+                    WHERE d.id_compra = c.id_compra
+                    AND d.tipo_item = 'mercancia_nueva'
+                    AND d.estado_registro = 'pendiente'
+                ) THEN 'parcial'
+                ELSE 'registrada'
+            END
+            WHERE c.id_compra IN (
+                SELECT DISTINCT id_compra
+                FROM detalle_compra_mercancia
+                WHERE id_detalle_compra IN ($marcadoresDetalle)
+            )
+        ");
+        $consultaActualizarCompra->execute($detallesCompra);
+    }
 
     $consultaImagen = $conexion->prepare("
         INSERT INTO producto_imagen (id_producto, ruta, es_principal, orden)

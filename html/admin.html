@@ -346,8 +346,27 @@
 
             <h2>Agregar Producto</h2>
 
+            <div class="product-form-block pending-merchandise-box">
+                <h3>Mercancía comprada pendiente</h3>
+                <div class="pending-merchandise-grid">
+                    <div class="campo">
+                        <label>Crear desde compra registrada</label>
+                        <select id="mercanciaPendienteSelect">
+                            <option value="">Producto manual / sin compra pendiente</option>
+                        </select>
+                        <small>Usa esta opción cuando el producto viene de una compra de mercancía ya registrada.</small>
+                    </div>
+                    <div class="pending-merchandise-summary" id="mercanciaPendienteResumen">
+                        <strong>Sin mercancía seleccionada</strong>
+                        <span>Selecciona una compra pendiente para cargar categoría, costo y tallas.</span>
+                    </div>
+                </div>
+                <div id="mercanciaPendienteVariantes" class="pending-variants-preview" hidden></div>
+                <button type="button" class="btn" onclick="limpiarMercanciaPendienteProducto()">Crear producto manual</button>
+            </div>
+
             <div class="product-form-block">
-                <h3>1. Información básica</h3>
+                <h3>1. Información comercial</h3>
                 <div class="product-basic-grid">
                     <div class="campo">
                         <label>Código</label>
@@ -388,61 +407,7 @@
             </div>
 
             <div class="product-form-block">
-                <h3>2. Variantes e inventario</h3>
-                <div class="campo">
-                    <label>Color, tallas y cantidades</label>
-                    <input id="inp-color" type="hidden">
-                    <input id="inp-tallas" type="hidden">
-                    <div class="variant-builder">
-                        <div class="variant-step">
-                            <strong>Color</strong>
-                            <div class="color-builder">
-                                <div id="colorOptions" class="color-options"></div>
-                                <div class="variant-custom-color">
-                                    <input id="customColorInput" placeholder="Agregar otro color">
-                                    <button type="button" onclick="agregarColorPersonalizado()">Agregar</button>
-                                </div>
-                                <small id="selectedColorLabel">Selecciona un color antes de agregar tallas</small>
-                            </div>
-                        </div>
-
-                        <div class="variant-step variant-size-step">
-                            <strong>Tallas del color seleccionado</strong>
-                            <div class="size-builder">
-                                <div class="size-mode">
-                                    <button type="button" class="size-mode-btn activo" data-size-mode="letras">Letras</button>
-                                    <button type="button" class="size-mode-btn" data-size-mode="numeros">Números</button>
-                                </div>
-                                <div id="sizeOptions" class="size-options compact-size-options"></div>
-                                <div class="size-quantity-row">
-                                    <span id="selectedSizeLabel">Selecciona una talla</span>
-                                    <input id="selectedSizeQty" type="number" min="0" placeholder="Cantidad">
-                                    <button type="button" onclick="agregarTallaSeleccionada()">Agregar</button>
-                                </div>
-                                <div id="selectedSizesList" class="selected-sizes-list compact-selected-list"></div>
-                            </div>
-                        </div>
-
-                        <input id="inp-variantes" type="hidden">
-                    </div>
-                </div>
-
-                <div class="variant-result-row">
-                    <div class="variant-step variant-summary-step">
-                        <strong>Resumen</strong>
-                        <div id="selectedVariantsList" class="selected-sizes-list compact-selected-list"></div>
-                    </div>
-
-                    <div class="campo compact-total-field">
-                        <label>Cantidad total</label>
-                        <input id="inp-cantidad" type="number" placeholder="0" readonly>
-                        <small>Se calcula automáticamente con las tallas.</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-form-block">
-                <h3>3. Costos y precio</h3>
+                <h3>2. Costos y precio</h3>
                 <div class="product-form-grid">
                     <div class="campo">
                         <label>Costo de compra</label>
@@ -498,7 +463,7 @@
             </div>
 
             <div class="product-form-block">
-                <h3>4. Imágenes</h3>
+                <h3>3. Imágenes</h3>
                 <div class="campo">
                     <label>Fotos del producto</label>
                     <input id="inp-img" type="file" multiple accept="image/*">
@@ -506,6 +471,67 @@
                     <div id="previewImagenesProducto" class="product-image-preview"></div>
                 </div>
             </div>
+
+            <details class="product-form-block manual-variant-block">
+                <summary>
+                    <div>
+                        <h3>Registro manual opcional de inventario</h3>
+                        <span>Úsalo solo si el producto no viene desde una compra de mercancía registrada.</span>
+                    </div>
+                    <strong>Abrir</strong>
+                </summary>
+
+                <div class="campo">
+                    <label>Color, tallas y cantidades</label>
+                    <input id="inp-color" type="hidden">
+                    <input id="inp-tallas" type="hidden">
+                    <div class="variant-builder">
+                        <div class="variant-step">
+                            <strong>Color</strong>
+                            <div class="color-builder">
+                                <div id="colorOptions" class="color-options"></div>
+                                <div class="variant-custom-color">
+                                    <input id="customColorInput" placeholder="Agregar otro color">
+                                    <button type="button" onclick="agregarColorPersonalizado()">Agregar</button>
+                                </div>
+                                <small id="selectedColorLabel">Selecciona un color antes de agregar tallas</small>
+                            </div>
+                        </div>
+
+                        <div class="variant-step variant-size-step">
+                            <strong>Tallas del color seleccionado</strong>
+                            <div class="size-builder">
+                                <div class="size-mode">
+                                    <button type="button" class="size-mode-btn activo" data-size-mode="letras">Letras</button>
+                                    <button type="button" class="size-mode-btn" data-size-mode="numeros">Números</button>
+                                </div>
+                                <div id="sizeOptions" class="size-options compact-size-options"></div>
+                                <div class="size-quantity-row">
+                                    <span id="selectedSizeLabel">Selecciona una talla</span>
+                                    <input id="selectedSizeQty" type="number" min="0" placeholder="Cantidad">
+                                    <button type="button" onclick="agregarTallaSeleccionada()">Agregar</button>
+                                </div>
+                                <div id="selectedSizesList" class="selected-sizes-list compact-selected-list"></div>
+                            </div>
+                        </div>
+
+                        <input id="inp-variantes" type="hidden">
+                    </div>
+                </div>
+
+                <div class="variant-result-row">
+                    <div class="variant-step variant-summary-step">
+                        <strong>Resumen</strong>
+                        <div id="selectedVariantsList" class="selected-sizes-list compact-selected-list"></div>
+                    </div>
+
+                    <div class="campo compact-total-field">
+                        <label>Cantidad total</label>
+                        <input id="inp-cantidad" type="number" placeholder="0" readonly>
+                        <small>Se calcula automáticamente con las tallas.</small>
+                    </div>
+                </div>
+            </details>
 
             <button class="btn btn-agregar" onclick="agregarProductoBD()">
                 Agregar Producto
@@ -559,13 +585,10 @@
                 <input type="text" id="buscador" placeholder="Buscar por código, nombre, marca, color o categoría...">
             </div>
 
-            <table class="tabla-inventario">
+            <table class="tabla-inventario tabla-inventario-productos">
                 <thead>
                     <tr>
                         <th>Producto</th>
-                        <th>Código</th>
-                        <th>Marca</th>
-                        <th>Color</th>
                         <th>Tipo</th>
                         <th>Precio</th>
                         <th>Costo</th>
@@ -1075,31 +1098,79 @@
                 </form>
 
                 <form id="formCompraMercancia" class="finance-form">
-                    <h3>Registrar compra de mercancia</h3>
+                    <h3>Registrar compra de mercancía</h3>
 
                     <div class="campo">
                         <label>Proveedor</label>
-                        <select id="compraProveedor">
-                            <option value="">Sin proveedor</option>
-                        </select>
+                        <input id="compraProveedorBusqueda" list="listaProveedoresCompra" placeholder="Buscar o escribir proveedor">
+                        <datalist id="listaProveedoresCompra"></datalist>
+                        <input id="compraProveedor" type="hidden">
                     </div>
 
                     <div class="campo">
+                        <label>Proveedor no registrado</label>
+                        <input id="compraProveedorReferencia" placeholder="Ej: NN, otro, compra local">
+                    </div>
+
+                    <div class="campo">
+                        <label>Tipo de compra</label>
+                        <select id="compraTipoItem">
+                            <option value="mercancia_nueva">Mercancía nueva por clasificar</option>
+                            <option value="reposicion">Reposición de producto existente</option>
+                        </select>
+                    </div>
+
+                    <div class="campo compra-campo-reposicion">
                         <label>Producto</label>
                         <select id="compraProducto">
                             <option value="">Seleccionar producto</option>
                         </select>
                     </div>
 
-                    <div class="campo">
-                        <label>Talla</label>
-                        <select id="compraTalla">
-                            <option value="">Sin talla</option>
+                    <div class="campo compra-campo-nueva">
+                        <label>Categoría</label>
+                        <select id="compraCategoria">
+                            <option value="">Seleccionar categoría</option>
                         </select>
                     </div>
 
+                    <div class="campo compra-campo-nueva">
+                        <label>Descripción de la mercancía</label>
+                        <input id="compraDescripcion" placeholder="Ej: blusas estampadas nueva colección">
+                    </div>
+
+                    <div class="campo compra-campo-nueva compra-color-panel">
+                        <label>Color</label>
+                        <input id="compraColor" type="hidden">
+                        <div class="color-builder compra-color-builder">
+                            <div id="compraColorOptions" class="color-options"></div>
+                            <div class="variant-custom-color">
+                                <input id="compraCustomColorInput" placeholder="Agregar otro color">
+                                <button type="button" onclick="agregarColorCompraPersonalizado()">Agregar</button>
+                            </div>
+                            <small id="compraSelectedColorLabel">Selecciona el color de la mercancía</small>
+                        </div>
+                    </div>
+
+                    <div class="campo compra-tallas-panel">
+                        <label>Tallas de esta entrada</label>
+                        <div class="compra-talla-builder">
+                            <select id="compraTalla">
+                                <option value="">Sin talla</option>
+                            </select>
+                            <input id="compraCantidadTalla" type="number" min="1" placeholder="Cant.">
+                            <button class="btn" type="button" id="btnAgregarTallaCompra">Agregar talla</button>
+                        </div>
+                        <div class="compra-tallas-lista" id="compraTallasSeleccionadas">
+                            <span>Sin tallas específicas</span>
+                        </div>
+                        <div class="compra-tallas-lista compra-variantes-lista" id="compraVariantesSeleccionadas">
+                            <span>Sin colores agregados</span>
+                        </div>
+                    </div>
+
                     <div class="campo">
-                        <label>Cantidad</label>
+                        <label>Cantidad sin talla</label>
                         <input id="compraCantidad" type="number" min="1" placeholder="0">
                     </div>
 
@@ -1108,7 +1179,7 @@
                         <input id="compraCostoUnitario" type="number" min="0" placeholder="0">
                     </div>
 
-                    <button class="btn btn-agregar" type="button" id="btnAgregarItemCompra">Agregar producto a la compra</button>
+                    <button class="btn btn-agregar" type="button" id="btnAgregarItemCompra">Agregar mercancía a la compra</button>
 
                     <div class="purchase-items-box">
                         <div class="purchase-items-header">
@@ -1123,7 +1194,9 @@
                             <table class="tabla-inventario purchase-items-table">
                                 <thead>
                                     <tr>
-                                        <th>Producto</th>
+                                        <th>Mercancía</th>
+                                        <th>Tipo</th>
+                                        <th>Color</th>
                                         <th>Talla</th>
                                         <th>Cantidad</th>
                                         <th>Costo</th>
@@ -1133,7 +1206,7 @@
                                 </thead>
                                 <tbody id="tablaItemsCompraMercancia">
                                     <tr>
-                                        <td colspan="6">Agrega productos antes de guardar.</td>
+                                        <td colspan="8">Agrega mercancía antes de guardar.</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1183,8 +1256,11 @@
                     <tr>
                         <th>Fecha</th>
                         <th>Proveedor</th>
+                        <th>Tipo</th>
                         <th>Código</th>
-                        <th>Producto</th>
+                        <th>Mercancía</th>
+                        <th>Categoría</th>
+                        <th>Color</th>
                         <th>Talla</th>
                         <th>Cantidad</th>
                         <th>Costo unitario</th>
@@ -1574,6 +1650,115 @@
         });
     });
 
+    const paginacionAdmin = {};
+
+    function obtenerPaginaAdmin(clave) {
+        return Number(paginacionAdmin[clave] || 1);
+    }
+
+    function cambiarPaginaAdmin(clave, pagina, renderizar) {
+        paginacionAdmin[clave] = pagina;
+        renderizar();
+    }
+
+    function prepararPaginaAdmin(datos, clave, porPagina, cuerpoTabla, renderizar) {
+        const totalPaginas = Math.max(1, Math.ceil(datos.length / porPagina));
+        let paginaActual = obtenerPaginaAdmin(clave);
+
+        if (paginaActual > totalPaginas) {
+            paginaActual = totalPaginas;
+            paginacionAdmin[clave] = paginaActual;
+        }
+
+        if (paginaActual < 1) {
+            paginaActual = 1;
+            paginacionAdmin[clave] = paginaActual;
+        }
+
+        renderizarPaginacionAdmin(clave, datos.length, porPagina, paginaActual, cuerpoTabla, renderizar);
+
+        const inicio = (paginaActual - 1) * porPagina;
+        return datos.slice(inicio, inicio + porPagina);
+    }
+
+    function renderizarPaginacionAdmin(clave, totalRegistros, porPagina, paginaActual, cuerpoTabla, renderizar) {
+        if (!cuerpoTabla || !cuerpoTabla.parentElement) return;
+
+        const tabla = cuerpoTabla.closest("table");
+        if (!tabla) return;
+
+        let contenedor = tabla.nextElementSibling;
+
+        if (!contenedor || contenedor.dataset.pagination !== clave) {
+            contenedor = document.createElement("div");
+            contenedor.className = "pagination-control";
+            contenedor.dataset.pagination = clave;
+            tabla.insertAdjacentElement("afterend", contenedor);
+        }
+
+        const totalPaginas = Math.ceil(totalRegistros / porPagina);
+        contenedor.innerHTML = "";
+
+        if (totalPaginas <= 1) {
+            contenedor.hidden = true;
+            return;
+        }
+
+        contenedor.hidden = false;
+
+        const crearBoton = function(texto, pagina, activo, deshabilitado) {
+            const boton = document.createElement("button");
+            boton.type = "button";
+            boton.textContent = texto;
+            boton.className = activo ? "activo" : "";
+            boton.disabled = deshabilitado;
+            boton.addEventListener("click", function() {
+                cambiarPaginaAdmin(clave, pagina, renderizar);
+            });
+            contenedor.appendChild(boton);
+        };
+
+        crearBoton("‹", paginaActual - 1, false, paginaActual === 1);
+
+        const rango = 2;
+        const inicio = Math.max(1, paginaActual - rango);
+        const fin = Math.min(totalPaginas, paginaActual + rango);
+
+        if (inicio > 1) {
+            crearBoton("1", 1, paginaActual === 1, false);
+            if (inicio > 2) {
+                const puntos = document.createElement("span");
+                puntos.textContent = "...";
+                contenedor.appendChild(puntos);
+            }
+        }
+
+        for (let pagina = inicio; pagina <= fin; pagina++) {
+            crearBoton(String(pagina), pagina, pagina === paginaActual, false);
+        }
+
+        if (fin < totalPaginas) {
+            if (fin < totalPaginas - 1) {
+                const puntos = document.createElement("span");
+                puntos.textContent = "...";
+                contenedor.appendChild(puntos);
+            }
+            crearBoton(String(totalPaginas), totalPaginas, paginaActual === totalPaginas, false);
+        }
+
+        crearBoton("Next ›", paginaActual + 1, false, paginaActual === totalPaginas);
+    }
+
+    function ocultarPaginacionAdmin(clave, cuerpoTabla) {
+        const tabla = cuerpoTabla ? cuerpoTabla.closest("table") : null;
+        const contenedor = tabla ? tabla.nextElementSibling : null;
+
+        if (contenedor && contenedor.dataset.pagination === clave) {
+            contenedor.hidden = true;
+            contenedor.innerHTML = "";
+        }
+    }
+
     function usuarioEsAdmin() {
         return window.usuarioActual && window.usuarioActual.rol === "admin";
     }
@@ -1602,8 +1787,14 @@
         { nombre: "Marrón", valor: "#6d4a35" }
     ];
     let colorSeleccionadoAdmin = "";
+    let colorCompraMercancia = "";
     let productosCompraMercancia = [];
+    let proveedoresCompraMercancia = [];
     let itemsCompraMercancia = [];
+    let tallasCompraMercancia = [];
+    let variantesCompraMercancia = [];
+    let mercanciaPendienteProducto = [];
+    let mercanciaPendienteSeleccionada = null;
     let categoriasAdmin = [];
     let productosVentaAdmin = [];
 
@@ -1742,6 +1933,247 @@
     renderizarTallasSeleccionadasAdmin();
     renderizarColoresAdmin();
     renderizarVariantesAdmin();
+    renderizarColoresCompraMercancia();
+
+    function renderizarColoresCompraMercancia() {
+        const contenedor = document.getElementById("compraColorOptions");
+        if (!contenedor) return;
+
+        contenedor.innerHTML = "";
+
+        coloresPrenda.forEach(function(color) {
+            const boton = document.createElement("button");
+            boton.type = "button";
+            boton.className = "color-option";
+            boton.title = color.nombre;
+            boton.style.background = color.valor;
+            boton.classList.toggle("activo", colorCompraMercancia === color.nombre);
+            boton.addEventListener("click", function() {
+                colorCompraMercancia = color.nombre;
+                actualizarColorCompraMercancia();
+            });
+            contenedor.appendChild(boton);
+        });
+    }
+
+    function actualizarColorCompraMercancia() {
+        const input = document.getElementById("compraColor");
+        const etiqueta = document.getElementById("compraSelectedColorLabel");
+
+        if (input) input.value = colorCompraMercancia;
+        if (etiqueta) {
+            etiqueta.textContent = colorCompraMercancia
+                ? "Color seleccionado: " + colorCompraMercancia
+                : "Selecciona el color de la mercancía";
+        }
+        renderizarColoresCompraMercancia();
+    }
+
+    function agregarColorCompraPersonalizado() {
+        const input = document.getElementById("compraCustomColorInput");
+        const valor = input ? input.value.trim() : "";
+
+        if (!valor) {
+            alert("Escribe el color de la mercancía.");
+            return;
+        }
+
+        colorCompraMercancia = valor;
+        if (input) input.value = "";
+        actualizarColorCompraMercancia();
+    }
+
+    function agruparMercanciaPendienteProducto(filas) {
+        const grupos = {};
+
+        filas.forEach(function(fila) {
+            const clave = [
+                fila.id_compra,
+                fila.categoria || "",
+                fila.descripcion || "",
+                Number(fila.costo_unitario || 0)
+            ].join("|");
+
+            if (!grupos[clave]) {
+                grupos[clave] = {
+                    clave,
+                    id_compra: fila.id_compra,
+                    fecha: fila.fecha,
+                    proveedor: fila.proveedor,
+                    categoria: fila.categoria || "",
+                    descripcion: fila.descripcion || "",
+                    costo_unitario: Number(fila.costo_unitario || 0),
+                    detalles: [],
+                    colores: {}
+                };
+            }
+
+            grupos[clave].detalles.push(Number(fila.id_detalle_compra));
+            const color = (fila.color || "Unico").toString().trim() || "Unico";
+            const talla = (fila.talla || "UNICA").toString().toUpperCase();
+            if (!grupos[clave].colores[color]) {
+                grupos[clave].colores[color] = {};
+            }
+            grupos[clave].colores[color][talla] = Number(grupos[clave].colores[color][talla] || 0) + Number(fila.cantidad || 0);
+        });
+
+        return Object.values(grupos);
+    }
+
+    function renderizarMercanciaPendienteProducto() {
+        const selector = document.getElementById("mercanciaPendienteSelect");
+        const resumen = document.getElementById("mercanciaPendienteResumen");
+        const variantesPreview = document.getElementById("mercanciaPendienteVariantes");
+
+        if (!selector) return;
+
+        selector.innerHTML = '<option value="">Producto manual / sin compra pendiente</option>';
+
+        mercanciaPendienteProducto.forEach(function(item) {
+            const unidades = Object.values(item.colores).reduce(function(totalColor, tallas) {
+                return totalColor + Object.values(tallas).reduce(function(total, cantidad) {
+                    return total + Number(cantidad || 0);
+                }, 0);
+            }, 0);
+            const colores = Object.keys(item.colores).join(", ");
+            const opcion = document.createElement("option");
+            opcion.value = item.clave;
+            opcion.textContent = `${item.descripcion} | ${colores} | ${unidades} und | ${formatoPrecioBD(item.costo_unitario)}`;
+            selector.appendChild(opcion);
+        });
+
+        if (resumen && !mercanciaPendienteSeleccionada) {
+            resumen.innerHTML = `
+                <strong>${mercanciaPendienteProducto.length} pendientes disponibles</strong>
+                <span>Selecciona una compra pendiente para cargar categoría, costo y tallas.</span>
+            `;
+        }
+
+        if (variantesPreview && !mercanciaPendienteSeleccionada) {
+            variantesPreview.hidden = true;
+            variantesPreview.innerHTML = "";
+        }
+    }
+
+    function renderizarResumenMercanciaSeleccionada(item) {
+        const contenedor = document.getElementById("mercanciaPendienteVariantes");
+        if (!contenedor || !item) return;
+
+        const colores = Object.keys(item.colores || {});
+        const totalUnidades = colores.reduce(function(totalColor, color) {
+            return totalColor + Object.values(item.colores[color]).reduce(function(total, cantidad) {
+                return total + Number(cantidad || 0);
+            }, 0);
+        }, 0);
+
+        contenedor.hidden = false;
+        contenedor.innerHTML = `
+            <div>
+                <span>Resumen cargado desde compra</span>
+                <strong>${totalUnidades} unidades listas para inventario</strong>
+            </div>
+            <div class="pending-variant-chip-list">
+                ${colores.map(function(color) {
+                    const tallas = Object.keys(item.colores[color]).map(function(talla) {
+                        return talla + ": " + item.colores[color][talla];
+                    }).join(", ");
+
+                    return `<span>${limpiarTextoBD(color)} <small>${limpiarTextoBD(tallas)}</small></span>`;
+                }).join("")}
+            </div>
+        `;
+    }
+
+    async function cargarMercanciaPendienteProductoBD() {
+        try {
+            const respuesta = await fetch("../php/mercancia_pendiente_listar.php");
+            const datos = await respuesta.json();
+
+            if (datos.error) {
+                console.error(datos.mensaje);
+                mercanciaPendienteProducto = [];
+            } else {
+                mercanciaPendienteProducto = agruparMercanciaPendienteProducto(datos);
+            }
+
+            renderizarMercanciaPendienteProducto();
+        } catch (error) {
+            mercanciaPendienteProducto = [];
+            renderizarMercanciaPendienteProducto();
+            console.error(error);
+        }
+    }
+
+    function aplicarMercanciaPendienteProducto() {
+        const selector = document.getElementById("mercanciaPendienteSelect");
+        const resumen = document.getElementById("mercanciaPendienteResumen");
+        const variantesPreview = document.getElementById("mercanciaPendienteVariantes");
+        const clave = selector ? selector.value : "";
+
+        mercanciaPendienteSeleccionada = mercanciaPendienteProducto.find(function(item) {
+            return item.clave === clave;
+        }) || null;
+
+        if (!mercanciaPendienteSeleccionada) {
+            if (resumen) {
+                resumen.innerHTML = `
+                    <strong>Sin mercancía seleccionada</strong>
+                    <span>El producto se creará manualmente.</span>
+                `;
+            }
+            if (variantesPreview) {
+                variantesPreview.hidden = true;
+                variantesPreview.innerHTML = "";
+            }
+            return;
+        }
+
+        document.getElementById("inp-tipo").value = mercanciaPendienteSeleccionada.categoria;
+        document.getElementById("inp-costo").value = mercanciaPendienteSeleccionada.costo_unitario;
+
+        if (!document.getElementById("inp-nombre").value.trim()) {
+            document.getElementById("inp-nombre").value = mercanciaPendienteSeleccionada.descripcion;
+        }
+
+        tallasSeleccionadasAdmin = {};
+        variantesColorAdmin = Object.keys(mercanciaPendienteSeleccionada.colores).map(function(color) {
+            return {
+                color: color,
+                hex: "",
+                tallas: Object.assign({}, mercanciaPendienteSeleccionada.colores[color])
+            };
+        });
+        colorSeleccionadoAdmin = variantesColorAdmin[0] ? variantesColorAdmin[0].color : "";
+        actualizarColorAdmin();
+        tallaSeleccionadaAdmin = "";
+        document.getElementById("selectedSizeLabel").textContent = "Selecciona una talla";
+        renderizarOpcionesTallas();
+        renderizarTallasSeleccionadasAdmin();
+        renderizarVariantesAdmin();
+        calcularPrecioProductoAdmin();
+
+        const tallasTexto = Object.keys(mercanciaPendienteSeleccionada.colores).map(function(color) {
+            const tallasColor = Object.keys(mercanciaPendienteSeleccionada.colores[color]).map(function(talla) {
+                return talla + ": " + mercanciaPendienteSeleccionada.colores[color][talla];
+            }).join(", ");
+            return color + " (" + tallasColor + ")";
+        }).join(" | ");
+
+        if (resumen) {
+            resumen.innerHTML = `
+                <strong>${limpiarTextoBD(mercanciaPendienteSeleccionada.descripcion)}</strong>
+                <span>${limpiarTextoBD(mercanciaPendienteSeleccionada.proveedor)} | ${tallasTexto} | Compra #${mercanciaPendienteSeleccionada.id_compra}</span>
+            `;
+        }
+        renderizarResumenMercanciaSeleccionada(mercanciaPendienteSeleccionada);
+    }
+
+    function limpiarMercanciaPendienteProducto() {
+        const selector = document.getElementById("mercanciaPendienteSelect");
+        mercanciaPendienteSeleccionada = null;
+        if (selector) selector.value = "";
+        renderizarMercanciaPendienteProducto();
+    }
 
     function exigirAdminFrontend() {
         if (!usuarioEsAdmin()) {
@@ -1794,6 +2226,9 @@
         datos.append("costo", costo);
         datos.append("tallas", tallas);
         datos.append("variantes", variantes);
+        datos.append("detalles_compra_mercancia", mercanciaPendienteSeleccionada
+            ? JSON.stringify(mercanciaPendienteSeleccionada.detalles)
+            : "[]");
 
         if (imagenes && imagenes.length > 0) {
             Array.from(imagenes).forEach(function(imagen) {
@@ -1845,6 +2280,8 @@
             document.getElementById("inp-img").value = "";
             actualizarPreviewImagenesProducto();
             calcularPrecioProductoAdmin();
+            mercanciaPendienteSeleccionada = null;
+            await cargarMercanciaPendienteProductoBD();
 
         } catch (error) {
             mensajeError.style.display = "block";
@@ -2482,10 +2919,11 @@
                     <td colspan="16">No hay ventas registradas</td>
                 </tr>
                 `;
+                ocultarPaginacionAdmin("historial", tabla);
                 return;
             }
             
-            ventas.forEach(function(venta) {
+            prepararPaginaAdmin(ventas, "historial", 20, tabla, cargarHistorialVentasBD).forEach(function(venta) {
                 let accion = `<span>Registrada</span>`;
                 let botonFactura = "";
 
@@ -2744,12 +3182,13 @@
 
             if (filtradas.length === 0) {
                 tabla.innerHTML = '<tr><td colspan="6">No hay facturas registradas</td></tr>';
+                ocultarPaginacionAdmin("facturas", tabla);
                 return;
             }
 
             tabla.innerHTML = "";
 
-            filtradas.forEach(function(factura) {
+            prepararPaginaAdmin(filtradas, "facturas", 20, tabla, cargarFacturasBD).forEach(function(factura) {
                 tabla.innerHTML += `
                     <tr>
                         <td>
@@ -3232,10 +3671,11 @@
                     <td colspan="7">No hay movimientos registrados</td>
                 </tr>
                 `;
+                ocultarPaginacionAdmin("movimientos", tabla);
                 return;
             }
             
-            movimientos.forEach(function(movimiento) {
+            prepararPaginaAdmin(movimientos, "movimientos", 30, tabla, cargarMovimientosBD).forEach(function(movimiento) {
                 tabla.innerHTML += `
                 <tr>
                     <td>${new Date(movimiento.fecha).toLocaleString()}</td>
@@ -3310,10 +3750,11 @@
                     <td colspan="13">No se encontraron productos</td>
                 </tr>
                 `;
+                ocultarPaginacionAdmin("inventario", tabla);
                 return;
             }
             
-            productosFiltrados.forEach(function(producto) {
+            prepararPaginaAdmin(productosFiltrados, "inventario", 20, tabla, cargarInventarioBD).forEach(function(producto) {
                 let claseEstado = "stock-alto";
                 const nombreSeguro = String(producto.nombre || "").replace(/'/g, "\\'");
                 const variantesCodigo = codigosBarrasVariantesBD(producto);
@@ -3341,13 +3782,12 @@
                             <img src="${rutaImagenAdmin(producto)}" alt="${limpiarTextoBD(producto.nombre)}">
                             <div>
                                 <strong>${limpiarTextoBD(producto.nombre)}</strong>
-                                <span>${limpiarTextoBD(producto.categoria)}</span>
+                                <span>Código: ${limpiarTextoBD(producto.codigo)}</span>
+                                <span>Marca: ${limpiarTextoBD(producto.marca || "-")}</span>
+                                <span>Color: ${textoColoresBD(producto) || "-"}</span>
                             </div>
                         </div>
                     </td>
-                    <td><span class="inventory-code-badge">${limpiarTextoBD(producto.codigo)}</span></td>
-                    <td>${producto.marca}</td>
-                    <td>${textoColoresBD(producto)}</td>
                     <td>${producto.categoria}</td>
                     <td>${formatoPrecioBD(producto.precio)}</td>
                     <td>${formatoPrecioBD(producto.costo_unitario || 0)}</td>
@@ -3366,7 +3806,7 @@
         } catch (error) {
             tabla.innerHTML = `
             <tr>
-                <td colspan="13">Error al cargar inventario desde PostgreSQL</td>
+                <td colspan="10">Error al cargar inventario desde PostgreSQL</td>
             </tr>
             `;
             console.error(error);
@@ -3491,10 +3931,11 @@
 
         if (clientesFiltrados.length === 0) {
             tabla.innerHTML = '<tr><td colspan="7">No hay clientes para mostrar</td></tr>';
+            ocultarPaginacionAdmin("clientes", tabla);
             return;
         }
 
-        clientesFiltrados.forEach(function(cliente) {
+        prepararPaginaAdmin(clientesFiltrados, "clientes", 20, tabla, renderizarClientesBD).forEach(function(cliente) {
             const telefonoLimpio = String(cliente.telefono || "").replace(/\D/g, "");
             const enlaceWhatsApp = telefonoLimpio ? "https://wa.me/57" + telefonoLimpio.replace(/^57/, "") : "";
             tabla.innerHTML += `
@@ -3637,6 +4078,7 @@
     async function cargarCategoriasBD() {
         const tabla = document.getElementById("tablaCategorias");
         const selectorProducto = document.getElementById("inp-tipo");
+        const selectorCompra = document.getElementById("compraCategoria");
 
         try {
             const respuesta = await fetch("../php/categorias_listar.php");
@@ -3669,16 +4111,35 @@
                 selectorProducto.value = seleccionado;
             }
 
+            if (selectorCompra) {
+                const seleccionadoCompra = selectorCompra.value;
+                selectorCompra.innerHTML = '<option value="">Seleccionar categoría</option>';
+
+                categorias
+                    .filter(function(categoria) {
+                        return categoria.estado;
+                    })
+                    .forEach(function(categoria) {
+                        const opcion = document.createElement("option");
+                        opcion.value = categoria.nombre;
+                        opcion.textContent = etiquetaCategoriaAdmin(categoria.nombre);
+                        selectorCompra.appendChild(opcion);
+                    });
+
+                selectorCompra.value = seleccionadoCompra;
+            }
+
             if (!tabla) return;
 
             tabla.innerHTML = "";
 
             if (categorias.length === 0) {
                 tabla.innerHTML = '<tr><td colspan="5">No hay categorías registradas</td></tr>';
+                ocultarPaginacionAdmin("categorias", tabla);
                 return;
             }
 
-            categorias.forEach(function(categoria) {
+            prepararPaginaAdmin(categorias, "categorias", 20, tabla, cargarCategoriasBD).forEach(function(categoria) {
                 const nuevoEstado = categoria.estado ? "0" : "1";
                 const textoEstado = categoria.estado ? "Desactivar" : "Activar";
 
@@ -3819,10 +4280,11 @@
 
             if (movimientos.length === 0) {
                 tabla.innerHTML = '<tr><td colspan="7">No hay movimientos financieros registrados</td></tr>';
+                ocultarPaginacionAdmin("finanzas", tabla);
                 return;
             }
 
-            movimientos.forEach(function(movimiento) {
+            prepararPaginaAdmin(movimientos, "finanzas", 30, tabla, cargarFinanzasBD).forEach(function(movimiento) {
                 const claseValor = Number(movimiento.valor) < 0 ? "stock-bajo" : "stock-alto";
 
                 tabla.innerHTML += `
@@ -3961,6 +4423,7 @@
 
             if (trabajadores.length === 0) {
                 tabla.innerHTML = '<tr><td colspan="7">No hay trabajadores registrados</td></tr>';
+                ocultarPaginacionAdmin("trabajadores", tabla);
                 return;
             }
 
@@ -3971,7 +4434,9 @@
                     opcion.textContent = trabajador.nombre + " - " + trabajador.cargo;
                     selector.appendChild(opcion);
                 }
+            });
 
+            prepararPaginaAdmin(trabajadores, "trabajadores", 20, tabla, cargarTrabajadoresBD).forEach(function(trabajador) {
                 tabla.innerHTML += `
                     <tr>
                         <td>${trabajador.nombre}</td>
@@ -4008,10 +4473,11 @@
 
             if (pagos.length === 0) {
                 tabla.innerHTML = '<tr><td colspan="7">No hay pagos registrados</td></tr>';
+                ocultarPaginacionAdmin("pagos-trabajadores", tabla);
                 return;
             }
 
-            pagos.forEach(function(pago) {
+            prepararPaginaAdmin(pagos, "pagos-trabajadores", 20, tabla, cargarPagosTrabajadoresBD).forEach(function(pago) {
                 tabla.innerHTML += `
                     <tr>
                         <td>${new Date(pago.fecha + "T00:00:00").toLocaleDateString()}</td>
@@ -4064,7 +4530,7 @@
 
     async function cargarProveedoresBD() {
         const tabla = document.getElementById("tablaProveedores");
-        const selector = document.getElementById("compraProveedor");
+        const selector = document.getElementById("listaProveedoresCompra");
 
         if (!tabla || !selector || !usuarioEsAdmin()) return;
 
@@ -4073,7 +4539,8 @@
             const proveedores = await respuesta.json();
 
             tabla.innerHTML = "";
-            selector.innerHTML = '<option value="">Sin proveedor</option>';
+            selector.innerHTML = "";
+            proveedoresCompraMercancia = [];
 
             if (proveedores.error) {
                 tabla.innerHTML = `<tr><td colspan="5">${proveedores.mensaje}</td></tr>`;
@@ -4082,17 +4549,21 @@
 
             if (proveedores.length === 0) {
                 tabla.innerHTML = '<tr><td colspan="5">No hay proveedores registrados</td></tr>';
+                ocultarPaginacionAdmin("proveedores", tabla);
                 return;
             }
 
             proveedores.forEach(function(proveedor) {
                 if (proveedor.estado) {
+                    proveedoresCompraMercancia.push(proveedor);
                     const opcion = document.createElement("option");
-                    opcion.value = proveedor.id_proveedor;
-                    opcion.textContent = proveedor.nombre;
+                    opcion.value = proveedor.nombre;
+                    opcion.dataset.id = proveedor.id_proveedor;
                     selector.appendChild(opcion);
                 }
+            });
 
+            prepararPaginaAdmin(proveedores, "proveedores", 20, tabla, cargarProveedoresBD).forEach(function(proveedor) {
                 tabla.innerHTML += `
                     <tr>
                         <td>${limpiarTextoBD(proveedor.nombre)}</td>
@@ -4103,9 +4574,39 @@
                     </tr>
                 `;
             });
+            sincronizarProveedorCompraMercancia();
         } catch (error) {
             tabla.innerHTML = '<tr><td colspan="5">Error al cargar proveedores</td></tr>';
             console.error(error);
+        }
+    }
+
+    function sincronizarProveedorCompraMercancia() {
+        const buscador = document.getElementById("compraProveedorBusqueda");
+        const oculto = document.getElementById("compraProveedor");
+        const referencia = document.getElementById("compraProveedorReferencia");
+
+        if (!buscador || !oculto || !referencia) return;
+
+        const texto = buscador.value.trim();
+        const proveedor = proveedoresCompraMercancia.find(function(item) {
+            return String(item.nombre || "").toLowerCase() === texto.toLowerCase();
+        });
+
+        if (proveedor) {
+            oculto.value = proveedor.id_proveedor;
+            referencia.value = "";
+            referencia.disabled = true;
+            referencia.placeholder = "Proveedor registrado seleccionado";
+            return;
+        }
+
+        oculto.value = "";
+        referencia.disabled = false;
+        referencia.placeholder = "Ej: NN, otro, compra local";
+
+        if (texto !== "") {
+            referencia.value = texto;
         }
     }
 
@@ -4142,10 +4643,165 @@
         }
     }
 
+    function renderizarTallasCompraMercancia() {
+        const contenedor = document.getElementById("compraTallasSeleccionadas");
+
+        if (!contenedor) return;
+
+        if (tallasCompraMercancia.length === 0) {
+            contenedor.innerHTML = "<span>Las tallas se agregarán al color seleccionado.</span>";
+            return;
+        }
+
+        contenedor.innerHTML = tallasCompraMercancia.map(function(item, indice) {
+            return `
+                <button type="button" onclick="eliminarTallaCompraMercancia(${indice})">
+                    ${limpiarTextoBD(item.talla)} x ${item.cantidad}
+                </button>
+            `;
+        }).join("");
+    }
+
+    function agregarTallaCompraMercancia() {
+        const selectorTalla = document.getElementById("compraTalla");
+        const inputCantidad = document.getElementById("compraCantidadTalla");
+        const tipoItem = document.getElementById("compraTipoItem")?.value || "mercancia_nueva";
+        const talla = selectorTalla ? selectorTalla.value.trim().toUpperCase() : "";
+        const cantidad = parseInt(inputCantidad ? inputCantidad.value : 0);
+
+        if (!talla) {
+            alert("Selecciona una talla para agregar.");
+            return;
+        }
+
+        if (isNaN(cantidad) || cantidad <= 0) {
+            alert("Ingresa una cantidad válida para la talla.");
+            return;
+        }
+
+        if (tipoItem === "mercancia_nueva") {
+            agregarTallaAVarianteCompra(colorCompraMercancia || document.getElementById("compraColor")?.value.trim() || "Unico", talla, cantidad);
+            if (inputCantidad) inputCantidad.value = "";
+            if (selectorTalla) selectorTalla.value = "";
+            renderizarVariantesCompraMercancia();
+            return;
+        }
+
+        const existente = tallasCompraMercancia.find(function(item) {
+            return item.talla === talla;
+        });
+
+        if (existente) {
+            existente.cantidad += cantidad;
+        } else {
+            tallasCompraMercancia.push({ talla: talla, cantidad: cantidad });
+        }
+
+        if (inputCantidad) inputCantidad.value = "";
+        renderizarTallasCompraMercancia();
+    }
+
+    function agregarTallaAVarianteCompra(color, talla, cantidad) {
+        const colorNormalizado = (color || "Unico").trim() || "Unico";
+        const tallaNormalizada = (talla || "UNICA").trim().toUpperCase() || "UNICA";
+        const cantidadNumero = Number(cantidad || 0);
+
+        if (cantidadNumero <= 0) return;
+
+        let variante = variantesCompraMercancia.find(function(item) {
+            return item.color.toLowerCase() === colorNormalizado.toLowerCase();
+        });
+
+        if (!variante) {
+            variante = {
+                color: colorNormalizado,
+                tallas: {}
+            };
+            variantesCompraMercancia.push(variante);
+        }
+
+        variante.tallas[tallaNormalizada] = Number(variante.tallas[tallaNormalizada] || 0) + cantidadNumero;
+    }
+
+    function eliminarTallaCompraMercancia(indice) {
+        tallasCompraMercancia.splice(indice, 1);
+        renderizarTallasCompraMercancia();
+    }
+
+    function renderizarVariantesCompraMercancia() {
+        const contenedor = document.getElementById("compraVariantesSeleccionadas");
+
+        if (!contenedor) return;
+
+        if (variantesCompraMercancia.length === 0) {
+            contenedor.innerHTML = "<span>Sin colores agregados</span>";
+            return;
+        }
+
+        contenedor.innerHTML = variantesCompraMercancia.map(function(variante, indice) {
+            const tallas = Object.keys(variante.tallas).map(function(talla) {
+                return talla + ": " + variante.tallas[talla];
+            }).join(", ");
+
+            return `
+                <button type="button" onclick="eliminarVarianteCompraMercancia(${indice})">
+                    ${limpiarTextoBD(variante.color)} - ${limpiarTextoBD(tallas)}
+                </button>
+            `;
+        }).join("");
+    }
+
+    function agregarColorActualCompraMercancia() {
+        const color = colorCompraMercancia || document.getElementById("compraColor")?.value.trim() || "Unico";
+        const cantidadSinTalla = parseInt(document.getElementById("compraCantidad")?.value || 0);
+        const selectorTalla = document.getElementById("compraTalla");
+        const inputCantidadTalla = document.getElementById("compraCantidadTalla");
+        const tallaActiva = selectorTalla ? selectorTalla.value.trim().toUpperCase() : "";
+        const cantidadTallaActiva = parseInt(inputCantidadTalla ? inputCantidadTalla.value : 0);
+        const tallasActuales = {};
+
+        tallasCompraMercancia.forEach(function(item) {
+            tallasActuales[item.talla] = Number(tallasActuales[item.talla] || 0) + Number(item.cantidad || 0);
+        });
+
+        if (tallaActiva && !isNaN(cantidadTallaActiva) && cantidadTallaActiva > 0) {
+            tallasActuales[tallaActiva] = Number(tallasActuales[tallaActiva] || 0) + cantidadTallaActiva;
+        }
+
+        if (Object.keys(tallasActuales).length === 0) {
+            if (isNaN(cantidadSinTalla) || cantidadSinTalla <= 0) {
+                alert("Agrega al menos una talla o una cantidad sin talla para este color.");
+                return false;
+            }
+
+            tallasActuales.UNICA = cantidadSinTalla;
+        }
+
+        Object.keys(tallasActuales).forEach(function(talla) {
+            agregarTallaAVarianteCompra(color, talla, tallasActuales[talla]);
+        });
+
+        tallasCompraMercancia = [];
+        colorCompraMercancia = "";
+        document.getElementById("compraColor").value = "";
+        document.getElementById("compraCantidad").value = "";
+        document.getElementById("compraCantidadTalla").value = "";
+        renderizarTallasCompraMercancia();
+        actualizarColorCompraMercancia();
+        renderizarVariantesCompraMercancia();
+        return true;
+    }
+
+    function eliminarVarianteCompraMercancia(indice) {
+        variantesCompraMercancia.splice(indice, 1);
+        renderizarVariantesCompraMercancia();
+    }
+
     function actualizarTallasCompraMercancia() {
         const selectorProducto = document.getElementById("compraProducto");
         const selectorTalla = document.getElementById("compraTalla");
         const inputCosto = document.getElementById("compraCostoUnitario");
+        const tipoItem = document.getElementById("compraTipoItem")?.value || "mercancia_nueva";
 
         if (!selectorProducto || !selectorTalla) return;
 
@@ -4155,13 +4811,11 @@
 
         selectorTalla.innerHTML = '<option value="">Sin talla</option>';
 
-        if (!producto) return;
-
-        if (inputCosto && (!inputCosto.value || Number(inputCosto.value) === 0)) {
+        if (producto && inputCosto && (!inputCosto.value || Number(inputCosto.value) === 0)) {
             inputCosto.value = Number(producto.costo_unitario || 0);
         }
 
-        const tallas = leerTallasBD(producto.tallas);
+        const tallas = producto ? leerTallasBD(producto.tallas) : [];
         const tallasUnicas = [];
 
         tallas.forEach(function(item) {
@@ -4175,6 +4829,12 @@
                 tallasUnicas.push(talla);
             }
         });
+
+        if (tipoItem === "reposicion" && !producto) {
+            tallasCompraMercancia = [];
+            renderizarTallasCompraMercancia();
+            return;
+        }
 
         tallasUnicas.forEach(function(talla) {
             const opcion = document.createElement("option");
@@ -4199,13 +4859,13 @@
             const totalCompra = itemsCompraMercancia.reduce(function(total, item) {
                 return total + (Number(item.cantidad || 0) * Number(item.costo_unitario || 0));
             }, 0);
-            resumen.textContent = itemsCompraMercancia.length + " productos | " + totalUnidades + " unidades | " + formatoPrecioBD(totalCompra);
+            resumen.textContent = itemsCompraMercancia.length + " registros | " + totalUnidades + " unidades | " + formatoPrecioBD(totalCompra);
         }
 
         if (itemsCompraMercancia.length === 0) {
-            tabla.innerHTML = '<tr><td colspan="6">Agrega productos antes de guardar.</td></tr>';
+            tabla.innerHTML = '<tr><td colspan="8">Agrega mercancía antes de guardar.</td></tr>';
             if (resumen) {
-                resumen.textContent = "0 productos agregados";
+                resumen.textContent = "0 registros agregados";
             }
             return;
         }
@@ -4214,6 +4874,8 @@
             tabla.innerHTML += `
                 <tr>
                     <td>${limpiarTextoBD(item.producto_texto)}</td>
+                    <td>${item.tipo_item === "reposicion" ? "Reposición" : "Nueva"}</td>
+                    <td>${limpiarTextoBD(item.color || "-")}</td>
                     <td>${limpiarTextoBD(item.talla || "-")}</td>
                     <td>${item.cantidad}</td>
                     <td>${formatoPrecioBD(item.costo_unitario)}</td>
@@ -4227,33 +4889,99 @@
     function limpiarCamposItemCompraMercancia() {
         document.getElementById("compraProducto").value = "";
         document.getElementById("compraTalla").innerHTML = '<option value="">Sin talla</option>';
+        document.getElementById("compraCantidadTalla").value = "";
+        document.getElementById("compraCategoria").value = "";
+        document.getElementById("compraDescripcion").value = "";
+        document.getElementById("compraColor").value = "";
+        document.getElementById("compraCustomColorInput").value = "";
         document.getElementById("compraCantidad").value = "";
         document.getElementById("compraCostoUnitario").value = "";
+        colorCompraMercancia = "";
+        tallasCompraMercancia = [];
+        variantesCompraMercancia = [];
+        renderizarTallasCompraMercancia();
+        renderizarVariantesCompraMercancia();
+        actualizarColorCompraMercancia();
+        actualizarModoCompraMercancia();
+        actualizarTallasCompraMercancia();
     }
 
     function agregarItemCompraMercancia() {
         if (!exigirAdminFrontend()) return;
 
+        const tipoItem = document.getElementById("compraTipoItem")?.value || "mercancia_nueva";
         const selectorProducto = document.getElementById("compraProducto");
-        const idProducto = Number(selectorProducto.value);
+        const idProducto = Number(selectorProducto.value || 0);
         const producto = productosCompraMercancia.find(function(item) {
             return Number(item.id_producto) === idProducto;
         });
-        const talla = document.getElementById("compraTalla").value;
+        const categoria = document.getElementById("compraCategoria").value;
+        const descripcion = document.getElementById("compraDescripcion").value.trim();
+        const color = document.getElementById("compraColor").value.trim();
         const cantidad = parseInt(document.getElementById("compraCantidad").value);
         const costoUnitario = parseFloat(document.getElementById("compraCostoUnitario").value);
+        const tallasSeleccionadas = tallasCompraMercancia.slice();
+        const variantesSeleccionadas = variantesCompraMercancia.slice();
 
-        if (!producto || isNaN(cantidad) || cantidad <= 0 || isNaN(costoUnitario) || costoUnitario < 0) {
-            alert("Selecciona producto, cantidad y costo unitario validos.");
+        if (tipoItem === "reposicion" && !producto) {
+            alert("Selecciona el producto existente que vas a reponer.");
             return;
         }
 
-        itemsCompraMercancia.push({
-            id_producto: idProducto,
-            producto_texto: selectorProducto.options[selectorProducto.selectedIndex].textContent,
-            talla: talla,
-            cantidad: cantidad,
-            costo_unitario: costoUnitario
+        if (tipoItem === "mercancia_nueva" && (!categoria || !descripcion)) {
+            alert("Selecciona categoría y escribe una descripción para la mercancía nueva.");
+            return;
+        }
+
+        if (isNaN(costoUnitario) || costoUnitario < 0) {
+            alert("Ingresa un costo unitario válido.");
+            return;
+        }
+
+        if (tipoItem === "mercancia_nueva" && variantesSeleccionadas.length === 0 && (color || tallasSeleccionadas.length > 0 || cantidad > 0)) {
+            if (!agregarColorActualCompraMercancia()) return;
+        }
+
+        const variantesFinales = variantesCompraMercancia.slice();
+
+        if (tipoItem === "reposicion" && tallasSeleccionadas.length === 0 && (isNaN(cantidad) || cantidad <= 0)) {
+            alert("Ingresa cantidad y costo unitario válidos.");
+            return;
+        }
+
+        if (tipoItem === "mercancia_nueva" && variantesFinales.length === 0) {
+            alert("Agrega al menos un color con tallas o cantidad para esta mercancía.");
+            return;
+        }
+
+        const productoTexto = tipoItem === "reposicion"
+            ? selectorProducto.options[selectorProducto.selectedIndex].textContent
+            : etiquetaCategoriaAdmin(categoria) + " - " + descripcion;
+
+        const entradasCompra = tipoItem === "mercancia_nueva"
+            ? variantesFinales.flatMap(function(variante) {
+                return Object.keys(variante.tallas).map(function(talla) {
+                    return {
+                        color: variante.color,
+                        talla: talla === "UNICA" ? "" : talla,
+                        cantidad: variante.tallas[talla]
+                    };
+                });
+            })
+            : (tallasSeleccionadas.length > 0 ? tallasSeleccionadas : [{ talla: "", cantidad: cantidad }]);
+
+        entradasCompra.forEach(function(entrada) {
+            itemsCompraMercancia.push({
+                tipo_item: tipoItem,
+                id_producto: tipoItem === "reposicion" ? idProducto : null,
+                categoria: tipoItem === "mercancia_nueva" ? categoria : "",
+                descripcion: tipoItem === "mercancia_nueva" ? descripcion : "",
+                color: tipoItem === "mercancia_nueva" ? (entrada.color || "Unico") : "",
+                producto_texto: productoTexto,
+                talla: entrada.talla,
+                cantidad: entrada.cantidad,
+                costo_unitario: costoUnitario
+            });
         });
 
         renderizarItemsCompraMercancia();
@@ -4277,9 +5005,14 @@
 
         const datos = new FormData();
         datos.append("id_proveedor", document.getElementById("compraProveedor").value);
+        datos.append("proveedor_referencia", document.getElementById("compraProveedorReferencia").value.trim());
         datos.append("items", JSON.stringify(itemsCompraMercancia.map(function(item) {
             return {
+                tipo_item: item.tipo_item,
                 id_producto: item.id_producto,
+                categoria: item.categoria,
+                descripcion: item.descripcion,
+                color: item.color,
                 talla: item.talla,
                 cantidad: item.cantidad,
                 costo_unitario: item.costo_unitario
@@ -4303,11 +5036,15 @@
 
             alert(resultado.mensaje + "\nTotal compra: " + formatoPrecioBD(resultado.total_compra));
             document.getElementById("formCompraMercancia").reset();
+            document.getElementById("compraProveedor").value = "";
+            document.getElementById("compraProveedorReferencia").disabled = false;
             itemsCompraMercancia = [];
             renderizarItemsCompraMercancia();
             definirFechasFinanzas();
+            actualizarModoCompraMercancia();
             cargarProductosCompraMercanciaBD();
             cargarComprasMercanciaBD();
+            cargarMercanciaPendienteProductoBD();
             cargarInventarioBD();
             cargarMovimientosBD();
             cargarFinanzasBD();
@@ -4330,22 +5067,30 @@
             tabla.innerHTML = "";
 
             if (compras.error) {
-                tabla.innerHTML = `<tr><td colspan="12">${compras.mensaje}</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="15">${compras.mensaje}</td></tr>`;
                 return;
             }
 
             if (compras.length === 0) {
-                tabla.innerHTML = '<tr><td colspan="12">No hay compras de mercancia registradas</td></tr>';
+                tabla.innerHTML = '<tr><td colspan="15">No hay compras de mercancía registradas</td></tr>';
+                ocultarPaginacionAdmin("compras-mercancia", tabla);
                 return;
             }
 
-            compras.forEach(function(compra) {
+            prepararPaginaAdmin(compras, "compras-mercancia", 20, tabla, cargarComprasMercanciaBD).forEach(function(compra) {
+                const tipoTexto = compra.tipo_item === "mercancia_nueva" ? "Nueva" : "Reposición";
+                const categoriaTexto = compra.categoria || "-";
+                const productoTexto = compra.producto || compra.descripcion || "Mercancía sin clasificar";
+
                 tabla.innerHTML += `
                     <tr>
                         <td>${new Date(compra.fecha + "T00:00:00").toLocaleDateString()}</td>
                         <td>${limpiarTextoBD(compra.proveedor)}</td>
+                        <td>${tipoTexto}</td>
                         <td>${limpiarTextoBD(compra.codigo || "-")}</td>
-                        <td>${limpiarTextoBD(compra.producto)}</td>
+                        <td>${limpiarTextoBD(productoTexto)}</td>
+                        <td>${limpiarTextoBD(categoriaTexto)}</td>
+                        <td>${limpiarTextoBD(compra.color || "-")}</td>
                         <td>${limpiarTextoBD(compra.talla || "-")}</td>
                         <td>${compra.cantidad}</td>
                         <td>${formatoPrecioBD(compra.costo_unitario)}</td>
@@ -4358,7 +5103,7 @@
                 `;
             });
         } catch (error) {
-            tabla.innerHTML = '<tr><td colspan="12">Error al cargar compras de mercancia</td></tr>';
+            tabla.innerHTML = '<tr><td colspan="15">Error al cargar compras de mercancía</td></tr>';
             console.error(error);
         }
     }
@@ -5081,6 +5826,35 @@
         });
     }
 
+    function actualizarModoCompraMercancia() {
+        const tipo = document.getElementById("compraTipoItem")?.value || "mercancia_nueva";
+        const esReposicion = tipo === "reposicion";
+
+        document.querySelectorAll(".compra-campo-reposicion").forEach(function(elemento) {
+            elemento.style.display = esReposicion ? "" : "none";
+        });
+
+        document.querySelectorAll(".compra-campo-nueva").forEach(function(elemento) {
+            elemento.style.display = esReposicion ? "none" : "";
+        });
+
+        if (!esReposicion) {
+            const producto = document.getElementById("compraProducto");
+            if (producto) producto.value = "";
+        }
+
+        if (esReposicion) {
+            colorCompraMercancia = "";
+            variantesCompraMercancia = [];
+            actualizarColorCompraMercancia();
+            renderizarVariantesCompraMercancia();
+        }
+
+        tallasCompraMercancia = [];
+        renderizarTallasCompraMercancia();
+        actualizarTallasCompraMercancia();
+    }
+
     function verPedidoPendienteAdmin(idVenta) {
         const panel = document.getElementById("panelNotificacionesAdmin");
         if (panel) panel.classList.remove("abierto");
@@ -5210,6 +5984,7 @@
             cargarProveedoresBD();
             cargarProductosCompraMercanciaBD();
             cargarComprasMercanciaBD();
+            cargarMercanciaPendienteProductoBD();
             cargarUsuariosSeguridadBD();
         }
     }
@@ -5254,8 +6029,12 @@
     const formPagoTrabajador = document.getElementById("formPagoTrabajador");
     const formProveedor = document.getElementById("formProveedor");
     const formCompraMercancia = document.getElementById("formCompraMercancia");
+    const compraProveedorBusqueda = document.getElementById("compraProveedorBusqueda");
+    const compraTipoItem = document.getElementById("compraTipoItem");
     const compraProducto = document.getElementById("compraProducto");
+    const btnAgregarTallaCompra = document.getElementById("btnAgregarTallaCompra");
     const btnAgregarItemCompra = document.getElementById("btnAgregarItemCompra");
+    const mercanciaPendienteSelect = document.getElementById("mercanciaPendienteSelect");
     const formCambiarPassword = document.getElementById("formCambiarPassword");
     const formRestablecerPassword = document.getElementById("formRestablecerPassword");
     const formReporteFechas = document.getElementById("formReporteFechas");
@@ -5289,12 +6068,34 @@
         formCompraMercancia.addEventListener("submit", guardarCompraMercanciaBD);
     }
 
+    if (compraProveedorBusqueda) {
+        compraProveedorBusqueda.addEventListener("input", sincronizarProveedorCompraMercancia);
+        compraProveedorBusqueda.addEventListener("change", sincronizarProveedorCompraMercancia);
+    }
+
+    if (compraTipoItem) {
+        compraTipoItem.addEventListener("change", actualizarModoCompraMercancia);
+        actualizarModoCompraMercancia();
+    }
+
     if (compraProducto) {
-        compraProducto.addEventListener("change", actualizarTallasCompraMercancia);
+        compraProducto.addEventListener("change", function() {
+            tallasCompraMercancia = [];
+            renderizarTallasCompraMercancia();
+            actualizarTallasCompraMercancia();
+        });
+    }
+
+    if (btnAgregarTallaCompra) {
+        btnAgregarTallaCompra.addEventListener("click", agregarTallaCompraMercancia);
     }
 
     if (btnAgregarItemCompra) {
         btnAgregarItemCompra.addEventListener("click", agregarItemCompraMercancia);
+    }
+
+    if (mercanciaPendienteSelect) {
+        mercanciaPendienteSelect.addEventListener("change", aplicarMercanciaPendienteProducto);
     }
 
     if (formCambiarPassword) {
@@ -5365,10 +6166,11 @@
                     <td colspan="7">No hay cambios de precio registrados</td>
                 </tr>
                 `;
+                ocultarPaginacionAdmin("cambios-precio", tabla);
                 return;
             }
             
-            cambios.forEach(function(cambio) {
+            prepararPaginaAdmin(cambios, "cambios-precio", 20, tabla, cargarCambiosPrecioBD).forEach(function(cambio) {
                 tabla.innerHTML += `
                 <tr>
                     <td>${new Date(cambio.fecha).toLocaleString()}</td>

@@ -5,6 +5,24 @@ require_once "auth_guard.php";
 
 header("Content-Type: application/json; charset=UTF-8");
 
+function columna_existe_compra(PDO $conexion, $tabla, $columna) {
+    $consulta = $conexion->prepare("
+        SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+            AND table_name = :tabla
+            AND column_name = :columna
+        ) AS existe
+    ");
+    $consulta->execute([
+        ":tabla" => $tabla,
+        ":columna" => $columna
+    ]);
+
+    return filter_var($consulta->fetch()["existe"], FILTER_VALIDATE_BOOLEAN);
+}
+
 try {
     $usuario = exigir_roles(["admin"]);
 
@@ -14,63 +32,74 @@ try {
     }
 
     $idProveedor = intval($_POST["id_proveedor"] ?? 0);
+    $proveedorReferencia = trim($_POST["proveedor_referencia"] ?? "");
     $costoEnvio = floatval($_POST["costo_envio"] ?? 0);
     $fecha = trim($_POST["fecha"] ?? date("Y-m-d"));
     $detalle = trim($_POST["detalle"] ?? "");
     $itemsTexto = trim($_POST["items"] ?? "");
 
     if ($costoEnvio < 0 || $fecha === "") {
-        echo json_encode(["error" => true, "mensaje" => "Datos incompletos o invalidos"], JSON_UNESCAPED_UNICODE);
+        echo json_encode(["error" => true, "mensaje" => "Datos incompletos o inválidos"], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
-    $items = [];
-
-    if ($itemsTexto !== "") {
-        $items = json_decode($itemsTexto, true);
-    }
+    $items = $itemsTexto !== "" ? json_decode($itemsTexto, true) : [];
 
     if (!is_array($items) || count($items) === 0) {
-        $idProducto = intval($_POST["id_producto"] ?? 0);
-        $cantidad = intval($_POST["cantidad"] ?? 0);
-        $costoUnitario = floatval($_POST["costo_unitario"] ?? 0);
-
-        if ($idProducto > 0) {
-            $items[] = [
-                "id_producto" => $idProducto,
-                "talla" => strtoupper(trim($_POST["talla"] ?? "")),
-                "cantidad" => $cantidad,
-                "costo_unitario" => $costoUnitario
-            ];
-        }
-    }
-
-    if (count($items) === 0) {
-        echo json_encode(["error" => true, "mensaje" => "Agrega al menos un producto a la compra"], JSON_UNESCAPED_UNICODE);
+        echo json_encode(["error" => true, "mensaje" => "Agrega al menos una mercancía a la compra"], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
     $totalProductos = 0;
     $totalUnidades = 0;
     $itemsValidados = [];
+    $tiposCompra = [];
 
     foreach ($items as $item) {
+        $tipoItem = trim($item["tipo_item"] ?? "reposicion");
         $idProducto = intval($item["id_producto"] ?? 0);
+        $categoria = trim($item["categoria"] ?? "");
+        $descripcion = trim($item["descripcion"] ?? "");
+        $color = trim($item["color"] ?? "");
         $talla = strtoupper(trim($item["talla"] ?? ""));
         $cantidad = intval($item["cantidad"] ?? 0);
         $costoUnitario = floatval($item["costo_unitario"] ?? 0);
 
-        if ($idProducto <= 0 || $cantidad <= 0 || $costoUnitario < 0) {
-            echo json_encode(["error" => true, "mensaje" => "Hay productos con datos invalidos en la compra"], JSON_UNESCAPED_UNICODE);
+        if (!in_array($tipoItem, ["mercancia_nueva", "reposicion"], true)) {
+            echo json_encode(["error" => true, "mensaje" => "Tipo de mercancía inválido"], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        if ($tipoItem === "reposicion" && $idProducto <= 0) {
+            echo json_encode(["error" => true, "mensaje" => "Selecciona el producto existente para la reposición"], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        if ($tipoItem === "mercancia_nueva" && ($categoria === "" || $descripcion === "")) {
+            echo json_encode(["error" => true, "mensaje" => "Completa categoría y descripción de la mercancía nueva"], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        if ($tipoItem === "mercancia_nueva" && $color === "") {
+            $color = "Unico";
+        }
+
+        if ($cantidad <= 0 || $costoUnitario < 0) {
+            echo json_encode(["error" => true, "mensaje" => "Hay mercancía con cantidad o costo inválido"], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
         $subtotal = $cantidad * $costoUnitario;
         $totalProductos += $subtotal;
         $totalUnidades += $cantidad;
+        $tiposCompra[$tipoItem] = true;
 
         $itemsValidados[] = [
-            "id_producto" => $idProducto,
+            "tipo_item" => $tipoItem,
+            "id_producto" => $tipoItem === "reposicion" ? $idProducto : null,
+            "categoria" => $tipoItem === "mercancia_nueva" ? $categoria : null,
+            "descripcion" => $tipoItem === "mercancia_nueva" ? $descripcion : null,
+            "color" => $tipoItem === "mercancia_nueva" ? $color : null,
             "talla" => $talla,
             "cantidad" => $cantidad,
             "costo_unitario" => $costoUnitario,
@@ -79,7 +108,7 @@ try {
     }
 
     if ($totalUnidades <= 0) {
-        echo json_encode(["error" => true, "mensaje" => "La compra debe tener unidades validas"], JSON_UNESCAPED_UNICODE);
+        echo json_encode(["error" => true, "mensaje" => "La compra debe tener unidades válidas"], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
@@ -96,15 +125,43 @@ try {
         }
     } else {
         $idProveedor = null;
+        if ($proveedorReferencia === "") {
+            $proveedorReferencia = "NN/Otro";
+        }
     }
 
+    $detalleTieneFlujo = columna_existe_compra($conexion, "detalle_compra_mercancia", "tipo_item")
+        && columna_existe_compra($conexion, "detalle_compra_mercancia", "categoria")
+        && columna_existe_compra($conexion, "detalle_compra_mercancia", "descripcion")
+        && columna_existe_compra($conexion, "detalle_compra_mercancia", "color")
+        && columna_existe_compra($conexion, "detalle_compra_mercancia", "estado_registro");
+    $compraTieneFlujo = columna_existe_compra($conexion, "compra_mercancia", "tipo_compra")
+        && columna_existe_compra($conexion, "compra_mercancia", "estado")
+        && columna_existe_compra($conexion, "compra_mercancia", "proveedor_referencia");
+
+    if (!$detalleTieneFlujo || !$compraTieneFlujo) {
+        $conexion->rollBack();
+        echo json_encode([
+            "error" => true,
+            "mensaje" => "Falta ejecutar la migración database/migracion_compras_mercancia_flujo.sql en PostgreSQL"
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    $tipoCompra = count($tiposCompra) > 1 ? "mixta" : array_key_first($tiposCompra);
+    $estadoCompra = isset($tiposCompra["mercancia_nueva"])
+        ? (isset($tiposCompra["reposicion"]) ? "parcial" : "pendiente_clasificar")
+        : "registrada";
     $totalCompra = $totalProductos + $costoEnvio;
 
-    $sqlCompra = "
+    $consultaCompra = $conexion->prepare("
         INSERT INTO compra_mercancia (
             id_proveedor,
             id_usuario,
             fecha,
+            tipo_compra,
+            estado,
+            proveedor_referencia,
             costo_envio,
             total_productos,
             total_compra,
@@ -114,19 +171,23 @@ try {
             :id_proveedor,
             :id_usuario,
             :fecha,
+            :tipo_compra,
+            :estado,
+            :proveedor_referencia,
             :costo_envio,
             :total_productos,
             :total_compra,
             :detalle
         )
         RETURNING id_compra
-    ";
-
-    $consultaCompra = $conexion->prepare($sqlCompra);
+    ");
     $consultaCompra->execute([
         ":id_proveedor" => $idProveedor,
         ":id_usuario" => $usuario["id_usuario"],
         ":fecha" => $fecha,
+        ":tipo_compra" => $tipoCompra,
+        ":estado" => $estadoCompra,
+        ":proveedor_referencia" => $proveedorReferencia,
         ":costo_envio" => $costoEnvio,
         ":total_productos" => $totalProductos,
         ":total_compra" => $totalCompra,
@@ -146,6 +207,11 @@ try {
         INSERT INTO detalle_compra_mercancia (
             id_compra,
             id_producto,
+            tipo_item,
+            categoria,
+            descripcion,
+            color,
+            estado_registro,
             talla,
             cantidad,
             costo_unitario,
@@ -154,6 +220,11 @@ try {
         VALUES (
             :id_compra,
             :id_producto,
+            :tipo_item,
+            :categoria,
+            :descripcion,
+            :color,
+            :estado_registro,
             :talla,
             :cantidad,
             :costo_unitario,
@@ -193,31 +264,43 @@ try {
         )
     ");
 
-    $envioPorUnidad = $costoEnvio / $totalUnidades;
+    $unidadesReposicion = array_reduce($itemsValidados, function($total, $item) {
+        return $total + ($item["tipo_item"] === "reposicion" ? $item["cantidad"] : 0);
+    }, 0);
+    $envioPorUnidadReposicion = $unidadesReposicion > 0 ? $costoEnvio / $unidadesReposicion : 0;
 
     foreach ($itemsValidados as $item) {
-        $consultaProducto->execute([":id_producto" => $item["id_producto"]]);
-        $producto = $consultaProducto->fetch();
-
-        if (!$producto) {
-            $conexion->rollBack();
-            echo json_encode(["error" => true, "mensaje" => "Producto no encontrado en la compra"], JSON_UNESCAPED_UNICODE);
-            exit;
-        }
-
         $consultaDetalle->execute([
             ":id_compra" => $idCompra,
             ":id_producto" => $item["id_producto"],
+            ":tipo_item" => $item["tipo_item"],
+            ":categoria" => $item["categoria"],
+            ":descripcion" => $item["descripcion"],
+            ":color" => $item["color"],
+            ":estado_registro" => $item["tipo_item"] === "mercancia_nueva" ? "pendiente" : "registrado",
             ":talla" => $item["talla"] !== "" ? $item["talla"] : null,
             ":cantidad" => $item["cantidad"],
             ":costo_unitario" => $item["costo_unitario"],
             ":subtotal" => $item["subtotal"]
         ]);
 
+        if ($item["tipo_item"] !== "reposicion") {
+            continue;
+        }
+
+        $consultaProducto->execute([":id_producto" => $item["id_producto"]]);
+        $producto = $consultaProducto->fetch();
+
+        if (!$producto) {
+            $conexion->rollBack();
+            echo json_encode(["error" => true, "mensaje" => "Producto no encontrado en la reposición"], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
         $cantidadActual = intval($producto["cantidad"]);
         $costoActual = floatval($producto["costo_unitario"]);
         $nuevaCantidad = $cantidadActual + $item["cantidad"];
-        $costoUnitarioInventario = $item["costo_unitario"] + $envioPorUnidad;
+        $costoUnitarioInventario = $item["costo_unitario"] + $envioPorUnidadReposicion;
         $nuevoCosto = $nuevaCantidad > 0
             ? (($costoActual * $cantidadActual) + ($costoUnitarioInventario * $item["cantidad"])) / $nuevaCantidad
             : $costoUnitarioInventario;
@@ -236,14 +319,14 @@ try {
             ]);
         }
 
-        $detalleMovimiento = "Compra de mercancia";
+        $detalleMovimiento = "Reposición por compra de mercancía";
 
         if ($item["talla"] !== "") {
             $detalleMovimiento .= " talla " . $item["talla"];
         }
 
         if ($costoEnvio > 0) {
-            $detalleMovimiento .= ". Envio repartido por unidad: " . number_format($envioPorUnidad, 2, ".", "");
+            $detalleMovimiento .= ". Envío repartido por unidad: " . number_format($envioPorUnidadReposicion, 2, ".", "");
         }
 
         if ($detalle !== "") {
@@ -262,10 +345,13 @@ try {
 
     echo json_encode([
         "error" => false,
-        "mensaje" => "Compra de mercancia registrada correctamente",
+        "mensaje" => $estadoCompra === "pendiente_clasificar"
+            ? "Compra registrada como mercancía nueva pendiente de clasificar"
+            : "Compra de mercancía registrada correctamente",
         "id_compra" => $idCompra,
         "total_productos" => $totalProductos,
         "total_compra" => $totalCompra,
+        "estado" => $estadoCompra,
         "cantidad_items" => count($itemsValidados)
     ], JSON_UNESCAPED_UNICODE);
 

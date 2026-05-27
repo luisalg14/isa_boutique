@@ -191,6 +191,8 @@
         let carrito = JSON.parse(localStorage.getItem("isa_carrito")) || [];
         let imagenesCarrusel = [];
         let indiceImagenCarrusel = 0;
+        let paginaCatalogo = 1;
+        const productosPorPaginaCatalogo = 100;
 
         const contenedor = document.getElementById("contenedor-productos");
         const buscador = document.getElementById("buscarProducto");
@@ -736,6 +738,79 @@
             return productos;
         }
 
+        function renderizarPaginacionCatalogo(totalProductos) {
+            let paginacion = document.getElementById("paginacionCatalogo");
+
+            if (!paginacion) {
+                paginacion = document.createElement("div");
+                paginacion.id = "paginacionCatalogo";
+                paginacion.className = "pagination-control public-pagination";
+                contenedor.insertAdjacentElement("afterend", paginacion);
+            }
+
+            const totalPaginas = Math.ceil(totalProductos / productosPorPaginaCatalogo);
+            paginacion.innerHTML = "";
+
+            if (totalPaginas <= 1) {
+                paginacion.hidden = true;
+                return;
+            }
+
+            paginacion.hidden = false;
+
+            if (paginaCatalogo > totalPaginas) {
+                paginaCatalogo = totalPaginas;
+            }
+
+            const crearBoton = function(texto, pagina, activo, deshabilitado) {
+                const boton = document.createElement("button");
+                boton.type = "button";
+                boton.textContent = texto;
+                boton.className = activo ? "activo" : "";
+                boton.disabled = deshabilitado;
+                boton.addEventListener("click", function() {
+                    paginaCatalogo = pagina;
+                    renderizarProductos();
+                    contenedor.scrollIntoView({ behavior: "smooth", block: "start" });
+                });
+                paginacion.appendChild(boton);
+            };
+
+            crearBoton("‹", paginaCatalogo - 1, false, paginaCatalogo === 1);
+
+            const inicio = Math.max(1, paginaCatalogo - 2);
+            const fin = Math.min(totalPaginas, paginaCatalogo + 2);
+
+            if (inicio > 1) {
+                crearBoton("1", 1, paginaCatalogo === 1, false);
+                if (inicio > 2) {
+                    const puntos = document.createElement("span");
+                    puntos.textContent = "...";
+                    paginacion.appendChild(puntos);
+                }
+            }
+
+            for (let pagina = inicio; pagina <= fin; pagina++) {
+                crearBoton(String(pagina), pagina, pagina === paginaCatalogo, false);
+            }
+
+            if (fin < totalPaginas) {
+                if (fin < totalPaginas - 1) {
+                    const puntos = document.createElement("span");
+                    puntos.textContent = "...";
+                    paginacion.appendChild(puntos);
+                }
+                crearBoton(String(totalPaginas), totalPaginas, paginaCatalogo === totalPaginas, false);
+            }
+
+            crearBoton("Next ›", paginaCatalogo + 1, false, paginaCatalogo === totalPaginas);
+        }
+
+        function reiniciarPaginaCatalogo() {
+            paginaCatalogo = 1;
+            renderizarProductos();
+        }
+
         async function cargarCategoriasCatalogo() {
             try {
                 const respuesta = await fetch("../php/categorias_listar.php?solo_activas=1");
@@ -767,7 +842,7 @@
                             item.classList.remove("activo");
                         });
                         chip.classList.add("activo");
-                        renderizarProductos();
+                        reiniciarPaginaCatalogo();
                     });
                     document.getElementById("categoriaChips").appendChild(chip);
                 });
@@ -777,7 +852,7 @@
                     document.querySelectorAll(".chip").forEach(function(item) {
                         item.classList.toggle("activo", item.dataset.categoria === "");
                     });
-                    renderizarProductos();
+                    reiniciarPaginaCatalogo();
                 });
             } catch (error) {
                 console.error("Error al cargar categorías", error);
@@ -795,10 +870,17 @@
 
             if (productos.length === 0) {
                 contenedor.innerHTML = '<div class="estado-vacio">No encontramos productos con esos filtros.</div>';
+                renderizarPaginacionCatalogo(0);
                 return;
             }
 
-            productos.forEach(function(producto) {
+            const totalPaginas = Math.max(1, Math.ceil(productos.length / productosPorPaginaCatalogo));
+            if (paginaCatalogo > totalPaginas) paginaCatalogo = totalPaginas;
+
+            const inicio = (paginaCatalogo - 1) * productosPorPaginaCatalogo;
+            const productosPagina = productos.slice(inicio, inicio + productosPorPaginaCatalogo);
+
+            productosPagina.forEach(function(producto) {
                 const agotado = Number(producto.cantidad) <= 0 || producto.estado === "agotado";
                 const estadoTexto = agotado ? "Agotado" : "Disponible";
                 const card = document.createElement("article");
@@ -828,6 +910,8 @@
 
                 contenedor.appendChild(card);
             });
+
+            renderizarPaginacionCatalogo(productos.length);
         }
 
         async function cargarProductos() {
@@ -911,15 +995,15 @@
             }
         });
 
-        buscador.addEventListener("input", renderizarProductos);
+        buscador.addEventListener("input", reiniciarPaginaCatalogo);
         filtroCategoria.addEventListener("change", function() {
             document.querySelectorAll(".chip").forEach(function(chip) {
                 chip.classList.toggle("activo", chip.dataset.categoria === filtroCategoria.value);
             });
-            renderizarProductos();
+            reiniciarPaginaCatalogo();
         });
-        ordenProductos.addEventListener("change", renderizarProductos);
-        soloDisponibles.addEventListener("change", renderizarProductos);
+        ordenProductos.addEventListener("change", reiniciarPaginaCatalogo);
+        soloDisponibles.addEventListener("change", reiniciarPaginaCatalogo);
 
         actualizarContadorCarrito();
         cargarCategoriasCatalogo().then(cargarProductos);
