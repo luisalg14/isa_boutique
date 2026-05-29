@@ -1029,23 +1029,23 @@
                 </form>
 
                 <form id="formInversion" class="finance-form">
-                    <h3>Registrar inversion</h3>
+                    <h3>Registrar inversión</h3>
 
                     <div class="campo">
-                        <label>Tipo de inversion</label>
+                        <label>Tipo de inversión</label>
                         <select id="inversionTipo">
                             <option value="capital">Capital</option>
-                            <option value="mercancia">Mercancia</option>
-                            <option value="adecuacion">Adecuacion</option>
+                            <option value="mercancia">Mercancía</option>
+                            <option value="adecuacion">Adecuación</option>
                             <option value="publicidad">Publicidad</option>
-                            <option value="tecnologia">Tecnologia</option>
+                            <option value="tecnologia">Tecnología</option>
                             <option value="otro">Otro</option>
                         </select>
                     </div>
 
                     <div class="campo">
                         <label>Concepto</label>
-                        <input id="inversionConcepto" placeholder="Ej: Compra de nueva mercancia">
+                        <input id="inversionConcepto" placeholder="Ej: Compra de nueva mercancía">
                     </div>
 
                     <div class="campo">
@@ -1063,7 +1063,7 @@
                         <input id="inversionDetalle" placeholder="Opcional">
                     </div>
 
-                    <button class="btn btn-agregar" type="submit">Guardar inversion</button>
+                    <button class="btn btn-agregar" type="submit">Guardar inversión</button>
                 </form>
             </div>
             </div>
@@ -1277,7 +1277,7 @@
             </div>
 
             <div class="admin-subsection" data-subsection="proveedores-compras">
-            <h3 class="finance-subtitle proveedores-compras-title">Historial de compras de mercancia</h3>
+            <h3 class="finance-subtitle proveedores-compras-title">Historial de compras de mercancía</h3>
             <table class="tabla-inventario proveedores-compras-table">
                 <thead>
                     <tr>
@@ -2834,14 +2834,14 @@
 
             if (!confirmar) return;
         } else {
-            const confirmarPrueba = confirm(
-                "BORRADO DE PRUEBA\n\n" +
+            const confirmarLimpieza = confirm(
+                "ELIMINACIÓN ADMINISTRATIVA\n\n" +
                 "Esto eliminará el producto y también sus ventas/devoluciones relacionadas.\n" +
-                "Úsalo solo para limpiar datos de prueba.\n\n" +
+                "Úsalo únicamente para depurar registros creados por error.\n\n" +
                 "Producto: " + nombreProducto
             );
 
-            if (!confirmarPrueba) return;
+            if (!confirmarLimpieza) return;
         }
 
         const confirmarFinal = confirm("Esta acción no se puede deshacer. ¿Confirmas la eliminación?");
@@ -2867,7 +2867,7 @@
                 if (
                     !forzar &&
                     resultado.mensaje.includes("ventas o devoluciones") &&
-                    confirm(resultado.mensaje + "\n\n¿Quieres hacer un borrado de prueba y limpiar también ese historial relacionado?")
+                    confirm(resultado.mensaje + "\n\n¿Quieres hacer una eliminación administrativa y limpiar también ese historial relacionado?")
                 ) {
                     eliminarProductoBD(idProducto, nombreProducto, true);
                     return;
@@ -2894,7 +2894,7 @@
 
         const confirmar = confirm(
             "¿Deseas eliminar todo el historial de ventas y devoluciones?\n\n" +
-            "Esto limpiará los registros de ventas/devoluciones de prueba y no se puede deshacer."
+            "Esto limpiará los registros de ventas/devoluciones seleccionados para depuración y no se puede deshacer."
         );
 
         if (!confirmar) return;

@@ -165,7 +165,7 @@ try {
     echo json_encode([
         "error" => false,
         "mensaje" => $forzar
-            ? "Producto de prueba eliminado junto con sus ventas/devoluciones relacionadas"
+            ? "Producto eliminado junto con sus ventas/devoluciones relacionadas"
             : "Producto eliminado correctamente"
     ], JSON_UNESCAPED_UNICODE);
 

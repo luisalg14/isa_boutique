@@ -3938,7 +3938,8 @@ button.cart-link {
 
 .stitch-story-image {
     padding: 34px;
-    background: #faebe3;
+    background: #ffffff;
+    border: 1px solid var(--public-comfort-line, rgba(203, 213, 225, 0.72));
 }
 
 .stitch-story-image img {
@@ -5748,7 +5749,7 @@ html {
 }
 
 .stitch-home .stitch-story {
-    background: linear-gradient(180deg, #ffffff, var(--public-comfort-soft));
+    background: #ffffff;
 }
 
 .stitch-home .stitch-newsletter {
