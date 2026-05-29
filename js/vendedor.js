@@ -698,6 +698,8 @@ async function registrarVentaVendedor(evento) {
 async function cargarHistorialVendedor() {
     const tabla = document.getElementById("tablaHistorialVendedor");
     const panelPendientes = document.getElementById("pedidosPendientesVendedor");
+    const buscador = document.getElementById("buscadorHistorialVendedor");
+    const textoBusqueda = buscador ? buscador.value.toLowerCase().trim() : "";
     if (!tabla && !panelPendientes) return;
 
     try {
@@ -705,15 +707,36 @@ async function cargarHistorialVendedor() {
         const historial = await respuesta.json();
 
         if (historial.error) {
-            if (tabla) tabla.innerHTML = `<tr><td colspan="14">${historial.mensaje}</td></tr>`;
+            if (tabla) tabla.innerHTML = `<tr><td colspan="8">${historial.mensaje}</td></tr>`;
             if (panelPendientes) panelPendientes.innerHTML = `<p class="empty-dashboard">${historial.mensaje}</p>`;
             return;
         }
 
         renderizarPedidosPendientesVendedor(historial);
 
-        if (tabla && historial.length === 0) {
-            tabla.innerHTML = '<tr><td colspan="14">No hay ventas registradas</td></tr>';
+        const historialFiltrado = textoBusqueda
+            ? historial.filter(function(registro) {
+                const texto = [
+                    registro.cliente,
+                    registro.telefono,
+                    registro.tipo,
+                    registro.codigo,
+                    registro.producto,
+                    registro.color,
+                    registro.talla,
+                    registro.medio_pago,
+                    registro.canal_venta,
+                    registro.tipo_entrega,
+                    registro.estado,
+                    registro.numero_factura
+                ].join(" ").toLowerCase();
+
+                return texto.includes(textoBusqueda);
+            })
+            : historial;
+
+        if (tabla && historialFiltrado.length === 0) {
+            tabla.innerHTML = '<tr><td colspan="8">No hay ventas registradas</td></tr>';
             ocultarPaginacionVendedor("historial-vendedor", tabla);
             return;
         }
@@ -722,9 +745,11 @@ async function cargarHistorialVendedor() {
 
         tabla.innerHTML = "";
 
-        prepararPaginaVendedor(historial, "historial-vendedor", 20, tabla, cargarHistorialVendedor).forEach(function(registro) {
+        prepararPaginaVendedor(historialFiltrado, "historial-vendedor", 20, tabla, cargarHistorialVendedor).forEach(function(registro) {
             let accion = "<span>Registrada</span>";
             let botonFactura = "";
+            const fecha = registro.fecha ? new Date(registro.fecha) : null;
+            const fechaTexto = fecha && !Number.isNaN(fecha.getTime()) ? fecha.toLocaleString() : "-";
 
             if (registro.tipo === "Venta" && registro.estado === "pendiente") {
                 accion = `
@@ -741,25 +766,45 @@ async function cargarHistorialVendedor() {
 
             tabla.innerHTML += `
                 <tr>
-                    <td>${registro.cliente || "Sin nombre"}</td>
-                    <td>${registro.telefono || "Sin telefono"}</td>
-                    <td>${registro.tipo}</td>
-                    <td>${registro.codigo || "Sin codigo"}</td>
-                    <td>${registro.producto}</td>
-                    <td>${registro.talla || "-"}</td>
-                    <td>${registro.cantidad}</td>
-                    <td>${formatoPrecioVendedor(registro.subtotal)}</td>
-                    <td>${registro.medio_pago}</td>
-                    <td>${etiquetaCanalVendedor(registro.canal_venta)}</td>
-                    <td>${etiquetaEntregaVendedor(registro.tipo_entrega)}</td>
+                    <td>
+                        <div class="compact-stack-cell">
+                            <strong>${registro.cliente || "Sin nombre"}</strong>
+                            <span>${registro.telefono || "Sin telefono"}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="compact-stack-cell">
+                            <strong>${registro.producto}</strong>
+                            <span>${registro.codigo || "Sin codigo"}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="compact-stack-cell">
+                            <strong>${registro.tipo}</strong>
+                            <span>Talla: ${registro.talla || "-"}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="compact-stack-cell money-stack">
+                            <strong>Cant. ${registro.cantidad}</strong>
+                            <span>${formatoPrecioVendedor(registro.total ?? registro.subtotal)}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="compact-stack-cell">
+                            <strong>${registro.medio_pago || "-"}</strong>
+                            <span>${etiquetaCanalVendedor(registro.canal_venta)}</span>
+                            <small>${etiquetaEntregaVendedor(registro.tipo_entrega)}</small>
+                        </div>
+                    </td>
                     <td>${etiquetaEstadoVendedor(registro.estado)}</td>
-                    <td>${new Date(registro.fecha).toLocaleString()}</td>
-                    <td>${botonFactura}${accion}</td>
+                    <td>${fechaTexto}</td>
+                    <td><div class="table-actions-inline">${botonFactura}${accion}</div></td>
                 </tr>
             `;
         });
     } catch (error) {
-        if (tabla) tabla.innerHTML = '<tr><td colspan="14">Error al cargar historial</td></tr>';
+        if (tabla) tabla.innerHTML = '<tr><td colspan="8">Error al cargar historial</td></tr>';
         if (panelPendientes) panelPendientes.innerHTML = '<p class="empty-dashboard">Error al cargar pedidos pendientes.</p>';
         console.error(error);
     }
@@ -1234,6 +1279,10 @@ document.querySelectorAll(".admin-tab").forEach(function(tab) {
 window.addEventListener("sesion-lista", iniciarPanelVendedor);
 
 document.getElementById("buscadorVendedor")?.addEventListener("input", cargarInventarioVendedor);
+document.getElementById("buscadorHistorialVendedor")?.addEventListener("input", function() {
+    paginacionVendedor["historial-vendedor"] = 1;
+    cargarHistorialVendedor();
+});
 document.getElementById("ventaProducto")?.addEventListener("change", llenarSelectorColores);
 document.getElementById("ventaColor")?.addEventListener("change", llenarSelectorTallas);
 document.getElementById("ventaTalla")?.addEventListener("change", actualizarResumenVenta);

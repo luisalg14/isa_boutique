@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vendedor - Isa Boutique</title>
-    <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="../css/internal-system.css">
+    <link rel="stylesheet" href="../css/styles.css?v=20260528-2">
+    <link rel="stylesheet" href="../css/internal-system.css?v=20260528-2">
 </head>
 
 <body class="admin-page vendedor-page" data-panel="vendedor">
@@ -59,23 +59,21 @@
 
             <main class="admin-content">
                 <section id="panel-venta" class="admin-panel activo">
-                    <div class="vendedor-panel-header">
+                    <div class="vendedor-panel-header vendedor-panel-header-meta">
                         <div>
                             <span>Operación</span>
                             <h2>Registrar venta</h2>
                         </div>
-                        <p>Selecciona un producto disponible y registra los datos del comprador.</p>
-                    </div>
-
-                    <div class="daily-goal-panel vendedor-daily-goal">
-                        <div>
-                            <span>Meta diaria</span>
-                            <h3 id="vendedorMetaDiariaVenta">$0</h3>
-                            <p id="vendedorMetaDiariaTextoVenta">Calculando avance del día...</p>
-                        </div>
-                        <div class="daily-goal-progress">
-                            <strong id="vendedorMetaDiariaAvanceVenta">0%</strong>
-                            <span><i id="vendedorMetaDiariaBarraVenta"></i></span>
+                        <div class="daily-goal-panel vendedor-daily-goal">
+                            <div>
+                                <span>Meta diaria</span>
+                                <h3 id="vendedorMetaDiariaVenta">$0</h3>
+                                <p id="vendedorMetaDiariaTextoVenta">Calculando avance del día...</p>
+                            </div>
+                            <div class="daily-goal-progress">
+                                <strong id="vendedorMetaDiariaAvanceVenta">0%</strong>
+                                <span><i id="vendedorMetaDiariaBarraVenta"></i></span>
+                            </div>
                         </div>
                     </div>
 
@@ -222,7 +220,7 @@
                         <input type="text" id="buscadorVendedor" placeholder="Buscar producto, código, marca, color o categoría...">
                     </div>
 
-                    <table class="tabla-inventario">
+                    <table class="tabla-inventario tabla-vendedor-inventario">
                         <thead>
                             <tr>
                                 <th>Código</th>
@@ -243,20 +241,18 @@
                 <section id="panel-historial" class="admin-panel">
                     <h2>Ventas y devoluciones</h2>
 
-                    <table class="tabla-inventario">
+                    <div class="filtros vendedor-historial-search">
+                        <input type="text" id="buscadorHistorialVendedor" placeholder="Buscar cliente, producto, código, teléfono o estado...">
+                    </div>
+
+                    <table class="tabla-inventario tabla-vendedor-historial">
                         <thead>
                             <tr>
                                 <th>Cliente</th>
-                                <th>Teléfono</th>
-                                <th>Tipo</th>
-                                <th>Código</th>
                                 <th>Producto</th>
-                                <th>Talla</th>
-                                <th>Cantidad</th>
-                                <th>Total</th>
-                                <th>Medio de pago</th>
-                                <th>Canal</th>
-                                <th>Entrega</th>
+                                <th>Detalle</th>
+                                <th>Venta</th>
+                                <th>Pago y entrega</th>
                                 <th>Estado</th>
                                 <th>Fecha</th>
                                 <th>Acción</th>
@@ -320,7 +316,7 @@
     </div>
 
     <script type="module" src="../js/script.js"></script>
-    <script src="../js/vendedor.js"></script>
+    <script src="../js/vendedor.js?v=20260528-2"></script>
 </body>
 </html>
 

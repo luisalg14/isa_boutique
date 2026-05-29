@@ -30,7 +30,7 @@ try {
         SELECT
             'Devolucion' AS clase,
             d.id_devolucion AS id_movimiento,
-            d.estado AS tipo,
+            d.estado::text AS tipo,
             'Devolucion venta #' || d.id_venta AS concepto,
             -d.total_devuelto AS valor,
             d.fecha,

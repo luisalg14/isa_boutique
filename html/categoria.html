@@ -322,6 +322,52 @@
             }).join(", ");
         }
 
+        function valorColorVisual(nombre) {
+            const color = (nombre || "").toLowerCase().trim();
+            const mapa = {
+                amarillo: "#f5c84b",
+                azul: "#2f6db5",
+                beige: "#d9c6a5",
+                blanco: "#ffffff",
+                cafe: "#7a4f35",
+                café: "#7a4f35",
+                dorado: "#c9a66b",
+                fucsia: "#c23a7a",
+                gris: "#9ca3af",
+                morado: "#7c3a8a",
+                naranja: "#e98235",
+                negro: "#171717",
+                rojo: "#c0393f",
+                rosado: "#e8a5b5",
+                rosa: "#e8a5b5",
+                verde: "#3f8f5f",
+                vinotinto: "#7c3344",
+                vino: "#7c3344"
+            };
+
+            return mapa[color] || "#d9c1c3";
+        }
+
+        function puntosColoresProducto(producto) {
+            const colores = leerColores(producto ? producto.colores : []);
+            const nombres = colores.length > 0
+                ? colores.map(function(item) { return item.color; })
+                : (producto && producto.color ? [producto.color] : []);
+
+            const unicos = [...new Set(nombres.filter(Boolean))];
+
+            if (unicos.length === 0) {
+                return '<div class="producto-color-swatches producto-color-swatches-vacio">Color por confirmar</div>';
+            }
+
+            return '<div class="producto-color-swatches" aria-label="Colores disponibles">' +
+                unicos.slice(0, 7).map(function(nombre) {
+                    return '<span class="producto-color-dot" style="--dot-color:' + valorColorVisual(nombre) + '" title="' + nombre + '"></span>';
+                }).join("") +
+                (unicos.length > 7 ? '<small>+' + (unicos.length - 7) + '</small>' : '') +
+            '</div>';
+        }
+
         function textoTallas(tallas) {
             const lista = leerTallas(tallas);
 
@@ -652,17 +698,22 @@
                 const card = document.createElement("article");
                 card.className = "card producto-card";
                 card.innerHTML =
-                    '<img class="producto-img-click" src="' + rutaImagenProducto(imagenPrincipalProducto(producto)) + '" alt="' + producto.nombre + '">' +
+                    '<div class="producto-imagen-wrap">' +
+                        '<img class="producto-img-click" src="' + rutaImagenProducto(imagenPrincipalProducto(producto)) + '" alt="' + producto.nombre + '">' +
+                    '</div>' +
                     miniaturasProducto(producto) +
-                    '<p class="producto-codigo">Código: ' + producto.codigo + '</p>' +
-                    '<h3>' + producto.nombre + '</h3>' +
-                    '<p class="producto-meta">' + producto.marca + (textoColores(producto) ? '  -  ' + textoColores(producto) : '') + '</p>' +
-                    '<p class="producto-precio">' + formatoPrecio(producto.precio) + '</p>' +
-                    '<p class="producto-stock">' + estadoTexto + '</p>' +
-                    '<p class="producto-stock">' + textoTallas(producto.tallas) + '</p>' +
-                    '<button class="boton-comprar" ' + (agotado ? "disabled" : "") + '>' +
-                        (agotado ? "Agotado" : "Comprar") +
-                    '</button>';
+                    '<div class="producto-card-body">' +
+                        '<p class="producto-codigo">Código: ' + producto.codigo + '</p>' +
+                        '<h3>' + producto.nombre + '</h3>' +
+                        '<p class="producto-meta">' + producto.marca + '</p>' +
+                        puntosColoresProducto(producto) +
+                        '<p class="producto-precio">' + formatoPrecio(producto.precio) + '</p>' +
+                        '<p class="producto-stock">' + estadoTexto + '</p>' +
+                        '<p class="producto-stock">' + textoTallas(producto.tallas) + '</p>' +
+                        '<button class="boton-comprar" ' + (agotado ? "disabled" : "") + '>' +
+                            (agotado ? "Agotado" : "Comprar") +
+                        '</button>' +
+                    '</div>';
 
                 card.querySelector(".boton-comprar").addEventListener("click", function() {
                     abrirModalCompra(producto);
@@ -911,5 +962,4 @@
 
 </body>
 </html>
-
 

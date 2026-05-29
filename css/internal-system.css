@@ -5,20 +5,20 @@
 ================================ */
 
 .admin-page {
-    --sys-bg: #faf7f5;
+    --sys-bg: #f7f7f6;
     --sys-paper: #ffffff;
     --sys-card: #ffffff;
-    --sys-soft: #fff5f6;
-    --sys-soft-2: #fdf0f2;
-    --sys-line: rgba(226, 232, 240, 0.8);
-    --sys-text: #334155;
+    --sys-soft: #f4f1ef;
+    --sys-soft-2: #f8f3f1;
+    --sys-line: rgba(203, 213, 225, 0.72);
+    --sys-text: #2f3b4d;
     --sys-muted: #64748b;
-    --sys-rose: #a3586d;
-    --sys-rose-dark: #8c4558;
-    --sys-gold: #d6b890;
+    --sys-rose: #98546a;
+    --sys-rose-dark: #814457;
+    --sys-gold: #c9a66b;
     --sys-brown: #475569;
-    --sys-shadow: 0 10px 30px -12px rgba(51, 65, 85, 0.08);
-    --sys-shadow-hover: 0 12px 20px -8px rgba(163, 88, 109, 0.12);
+    --sys-shadow: 0 10px 28px -16px rgba(51, 65, 85, 0.14);
+    --sys-shadow-hover: 0 12px 20px -10px rgba(51, 65, 85, 0.14);
     background: var(--sys-bg);
     color: var(--sys-text);
     font-family: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
@@ -29,9 +29,8 @@
 .admin-page #contenido {
     min-height: 100vh;
     background:
-        radial-gradient(circle at 5% 15%, rgba(214, 184, 144, 0.12) 0%, transparent 40%),
-        radial-gradient(circle at 95% 85%, rgba(163, 88, 109, 0.08) 0%, transparent 45%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(250, 247, 245, 0.98)),
+        radial-gradient(circle at 5% 15%, rgba(201, 166, 107, 0.08) 0%, transparent 40%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(247, 247, 246, 0.98)),
         var(--sys-bg);
 }
 
@@ -795,6 +794,55 @@
     margin-bottom: -4px;
 }
 
+.admin-page .proveedores-registros {
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: 16px;
+}
+
+.admin-page #formProveedor,
+.admin-page #formCompraMercancia {
+    display: grid;
+    gap: 12px;
+    padding: 14px;
+}
+
+.admin-page #formProveedor {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-page #formCompraMercancia {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin-page #formProveedor h3,
+.admin-page #formProveedor button[type="submit"],
+.admin-page #formCompraMercancia h3,
+.admin-page #formCompraMercancia .purchase-items-box,
+.admin-page #formCompraMercancia button[type="submit"] {
+    grid-column: 1 / -1;
+}
+
+.admin-page #formProveedor .campo,
+.admin-page #formCompraMercancia .campo {
+    margin-bottom: 0;
+}
+
+.admin-page #formCompraMercancia .compra-color-panel,
+.admin-page #formCompraMercancia .compra-tallas-panel {
+    grid-column: span 2;
+}
+
+.admin-page #btnAgregarItemCompra {
+    grid-column: span 2;
+    align-self: end;
+}
+
+.admin-page #formCompraMercancia .purchase-items-box {
+    margin: 0;
+    padding: 12px;
+}
+
 .compra-color-builder {
     gap: 8px;
 }
@@ -970,6 +1018,100 @@
     flex: 0 0 42px;
 }
 
+.admin-page .proveedores-compras-table {
+    min-width: 780px;
+    table-layout: fixed;
+}
+
+.admin-page .proveedores-compras-table th,
+.admin-page .proveedores-compras-table td {
+    padding: 8px 8px;
+    font-size: 11px;
+    line-height: 1.25;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    vertical-align: top;
+}
+
+.admin-page .proveedores-compras-table th {
+    white-space: nowrap;
+    overflow-wrap: normal;
+}
+
+.admin-page .proveedores-compras-table th:nth-child(1),
+.admin-page .proveedores-compras-table td:nth-child(1) {
+    width: 76px;
+}
+
+.admin-page .proveedores-compras-table th:nth-child(2),
+.admin-page .proveedores-compras-table td:nth-child(2) {
+    width: 120px;
+}
+
+.admin-page .proveedores-compras-table th:nth-child(3),
+.admin-page .proveedores-compras-table td:nth-child(3) {
+    width: 190px;
+}
+
+.admin-page .proveedores-compras-table th:nth-child(4),
+.admin-page .proveedores-compras-table td:nth-child(4) {
+    width: 92px;
+}
+
+.admin-page .proveedores-compras-table th:nth-child(5),
+.admin-page .proveedores-compras-table td:nth-child(5) {
+    width: 70px;
+    text-align: center;
+}
+
+.admin-page .proveedores-compras-table th:nth-child(6),
+.admin-page .proveedores-compras-table td:nth-child(6) {
+    width: 168px;
+}
+
+.admin-page .proveedores-compras-table th:nth-child(7),
+.admin-page .proveedores-compras-table td:nth-child(7) {
+    width: 126px;
+    white-space: nowrap;
+}
+
+.admin-page .proveedores-compras-table th:nth-child(8),
+.admin-page .proveedores-compras-table td:nth-child(8) {
+    width: 150px;
+}
+
+.compact-stack-cell {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.compact-stack-cell strong {
+    color: var(--sys-ink);
+    font-size: 12px;
+    line-height: 1.2;
+}
+
+.compact-stack-cell span,
+.compact-stack-cell small {
+    color: var(--sys-text);
+    font-size: 10.5px;
+    line-height: 1.25;
+}
+
+.compact-stack-cell.money-stack strong,
+.compact-stack-cell.money-stack span,
+.compact-stack-cell.money-stack small {
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
+}
+
+.purchase-detail-cell span {
+    min-height: 14px;
+    color: var(--sys-text);
+}
+
 .admin-page .tabla-historial-ventas {
     min-width: 920px;
     table-layout: fixed;
@@ -1075,6 +1217,189 @@
     color: #5c3634;
 }
 
+.vendedor-page .vendedor-panel-header-meta {
+    align-items: stretch;
+}
+
+.vendedor-page .vendedor-panel-header .vendedor-daily-goal {
+    display: flex;
+    width: min(560px, 100%);
+    margin: 0;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.88);
+}
+
+.vendedor-page .vendedor-panel-header .vendedor-daily-goal h3 {
+    font-size: clamp(22px, 2.2vw, 30px);
+}
+
+.vendedor-page .vendedor-panel-header .vendedor-daily-goal p {
+    max-width: none;
+    margin: 0;
+    text-align: left;
+    font-size: 12px;
+}
+
+.admin-page .tabla-vendedor-inventario {
+    min-width: 900px;
+    table-layout: fixed;
+}
+
+.admin-page .tabla-vendedor-inventario th,
+.admin-page .tabla-vendedor-inventario td,
+.admin-page .tabla-vendedor-historial th,
+.admin-page .tabla-vendedor-historial td {
+    padding: 9px 8px;
+    font-size: 11px;
+    line-height: 1.25;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    vertical-align: top;
+}
+
+.admin-page .tabla-vendedor-inventario th,
+.admin-page .tabla-vendedor-historial th {
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
+}
+
+.admin-page .tabla-vendedor-inventario th:nth-child(1),
+.admin-page .tabla-vendedor-inventario td:nth-child(1) {
+    width: 88px;
+}
+
+.admin-page .tabla-vendedor-inventario th:nth-child(2),
+.admin-page .tabla-vendedor-inventario td:nth-child(2) {
+    width: 170px;
+}
+
+.admin-page .tabla-vendedor-inventario th:nth-child(3),
+.admin-page .tabla-vendedor-inventario td:nth-child(3),
+.admin-page .tabla-vendedor-inventario th:nth-child(4),
+.admin-page .tabla-vendedor-inventario td:nth-child(4),
+.admin-page .tabla-vendedor-inventario th:nth-child(5),
+.admin-page .tabla-vendedor-inventario td:nth-child(5) {
+    width: 112px;
+}
+
+.admin-page .tabla-vendedor-inventario th:nth-child(6),
+.admin-page .tabla-vendedor-inventario td:nth-child(6) {
+    width: 104px;
+    white-space: nowrap;
+}
+
+.admin-page .tabla-vendedor-inventario th:nth-child(7),
+.admin-page .tabla-vendedor-inventario td:nth-child(7) {
+    width: 82px;
+}
+
+.admin-page .tabla-vendedor-inventario th:nth-child(8),
+.admin-page .tabla-vendedor-inventario td:nth-child(8) {
+    width: 178px;
+}
+
+.admin-page .tabla-vendedor-inventario td:nth-child(8) {
+    line-height: 1.35;
+}
+
+.admin-page .tabla-vendedor-inventario th:nth-child(9),
+.admin-page .tabla-vendedor-inventario td:nth-child(9) {
+    width: 112px;
+}
+
+.admin-page .tabla-vendedor-inventario td:nth-child(9) {
+    text-align: center;
+}
+
+.admin-page .tabla-vendedor-historial {
+    min-width: 980px;
+    table-layout: fixed;
+}
+
+.admin-page .tabla-vendedor-historial th:nth-child(1),
+.admin-page .tabla-vendedor-historial td:nth-child(1) {
+    width: 150px;
+}
+
+.admin-page .tabla-vendedor-historial th:nth-child(2),
+.admin-page .tabla-vendedor-historial td:nth-child(2) {
+    width: 170px;
+}
+
+.admin-page .tabla-vendedor-historial th:nth-child(3),
+.admin-page .tabla-vendedor-historial td:nth-child(3) {
+    width: 120px;
+}
+
+.admin-page .tabla-vendedor-historial th:nth-child(4),
+.admin-page .tabla-vendedor-historial td:nth-child(4) {
+    width: 120px;
+}
+
+.admin-page .tabla-vendedor-historial th:nth-child(5),
+.admin-page .tabla-vendedor-historial td:nth-child(5) {
+    width: 150px;
+}
+
+.admin-page .tabla-vendedor-historial th:nth-child(6),
+.admin-page .tabla-vendedor-historial td:nth-child(6) {
+    width: 95px;
+}
+
+.admin-page .tabla-vendedor-historial th:nth-child(7),
+.admin-page .tabla-vendedor-historial td:nth-child(7) {
+    width: 138px;
+}
+
+.admin-page .tabla-vendedor-historial th:nth-child(8),
+.admin-page .tabla-vendedor-historial td:nth-child(8) {
+    width: 160px;
+}
+
+.compact-number-cell,
+.compact-money-cell {
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
+}
+
+.table-actions-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.table-actions-inline button {
+    min-height: 30px;
+    padding: 5px 8px;
+    border-radius: 9px;
+    font-size: 11px;
+}
+
+.table-actions-inline span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    color: var(--sys-muted);
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.vendedor-page .vendedor-historial-search {
+    max-width: 520px;
+    margin-bottom: 14px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+
+.vendedor-page .vendedor-historial-search input {
+    min-height: 44px;
+    font-size: 14px;
+}
+
 .admin-page .btn-limpiar-historial {
     margin-top: 16px;
 }
@@ -1115,7 +1440,7 @@
 .admin-page .finance-result-card {
     position: relative;
     overflow: hidden;
-    padding: 20px;
+    padding: 13px 16px;
     background: linear-gradient(135deg, #fff, #fff8f5);
 }
 
@@ -1150,16 +1475,16 @@
 }
 
 .admin-page .finance-result-card h3 {
-    margin: 8px 0;
+    margin: 6px 0;
     color: var(--sys-ink);
-    font-size: 18px;
+    font-size: 16px;
 }
 
 .admin-page .finance-result-card strong {
     display: block;
     color: var(--sys-rose);
     font-family: "Libre Caslon Text", Georgia, serif;
-    font-size: clamp(34px, 4vw, 48px);
+    font-size: clamp(24px, 2.6vw, 34px);
     font-weight: 400;
     line-height: 1;
 }
@@ -1262,6 +1587,28 @@
     box-shadow: 0 8px 22px rgba(58, 42, 34, 0.05);
 }
 
+.admin-page .dashboard-hero .daily-goal-panel {
+    width: min(560px, 100%);
+    margin: 0;
+    padding: 14px;
+    background: rgba(255, 253, 251, 0.82);
+}
+
+.admin-page .dashboard-hero .daily-goal-panel h3 {
+    font-size: clamp(22px, 2.2vw, 30px);
+}
+
+.admin-page .dashboard-hero .daily-goal-panel p {
+    font-size: 12px;
+}
+
+.admin-page .dashboard-inline-action {
+    min-height: 34px;
+    margin-top: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+}
+
 .admin-page .daily-goal-panel span {
     color: var(--sys-muted);
     font-size: 11px;
@@ -1310,6 +1657,475 @@
     border-radius: inherit;
     background: linear-gradient(90deg, var(--sys-gold), var(--sys-rose));
     transition: width 0.25s ease;
+}
+
+.admin-page .sales-stats-panel {
+    margin-top: 18px;
+}
+
+.admin-page .dashboard-panel-header .report-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    font-weight: 800;
+}
+
+.admin-page .dashboard-panel-header .report-link-btn svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.admin-page .sales-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 16px;
+}
+
+.admin-page .sales-chart-card {
+    display: grid;
+    gap: 14px;
+    min-height: 250px;
+    padding: 16px;
+    border: 1px solid var(--sys-line);
+    border-radius: 16px;
+    background: #fffdfb;
+}
+
+.admin-page .sales-chart-card span {
+    color: var(--sys-muted);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.admin-page .sales-chart-card strong {
+    display: block;
+    margin-top: 4px;
+    color: var(--sys-rose);
+    font-size: 18px;
+}
+
+.admin-page .sales-chart-card p {
+    margin: 8px 0 0;
+    color: var(--sys-muted);
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.admin-page .sales-line-chart {
+    min-height: 250px;
+}
+
+.admin-page .sales-line-chart svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.admin-page .chart-grid-line {
+    stroke: var(--sys-line);
+    stroke-dasharray: 4 5;
+}
+
+.admin-page .chart-axis-line {
+    stroke: #e2cec8;
+}
+
+.admin-page .chart-line {
+    fill: none;
+    stroke: var(--sys-rose);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.admin-page .chart-point {
+    fill: #fffdfb;
+    stroke: var(--sys-rose);
+    stroke-width: 3;
+}
+
+.admin-page .chart-axis-label,
+.admin-page .chart-x-label,
+.admin-page .chart-value-label {
+    fill: var(--sys-muted);
+    font-family: inherit;
+    font-weight: 800;
+}
+
+.admin-page .chart-axis-label,
+.admin-page .chart-x-label {
+    font-size: 13px;
+}
+
+.admin-page .chart-value-label {
+    font-size: 12px;
+}
+
+.admin-page .sales-chart-insight {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    align-items: center;
+    gap: 14px;
+    min-height: 72px;
+    padding: 12px 14px;
+    border: 1px solid var(--sys-line);
+    border-radius: 14px;
+    background: #fff8f5;
+}
+
+.admin-page .sales-chart-insight > span {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--sys-gold);
+    border-radius: 999px;
+    color: var(--sys-rose);
+    font-size: 22px;
+    letter-spacing: 0;
+}
+
+.admin-page .sales-chart-insight strong {
+    margin: 0;
+    color: var(--sys-muted);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.admin-page .sales-chart-insight small {
+    display: block;
+    margin-top: 5px;
+    color: var(--sys-rose);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+/* Paleta descansada para trabajo interno */
+.admin-page .admin-topbar,
+.vendedor-page .admin-topbar {
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 8px 24px rgba(47, 59, 77, 0.05);
+}
+
+.admin-page .admin-tabs,
+.vendedor-page .admin-tabs,
+.admin-page .admin-panel,
+.vendedor-page .admin-panel,
+.admin-page .dashboard-card,
+.admin-page .dashboard-panel,
+.admin-page .admin-module-grid button,
+.admin-page .reporte-card,
+.admin-page .finance-form,
+.admin-page .finance-breakdown div,
+.admin-page .purchase-items-box,
+.admin-page .venta-resumen {
+    border-color: var(--sys-line);
+    background: #ffffff;
+    box-shadow: var(--sys-shadow);
+}
+
+.admin-page .dashboard-hero,
+.vendedor-page .vendedor-panel-header {
+    border-color: var(--sys-line);
+    background: linear-gradient(135deg, #ffffff 0%, #fbfaf9 58%, #f4f1ef 100%);
+}
+
+.admin-page .daily-goal-panel,
+.admin-page .sales-chart-card,
+.admin-page .sales-chart-insight {
+    border-color: var(--sys-line);
+    background: #ffffff;
+}
+
+.admin-page .admin-tab {
+    color: var(--sys-muted);
+}
+
+.admin-page .admin-tab:hover {
+    background: #f4f1ef;
+    color: var(--sys-rose);
+    transform: translateX(2px);
+}
+
+.admin-page .admin-tab.activo {
+    background: var(--sys-rose);
+    color: #ffffff;
+    box-shadow: 0 10px 20px rgba(129, 68, 87, 0.16);
+}
+
+.admin-page .admin-tab.activo::after {
+    background: var(--sys-gold);
+}
+
+.admin-page .btn-secundario,
+.admin-page .dashboard-panel-header button,
+.admin-page .admin-userbar a {
+    border-color: var(--sys-line);
+    background: #ffffff;
+    color: var(--sys-text);
+}
+
+.admin-page .btn-secundario:hover,
+.admin-page .dashboard-panel-header button:hover,
+.admin-page .admin-userbar a:hover {
+    border-color: rgba(152, 84, 106, 0.28);
+    background: #f8f3f1;
+    color: var(--sys-rose);
+}
+
+.admin-page .btn,
+.admin-page .btn-agregar,
+.admin-page .tabla-inventario button,
+.admin-page .admin-userbar button {
+    background: var(--sys-rose);
+    border-color: var(--sys-rose);
+}
+
+.admin-page .btn:hover,
+.admin-page .btn-agregar:hover,
+.admin-page .tabla-inventario button:hover,
+.admin-page .admin-userbar button:hover {
+    background: var(--sys-rose-dark);
+}
+
+.admin-page .dashboard-card:hover,
+.admin-page .reporte-card:hover,
+.admin-page .dashboard-panel:hover {
+    border-color: rgba(148, 163, 184, 0.72);
+    box-shadow: var(--sys-shadow-hover);
+}
+
+.admin-page .dashboard-card::after,
+.admin-page .reporte-card::after {
+    background: linear-gradient(90deg, rgba(201, 166, 107, 0.72), rgba(152, 84, 106, 0.7));
+    opacity: 0.55;
+}
+
+.admin-page .dashboard-card::before,
+.admin-page .reporte-card::before {
+    opacity: 0.028;
+}
+
+.admin-page .chart-grid-line {
+    stroke: rgba(203, 213, 225, 0.88);
+}
+
+.admin-page .chart-axis-line {
+    stroke: rgba(148, 163, 184, 0.65);
+}
+
+.admin-page .chart-line,
+.admin-page .chart-point {
+    stroke: var(--sys-rose);
+}
+
+.admin-page .chart-axis-label,
+.admin-page .chart-x-label,
+.admin-page .chart-value-label {
+    fill: var(--sys-muted);
+}
+
+.admin-page .admin-userbar .notification-button {
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0;
+    border-color: rgba(152, 84, 106, 0.24);
+    border-radius: 999px;
+    background: #ffffff;
+    color: var(--sys-rose);
+}
+
+.admin-page .admin-userbar .notification-button .notification-bell {
+    display: block;
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.admin-page .admin-userbar .notification-button.tiene-alerta {
+    background: var(--sys-rose);
+    color: #ffffff;
+    border-color: var(--sys-rose);
+}
+
+.admin-page .admin-userbar .notification-button.tiene-alerta strong {
+    background: var(--sys-gold);
+    color: var(--sys-text);
+}
+
+.admin-page .sales-chart-bars {
+    display: flex;
+    align-items: end;
+    gap: 7px;
+    min-height: 150px;
+    overflow-x: auto;
+    padding: 4px 2px 0;
+}
+
+.admin-page .sales-bar-item {
+    display: grid;
+    flex: 1 0 28px;
+    gap: 7px;
+    min-width: 28px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--sys-text);
+    cursor: help;
+}
+
+.admin-page .sales-bar-track {
+    display: flex;
+    align-items: end;
+    height: 128px;
+    overflow: hidden;
+    border-radius: 999px 999px 6px 6px;
+    background: #f5eae5;
+}
+
+.admin-page .sales-bar-track i {
+    display: block;
+    width: 100%;
+    min-height: 6px;
+    border-radius: inherit;
+    background: linear-gradient(180deg, var(--sys-gold), var(--sys-rose));
+}
+
+.admin-page .sales-bar-item.negativo .sales-bar-track i {
+    background: linear-gradient(180deg, #c99b9b, var(--sys-rose-dark));
+}
+
+.admin-page .sales-bar-item small {
+    color: var(--sys-muted);
+    font-size: 11px;
+    font-weight: 800;
+    text-align: center;
+}
+
+.admin-page .sales-chart-data {
+    display: grid;
+    gap: 6px;
+    padding-top: 10px;
+    border-top: 1px solid var(--sys-line);
+}
+
+.admin-page .sales-data-head,
+.admin-page .sales-data-row {
+    display: grid;
+    grid-template-columns: 0.75fr repeat(3, minmax(74px, 1fr));
+    gap: 8px;
+    align-items: center;
+}
+
+.admin-page .sales-data-head span {
+    color: var(--sys-muted);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.admin-page .sales-data-row {
+    padding: 7px 0;
+    border-bottom: 1px solid #f2e7e1;
+}
+
+.admin-page .sales-data-row span {
+    color: var(--sys-text);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.admin-page .sales-data-row strong {
+    color: #2f3545;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.admin-page .sales-data-row strong.negativo {
+    color: var(--sys-rose);
+}
+
+.admin-page .finance-state-panel {
+    display: grid;
+    gap: 18px;
+}
+
+.admin-page .finance-state-hero {
+    display: grid;
+    grid-template-columns: minmax(280px, 1.1fr) minmax(300px, 0.9fr);
+    gap: 14px;
+    align-items: start;
+}
+
+.admin-page .finance-state-hero .finance-result-card {
+    align-self: start;
+}
+
+.admin-page .finance-state-metrics {
+    display: grid;
+    grid-template-columns: 1fr;
+    overflow: hidden;
+    border: 1px solid var(--sys-line);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 10px 24px rgba(93, 55, 45, 0.06);
+}
+
+.admin-page .finance-state-metrics > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: auto;
+    padding: 14px 16px;
+    border-right: 0;
+    border-bottom: 1px solid #f0e2dc;
+}
+
+.admin-page .finance-state-metrics > div:last-child {
+    border-bottom: 0;
+}
+
+.admin-page .finance-state-metrics span {
+    color: var(--sys-muted);
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.admin-page .finance-state-metrics strong {
+    color: var(--sys-rose);
+    font-size: clamp(18px, 1.8vw, 23px);
+    text-align: right;
+}
+
+.admin-page .finance-state-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+    gap: 18px;
+    align-items: start;
 }
 
 .admin-page .finance-summary-shell {
@@ -1399,22 +2215,26 @@
 
 .admin-page .cash-classification-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-    gap: 12px;
+    grid-template-columns: 1fr;
+    gap: 8px;
 }
 
 .admin-page .cash-classification-card {
-    padding: 14px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 12px;
+    align-items: center;
+    padding: 11px 12px;
     border: 1px solid var(--sys-line);
-    border-radius: 14px;
+    border-radius: 12px;
     background: rgba(255, 255, 255, 0.82);
 }
 
 .admin-page .cash-classification-card strong {
-    display: block;
-    margin: 8px 0 6px;
+    margin: 0;
     color: var(--sys-rose);
-    font-size: 19px;
+    font-size: 17px;
+    text-align: right;
 }
 
 .admin-page .cash-classification-card.negativo strong {
@@ -1422,8 +2242,10 @@
 }
 
 .admin-page .cash-classification-card small {
+    grid-column: 1 / -1;
     color: var(--sys-text);
     line-height: 1.35;
+    font-size: 12px;
 }
 
 .admin-page .sale-allocation-box {
@@ -1480,9 +2302,115 @@
     font-size: 13px;
 }
 
+.admin-page .info-tip {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    margin-left: 5px;
+    border: 1px solid #d9c1c3;
+    border-radius: 50%;
+    background: #fffaf7;
+    color: var(--sys-rose);
+    font: 800 11px/1 Arial, sans-serif;
+    vertical-align: middle;
+    cursor: help;
+}
+
+.admin-page .info-tip::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 9px);
+    z-index: 20;
+    width: max-content;
+    max-width: min(260px, 80vw);
+    padding: 9px 10px;
+    border: 1px solid var(--sys-line);
+    border-radius: 10px;
+    background: var(--sys-ink);
+    color: #ffffff !important;
+    font-family: "Montserrat", Arial, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1.35 !important;
+    letter-spacing: 0;
+    text-align: left;
+    text-transform: none;
+    white-space: normal;
+    box-shadow: 0 12px 28px rgba(45, 36, 34, 0.2);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 4px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    display: none;
+}
+
+.admin-page .info-tip::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 4px);
+    z-index: 21;
+    width: 9px;
+    height: 9px;
+    background: var(--sys-ink);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 4px) rotate(45deg);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    display: none;
+}
+
+.admin-page .info-tip:hover::after,
+.admin-page .info-tip:focus-visible::after,
+.admin-page .info-tip:hover::before,
+.admin-page .info-tip:focus-visible::before {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+.admin-page .info-tip:focus-visible {
+    outline: 2px solid var(--sys-gold);
+    outline-offset: 2px;
+}
+
+.floating-info-tip {
+    position: fixed;
+    z-index: 9999;
+    max-width: min(280px, calc(100vw - 32px));
+    padding: 10px 12px;
+    border: 1px solid var(--sys-line);
+    border-radius: 10px;
+    background: #fffaf7 !important;
+    color: var(--sys-ink) !important;
+    -webkit-text-fill-color: var(--sys-ink);
+    font-family: Arial, sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    line-height: 1.35 !important;
+    letter-spacing: 0 !important;
+    text-shadow: none !important;
+    text-transform: none !important;
+    box-shadow: 0 14px 30px rgba(45, 36, 34, 0.16);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(4px);
+    transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.floating-info-tip.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 @media (max-width: 900px) {
+    .admin-page .finance-state-hero,
+    .admin-page .finance-state-grid,
     .admin-page .finance-executive-summary,
     .admin-page .finance-summary-view .finance-breakdown,
+    .admin-page .sales-stats-grid,
     .admin-page .daily-goal-panel {
         grid-template-columns: 1fr;
     }
@@ -1761,6 +2689,18 @@
 }
 
 @media (max-width: 1000px) {
+    .admin-page .proveedores-registros,
+    .admin-page #formProveedor,
+    .admin-page #formCompraMercancia {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-page #formCompraMercancia .compra-color-panel,
+    .admin-page #formCompraMercancia .compra-tallas-panel,
+    .admin-page #btnAgregarItemCompra {
+        grid-column: 1 / -1;
+    }
+
     .compra-talla-builder {
         grid-template-columns: 1fr;
     }

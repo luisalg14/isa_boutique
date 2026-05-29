@@ -70,9 +70,19 @@
                 <div>
                     <span>Resumen general</span>
                     <h2>Inicio</h2>
-                    <p>Vista rápida del estado de Isa Boutique para tomar decisiones sin entrar a cada módulo.</p>
+                    <button class="btn btn-secundario dashboard-inline-action" type="button" onclick="activarPanelAdmin('panel-menu-ventas')">Ver ventas</button>
                 </div>
-                <button class="btn btn-agregar" type="button" onclick="activarPanelAdmin('panel-menu-ventas')">Ver ventas</button>
+                <div class="daily-goal-panel">
+                    <div>
+                        <span>Meta diaria</span>
+                        <h3 id="inicioMetaDiaria">$0</h3>
+                        <p id="inicioMetaDiariaTexto">Calculando avance del día...</p>
+                    </div>
+                    <div class="daily-goal-progress">
+                        <strong id="inicioMetaDiariaAvance">0%</strong>
+                        <span><i id="inicioMetaDiariaBarra"></i></span>
+                    </div>
+                </div>
             </div>
 
             <div class="dashboard-cards">
@@ -94,15 +104,53 @@
                 </div>
             </div>
 
-            <div class="daily-goal-panel">
-                <div>
-                    <span>Meta diaria</span>
-                    <h3 id="inicioMetaDiaria">$0</h3>
-                    <p id="inicioMetaDiariaTexto">Calculando avance del día...</p>
+            <div class="dashboard-panel sales-stats-panel">
+                <div class="dashboard-panel-header">
+                    <div>
+                        <span>Estadísticas</span>
+                        <h3>Comportamiento de ventas</h3>
+                    </div>
+                    <button type="button" class="report-link-btn" onclick="activarPanelAdmin('panel-reportes')">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M4 19h16" />
+                            <path d="M7 16v-5" />
+                            <path d="M12 16V7" />
+                            <path d="M17 16v-8" />
+                            <path d="M6 8l4-3 4 3 4-5" />
+                            <path d="M18 3h-4" />
+                            <path d="M18 3v4" />
+                        </svg>
+                        Ver reportes
+                    </button>
                 </div>
-                <div class="daily-goal-progress">
-                    <strong id="inicioMetaDiariaAvance">0%</strong>
-                    <span><i id="inicioMetaDiariaBarra"></i></span>
+                <div class="sales-stats-grid">
+                    <article class="sales-chart-card">
+                        <div>
+                            <span>Este mes</span>
+                            <strong>Ventas por día</strong>
+                            <p id="totalVentasMesGrafico">Total: $0</p>
+                        </div>
+                        <div id="graficoVentasMes" class="sales-line-chart"></div>
+                        <div id="datoDestacadoVentasMes" class="sales-chart-insight"></div>
+                    </article>
+                    <article class="sales-chart-card">
+                        <div>
+                            <span>Últimos meses</span>
+                            <strong>Ventas netas</strong>
+                            <p id="totalVentasUltimosMesesGrafico">Total: $0</p>
+                        </div>
+                        <div id="graficoVentasUltimosMeses" class="sales-line-chart"></div>
+                        <div id="datoDestacadoVentasUltimosMeses" class="sales-chart-insight"></div>
+                    </article>
+                    <article class="sales-chart-card">
+                        <div>
+                            <span>Año actual</span>
+                            <strong>Balance mensual</strong>
+                            <p id="promedioVentasAnioGrafico">Promedio: $0</p>
+                        </div>
+                        <div id="graficoVentasAnio" class="sales-line-chart"></div>
+                        <div id="datoDestacadoVentasAnio" class="sales-chart-insight"></div>
+                    </article>
                 </div>
             </div>
 
@@ -624,7 +672,7 @@
 
             <div class="admin-section-menu" data-submenu="panel-reportes">
                 <button type="button" class="activo" data-subsection-target="reportes-resumen">Resumen</button>
-                <button type="button" data-subsection-target="reportes-financiero">Rango financiero</button>
+                <button type="button" data-subsection-target="reportes-financiero">Análisis por rango</button>
                 <button type="button" data-subsection-target="reportes-productos">Productos</button>
                 <button type="button" data-subsection-target="reportes-dias-pagos">Dias y pagos</button>
             </div>
@@ -650,47 +698,27 @@
             <div class="admin-subsection activo" data-subsection="reportes-resumen">
             <div class="reportes reportes-generales">
     <div class="reporte-card">
-        <h4>Total neto vendido</h4>
-        <p id="totalVentas">$0</p>
-    </div>
-
-    <div class="reporte-card">
-        <h4>Ventas de hoy</h4>
+        <h4>Ventas de hoy <button type="button" class="info-tip" data-tip="Total vendido durante el día actual." aria-label="Total vendido durante el día actual.">?</button></h4>
         <p id="ventasHoy">$0</p>
     </div>
 
     <div class="reporte-card">
-        <h4>Devoluciones de hoy</h4>
+        <h4>Devoluciones de hoy <button type="button" class="info-tip" data-tip="Valor devuelto durante el día actual." aria-label="Valor devuelto durante el día actual.">?</button></h4>
         <p id="devolucionesHoy">$0</p>
     </div>
 
     <div class="reporte-card">
-        <h4>Neto de hoy</h4>
+        <h4>Neto de hoy <button type="button" class="info-tip" data-tip="Ventas de hoy menos devoluciones de hoy." aria-label="Ventas de hoy menos devoluciones de hoy.">?</button></h4>
         <p id="netoHoy">$0</p>
     </div>
 
     <div class="reporte-card">
-        <h4>Ventas del mes</h4>
-        <p id="ventasMes">$0</p>
-    </div>
-
-    <div class="reporte-card">
-        <h4>Devoluciones del mes</h4>
-        <p id="devolucionesMes">$0</p>
-    </div>
-
-    <div class="reporte-card">
-        <h4>Neto del mes</h4>
-        <p id="netoMes">$0</p>
-    </div>
-
-    <div class="reporte-card">
-        <h4>Producto más vendido</h4>
+        <h4>Producto más vendido <button type="button" class="info-tip" data-tip="Producto con mayor cantidad vendida en el periodo consultado." aria-label="Producto con mayor cantidad vendida en el periodo consultado.">?</button></h4>
         <p id="productoTop">-</p>
     </div>
 
     <div class="reporte-card">
-        <h4>Menor rotación</h4>
+        <h4>Menor rotación <button type="button" class="info-tip" data-tip="Producto con poca o ninguna venta en el periodo consultado." aria-label="Producto con poca o ninguna venta en el periodo consultado.">?</button></h4>
         <p id="menorRotacion">-</p>
     </div>
 </div>
@@ -698,48 +726,6 @@
 
             <div class="admin-subsection" data-subsection="reportes-financiero">
             <h3 class="finance-subtitle">Resultado del rango seleccionado</h3>
-
-            <div class="reportes reportes-rango">
-                <div class="reporte-card">
-                    <h4>Ventas netas</h4>
-                    <p id="rangoVentasNetas">$0</p>
-                </div>
-
-                <div class="reporte-card">
-                    <h4>Costo mercancia</h4>
-                    <p id="rangoCostoMercancia">$0</p>
-                </div>
-
-                <div class="reporte-card">
-                    <h4>Utilidad bruta</h4>
-                    <p id="rangoUtilidadBruta">$0</p>
-                </div>
-
-                <div class="reporte-card">
-                    <h4>Gastos operativos</h4>
-                    <p id="rangoGastosOperativos">$0</p>
-                </div>
-
-                <div class="reporte-card">
-                    <h4>Compras mercancia</h4>
-                    <p id="rangoComprasMercancia">$0</p>
-                </div>
-
-                <div class="reporte-card">
-                    <h4>Utilidad neta</h4>
-                    <p id="rangoUtilidadNeta">$0</p>
-                </div>
-
-                <div class="reporte-card">
-                    <h4>Margen</h4>
-                    <p id="rangoMargen">0%</p>
-                </div>
-
-                <div class="reporte-card">
-                    <h4>Caja estimada</h4>
-                    <p id="rangoCaja">$0</p>
-                </div>
-            </div>
 
             <div class="finance-breakdown" id="rangoDetalleFinanciero"></div>
             </div>
@@ -919,100 +905,83 @@
             </div>
 
             <div class="admin-subsection activo finance-summary-view" data-subsection="finanzas-resumen">
-            <div class="finance-summary-shell">
-                <aside class="finance-summary-menu" aria-label="Secciones del resumen financiero">
-                    <button type="button" class="activo" data-finance-summary-target="resultado">Resultado</button>
-                    <button type="button" data-finance-summary-target="caja">Caja inteligente</button>
-                    <button type="button" data-finance-summary-target="rentabilidad">Rentabilidad</button>
-                    <button type="button" data-finance-summary-target="detalle">Detalle</button>
-                </aside>
-
-                <div class="finance-summary-content">
-            <div class="finance-summary-section activo" data-finance-summary="resultado">
-            <div class="finance-executive-summary">
-                <div class="finance-result-card">
-                    <span>Resultado del negocio</span>
-                    <h3>Utilidad neta</h3>
-                    <strong id="finUtilidad">$0</strong>
-                    <p>Resultado después de descontar costo de mercancía y gastos operativos.</p>
-                </div>
-
-                <div class="finance-kpi-list">
-                    <div>
-                        <span>Margen de ganancia</span>
-                        <strong id="finMargen">0%</strong>
-                    </div>
-                    <div>
-                        <span>Saldo de caja estimado</span>
+            <div class="finance-state-panel">
+                <div class="finance-state-hero">
+                    <div class="finance-result-card">
+                        <span>Estado financiero</span>
+                        <h3>Saldo de caja estimado <button type="button" class="info-tip" data-tip="Dinero disponible estimado después de entradas, compras, gastos y pagos registrados." aria-label="Dinero disponible estimado después de entradas, compras, gastos y pagos registrados.">?</button></h3>
                         <strong id="finSaldo">$0</strong>
                     </div>
-                </div>
-            </div>
-            </div>
 
-            <div class="finance-summary-section" data-finance-summary="caja">
-            <div class="cash-intelligence-panel">
-                <div class="cash-intelligence-header">
-                    <div>
-                        <span>Caja inteligente</span>
-                        <h3>Clasificación del dinero vendido este mes</h3>
-                    </div>
-                    <strong id="finSaldoCajaMes">$0</strong>
-                </div>
-
-                <div class="cash-classification-grid" id="finClasificacionCaja"></div>
-            </div>
-            </div>
-
-            <div class="finance-summary-section" data-finance-summary="detalle">
-            <div class="finance-breakdown finanzas-detalle" id="finGastosDetalle"></div>
-            </div>
-
-            <div class="finance-summary-section" data-finance-summary="rentabilidad">
-            <div class="profitability-panel" id="finRentabilidadPanel">
-                <div class="profitability-header">
-                    <div>
-                        <span>Rentabilidad del mes</span>
-                        <h3>Meta para cubrir gastos y generar ganancia</h3>
-                    </div>
-                    <p id="finDiagnosticoRentabilidad">Calculando rentabilidad...</p>
-                </div>
-
-                <div class="profitability-grid">
-                    <div>
-                        <span>Punto de equilibrio</span>
-                        <strong id="finPuntoEquilibrio">$0</strong>
-                        <small>Venta mínima estimada para cubrir gastos operativos.</small>
-                    </div>
-                    <div>
-                        <span>Meta con ganancia</span>
-                        <strong id="finMetaGanancia">$0</strong>
-                        <small>Incluye una utilidad objetivo del 30% sobre los gastos del mes.</small>
-                    </div>
-                    <div>
-                        <span>Falta para equilibrio</span>
-                        <strong id="finFaltanteEquilibrio">$0</strong>
-                        <small id="finVentaDiariaEquilibrio">$0 diarios restantes.</small>
-                    </div>
-                    <div>
-                        <span>Falta para meta</span>
-                        <strong id="finFaltanteMeta">$0</strong>
-                        <small id="finVentaDiariaMeta">$0 diarios restantes.</small>
+                    <div class="finance-state-metrics">
+                        <div>
+                            <span>Ganancia libre estimada <button type="button" class="info-tip" data-tip="Resultado estimado después de separar impuestos, mercancía, nómina y gastos." aria-label="Resultado estimado después de separar impuestos, mercancía, nómina y gastos.">?</button></span>
+                            <strong id="finUtilidad">$0</strong>
+                        </div>
+                        <div>
+                            <span>Margen de ganancia <button type="button" class="info-tip" data-tip="Porcentaje de utilidad frente a las ventas netas." aria-label="Porcentaje de utilidad frente a las ventas netas.">?</button></span>
+                            <strong id="finMargen">0%</strong>
+                        </div>
+                        <div>
+                            <span>Meta con ganancia <button type="button" class="info-tip" data-tip="Venta mensual estimada para cubrir gastos y dejar ganancia objetivo." aria-label="Venta mensual estimada para cubrir gastos y dejar ganancia objetivo.">?</button></span>
+                            <strong id="finMetaGanancia">$0</strong>
+                        </div>
                     </div>
                 </div>
 
-                <div class="profitability-progress">
-                    <div>
-                        <label>Avance punto de equilibrio <strong id="finAvanceEquilibrioTexto">0%</strong></label>
-                        <span><i id="finAvanceEquilibrioBarra"></i></span>
-                    </div>
-                    <div>
-                        <label>Avance meta con ganancia <strong id="finAvanceMetaTexto">0%</strong></label>
-                        <span><i id="finAvanceMetaBarra"></i></span>
+                <div class="finance-state-grid">
+                    <section class="cash-intelligence-panel">
+                        <div class="cash-intelligence-header">
+                            <div>
+                                <span>Distribución del dinero</span>
+                                <h3>Así se separa el dinero del mes</h3>
+                            </div>
+                            <strong id="finSaldoCajaMes">$0</strong>
+                        </div>
+
+                        <div class="cash-classification-grid" id="finClasificacionCaja"></div>
+                    </section>
+
+                    <section class="profitability-panel" id="finRentabilidadPanel">
+                        <div class="profitability-header">
+                            <div>
+                                <span>Rentabilidad</span>
+                                <h3>Equilibrio y meta mensual</h3>
+                            </div>
+                            <p id="finDiagnosticoRentabilidad">Calculando rentabilidad...</p>
+                        </div>
+
+                        <div class="profitability-grid">
+                            <div>
+                                <span>Punto de equilibrio <button type="button" class="info-tip" data-tip="Venta mínima estimada para cubrir gastos operativos." aria-label="Venta mínima estimada para cubrir gastos operativos.">?</button></span>
+                                <strong id="finPuntoEquilibrio">$0</strong>
+                            </div>
+                            <div>
+                                <span>Falta para equilibrio <button type="button" class="info-tip" data-tip="Dinero pendiente para cubrir el punto de equilibrio del mes." aria-label="Dinero pendiente para cubrir el punto de equilibrio del mes.">?</button></span>
+                                <strong id="finFaltanteEquilibrio">$0</strong>
+                                <small id="finVentaDiariaEquilibrio">$0 diarios restantes.</small>
+                            </div>
+                            <div>
+                                <span>Falta para meta <button type="button" class="info-tip" data-tip="Dinero pendiente para alcanzar la meta mensual con ganancia." aria-label="Dinero pendiente para alcanzar la meta mensual con ganancia.">?</button></span>
+                                <strong id="finFaltanteMeta">$0</strong>
+                                <small id="finVentaDiariaMeta">$0 diarios restantes.</small>
+                            </div>
+                        </div>
+
+                        <div class="profitability-progress">
+                            <div>
+                                <label>Avance punto de equilibrio <strong id="finAvanceEquilibrioTexto">0%</strong></label>
+                                <span><i id="finAvanceEquilibrioBarra"></i></span>
+                            </div>
+                            <div>
+                                <label>Avance meta con ganancia <strong id="finAvanceMetaTexto">0%</strong></label>
+                                <span><i id="finAvanceMetaBarra"></i></span>
+                            </div>
+                        </div>
+                    </section>
                 </div>
-            </div>
-            </div>
-                </div>
+
+                <div class="finance-breakdown finanzas-detalle" id="finGastosDetalle"></div>
             </div>
             </div>
 
@@ -1314,18 +1283,11 @@
                     <tr>
                         <th>Fecha</th>
                         <th>Proveedor</th>
-                        <th>Tipo</th>
-                        <th>Código</th>
                         <th>Mercancía</th>
-                        <th>Categoría</th>
-                        <th>Color</th>
-                        <th>Talla</th>
+                        <th>Variante</th>
                         <th>Cantidad</th>
-                        <th>Costo unitario</th>
-                        <th>Subtotal</th>
-                        <th>Envio</th>
+                        <th>Costos</th>
                         <th>Total</th>
-                        <th>Usuario</th>
                         <th>Detalle</th>
                     </tr>
                 </thead>
@@ -1425,6 +1387,9 @@
 
             <div class="admin-subsection" data-subsection="trabajadores-lista">
             <h3 class="finance-subtitle trabajadores-lista-title">Lista de trabajadores</h3>
+            <div class="filtros trabajadores-search">
+                <input type="text" id="buscadorTrabajadores" placeholder="Buscar por ID, nombre, documento, teléfono o cargo...">
+            </div>
             <table class="tabla-inventario trabajadores-lista-table">
                 <thead>
                     <tr>
@@ -3701,27 +3666,14 @@
                 return;
             }
             
-            document.getElementById("totalVentas").innerText = formatoPrecioBD(reportes.total_neto);
-            document.getElementById("ventasHoy").innerText = formatoPrecioBD(reportes.ventas_hoy);
-            document.getElementById("devolucionesHoy").innerText = formatoPrecioBD(reportes.devoluciones_hoy);
-            document.getElementById("netoHoy").innerText = formatoPrecioBD(reportes.neto_hoy);
-            document.getElementById("ventasMes").innerText = formatoPrecioBD(reportes.ventas_mes);
-            document.getElementById("devolucionesMes").innerText = formatoPrecioBD(reportes.devoluciones_mes);
-            document.getElementById("netoMes").innerText = formatoPrecioBD(reportes.neto_mes);
-            document.getElementById("productoTop").innerText = reportes.producto_top;
-            document.getElementById("menorRotacion").innerText = reportes.menor_rotacion;
+            if (document.getElementById("ventasHoy")) document.getElementById("ventasHoy").innerText = formatoPrecioBD(reportes.ventas_hoy);
+            if (document.getElementById("devolucionesHoy")) document.getElementById("devolucionesHoy").innerText = formatoPrecioBD(reportes.devoluciones_hoy);
+            if (document.getElementById("netoHoy")) document.getElementById("netoHoy").innerText = formatoPrecioBD(reportes.neto_hoy);
+            if (document.getElementById("productoTop")) document.getElementById("productoTop").innerText = reportes.producto_top;
+            if (document.getElementById("menorRotacion")) document.getElementById("menorRotacion").innerText = reportes.menor_rotacion;
 
             if (reportes.rango) {
                 const rango = reportes.rango;
-
-                document.getElementById("rangoVentasNetas").innerText = formatoPrecioBD(rango.ventas_netas);
-                document.getElementById("rangoCostoMercancia").innerText = formatoPrecioBD(rango.costo_mercancia);
-                document.getElementById("rangoUtilidadBruta").innerText = formatoPrecioBD(rango.utilidad_bruta);
-                document.getElementById("rangoGastosOperativos").innerText = formatoPrecioBD(rango.gastos_operativos);
-                document.getElementById("rangoComprasMercancia").innerText = formatoPrecioBD(rango.compras_mercancia);
-                document.getElementById("rangoUtilidadNeta").innerText = formatoPrecioBD(rango.utilidad_neta);
-                document.getElementById("rangoMargen").innerText = Number(rango.margen_ganancia || 0).toFixed(2) + "%";
-                document.getElementById("rangoCaja").innerText = formatoPrecioBD(rango.saldo_caja_estimado);
 
                 document.getElementById("rangoDetalleFinanciero").innerHTML = `
                     <div class="report-detail-header">
@@ -3730,32 +3682,28 @@
                     </div>
                     <div class="report-detail-grid">
                         <div>
-                            <span>Ventas brutas</span>
-                            <strong>${formatoPrecioBD(rango.ventas_brutas)}</strong>
+                            <span>Ventas netas</span>
+                            <strong>${formatoPrecioBD(rango.ventas_netas)}</strong>
                         </div>
                         <div>
                             <span>Devoluciones</span>
                             <strong>${formatoPrecioBD(rango.devoluciones)}</strong>
                         </div>
                         <div>
-                            <span>Gastos generales</span>
-                            <strong>${formatoPrecioBD(rango.gastos_generales)}</strong>
+                            <span>Producto lider</span>
+                            <strong>${(rango.productos_top && rango.productos_top[0]) ? rango.productos_top[0].producto + " (" + rango.productos_top[0].cantidad + ")" : "Sin ventas"}</strong>
                         </div>
                         <div>
-                            <span>Nomina</span>
-                            <strong>${formatoPrecioBD(rango.nomina)}</strong>
+                            <span>Canal principal</span>
+                            <strong>${(rango.canales_venta && rango.canales_venta[0]) ? rango.canales_venta[0].canal_venta : "Sin datos"}</strong>
                         </div>
                         <div>
-                            <span>Inversiones</span>
-                            <strong>${formatoPrecioBD(rango.inversiones)}</strong>
+                            <span>Medio de pago principal</span>
+                            <strong>${(rango.medios_pago && rango.medios_pago[0]) ? rango.medios_pago[0].medio_pago : "Sin datos"}</strong>
                         </div>
                         <div>
-                            <span>Costo sobre ventas</span>
-                            <strong>${Number(rango.porcentaje_costo || 0).toFixed(2)}%</strong>
-                        </div>
-                        <div>
-                            <span>Gastos sobre ventas</span>
-                            <strong>${Number(rango.porcentaje_gastos || 0).toFixed(2)}%</strong>
+                            <span>Caja del periodo</span>
+                            <strong>${formatoPrecioBD(rango.saldo_caja_estimado)}</strong>
                         </div>
                     </div>
                 `;
@@ -3974,6 +3922,27 @@
         return "$" + Number(valor || 0).toLocaleString("es-CO", {
             maximumFractionDigits: 0
         }) + " COP";
+    }
+
+    function formatoFechaBD(valor, incluirHora = false) {
+        if (!valor) return "-";
+
+        const texto = String(valor).trim();
+        const fechaNormalizada = texto.includes(" ")
+            ? texto.replace(" ", "T")
+            : texto;
+        const fecha = new Date(fechaNormalizada);
+
+        if (!Number.isNaN(fecha.getTime())) {
+            return incluirHora ? fecha.toLocaleString("es-CO") : fecha.toLocaleDateString("es-CO");
+        }
+
+        const partes = texto.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (partes) {
+            return `${partes[3]}/${partes[2]}/${partes[1]}`;
+        }
+
+        return texto;
     }
 
     function calcularPrecioProductoAdmin() {
@@ -4446,7 +4415,7 @@
 
                 tabla.innerHTML += `
                     <tr>
-                        <td>${new Date(movimiento.fecha + "T00:00:00").toLocaleDateString()}</td>
+                        <td>${formatoFechaBD(movimiento.fecha)}</td>
                         <td>${movimiento.clase}</td>
                         <td>${movimiento.tipo}</td>
                         <td>${movimiento.concepto}</td>
@@ -4566,6 +4535,7 @@
     async function cargarTrabajadoresBD() {
         const tabla = document.getElementById("tablaTrabajadores");
         const selector = document.getElementById("pagoTrabajadorSelect");
+        const buscador = document.getElementById("buscadorTrabajadores");
 
         if (!tabla || !selector || !usuarioEsAdmin()) return;
 
@@ -4596,7 +4566,31 @@
                 }
             });
 
-            prepararPaginaAdmin(trabajadores, "trabajadores", 20, tabla, cargarTrabajadoresBD).forEach(function(trabajador) {
+            const textoBusqueda = buscador ? buscador.value.toLowerCase().trim() : "";
+            const trabajadoresFiltrados = textoBusqueda
+                ? trabajadores.filter(function(trabajador) {
+                    const texto = [
+                        trabajador.id_trabajador,
+                        trabajador.nombre,
+                        trabajador.documento,
+                        trabajador.telefono,
+                        trabajador.cargo,
+                        trabajador.salario_base,
+                        trabajador.fecha_ingreso,
+                        trabajador.estado ? "activo" : "inactivo"
+                    ].join(" ").toLowerCase();
+
+                    return texto.includes(textoBusqueda);
+                })
+                : trabajadores;
+
+            if (trabajadoresFiltrados.length === 0) {
+                tabla.innerHTML = '<tr><td colspan="7">No hay trabajadores que coincidan con la búsqueda</td></tr>';
+                ocultarPaginacionAdmin("trabajadores", tabla);
+                return;
+            }
+
+            prepararPaginaAdmin(trabajadoresFiltrados, "trabajadores", 20, tabla, cargarTrabajadoresBD).forEach(function(trabajador) {
                 tabla.innerHTML += `
                     <tr>
                         <td>${trabajador.nombre}</td>
@@ -4604,7 +4598,7 @@
                         <td>${trabajador.telefono || "-"}</td>
                         <td>${trabajador.cargo}</td>
                         <td>${formatoPrecioBD(trabajador.salario_base)}</td>
-                        <td>${new Date(trabajador.fecha_ingreso + "T00:00:00").toLocaleDateString()}</td>
+                        <td>${formatoFechaBD(trabajador.fecha_ingreso)}</td>
                         <td class="${trabajador.estado ? "stock-alto" : "stock-bajo"}">${trabajador.estado ? "Activo" : "Inactivo"}</td>
                     </tr>
                 `;
@@ -5227,12 +5221,12 @@
             tabla.innerHTML = "";
 
             if (compras.error) {
-                tabla.innerHTML = `<tr><td colspan="15">${compras.mensaje}</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="8">${compras.mensaje}</td></tr>`;
                 return;
             }
 
             if (compras.length === 0) {
-                tabla.innerHTML = '<tr><td colspan="15">No hay compras de mercancía registradas</td></tr>';
+                tabla.innerHTML = '<tr><td colspan="8">No hay compras de mercancía registradas</td></tr>';
                 ocultarPaginacionAdmin("compras-mercancia", tabla);
                 return;
             }
@@ -5244,26 +5238,41 @@
 
                 tabla.innerHTML += `
                     <tr>
-                        <td>${new Date(compra.fecha + "T00:00:00").toLocaleDateString()}</td>
+                        <td>${formatoFechaBD(compra.fecha)}</td>
                         <td>${limpiarTextoBD(compra.proveedor)}</td>
-                        <td>${tipoTexto}</td>
-                        <td>${limpiarTextoBD(compra.codigo || "-")}</td>
-                        <td>${limpiarTextoBD(productoTexto)}</td>
-                        <td>${limpiarTextoBD(categoriaTexto)}</td>
-                        <td>${limpiarTextoBD(compra.color || "-")}</td>
-                        <td>${limpiarTextoBD(compra.talla || "-")}</td>
+                        <td>
+                            <div class="compact-stack-cell">
+                                <strong>${limpiarTextoBD(productoTexto)}</strong>
+                                <span>${limpiarTextoBD(compra.codigo || "Sin código")} | ${limpiarTextoBD(categoriaTexto)}</span>
+                                <small>${tipoTexto}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="compact-stack-cell">
+                                <strong>${limpiarTextoBD(compra.color || "-")}</strong>
+                                <span>Talla ${limpiarTextoBD(compra.talla || "-")}</span>
+                            </div>
+                        </td>
                         <td>${compra.cantidad}</td>
-                        <td>${formatoPrecioBD(compra.costo_unitario)}</td>
-                        <td>${formatoPrecioBD(compra.subtotal)}</td>
-                        <td>${formatoPrecioBD(compra.costo_envio)}</td>
+                        <td>
+                            <div class="compact-stack-cell money-stack">
+                                <strong>${formatoPrecioBD(compra.costo_unitario)}</strong>
+                                <span>Subtotal: ${formatoPrecioBD(compra.subtotal)}</span>
+                                <small>Envío: ${formatoPrecioBD(compra.costo_envio)}</small>
+                            </div>
+                        </td>
                         <td>${formatoPrecioBD(compra.total_compra)}</td>
-                        <td>${limpiarTextoBD(compra.usuario || "Sin usuario")}</td>
-                        <td>${limpiarTextoBD(compra.detalle || "Sin detalle")}</td>
+                        <td>
+                            <div class="compact-stack-cell purchase-detail-cell">
+                                <strong>${limpiarTextoBD(compra.usuario || "Sin usuario")}</strong>
+                                <span>${limpiarTextoBD(compra.detalle || "Sin detalle")}</span>
+                            </div>
+                        </td>
                     </tr>
                 `;
             });
         } catch (error) {
-            tabla.innerHTML = '<tr><td colspan="15">Error al cargar compras de mercancía</td></tr>';
+            tabla.innerHTML = '<tr><td colspan="8">Error al cargar compras de mercancía</td></tr>';
             console.error(error);
         }
     }
@@ -5393,12 +5402,12 @@
             contenedor.innerHTML = tarjetas.map(function(tarjeta) {
                 const valor = Number(tarjeta[1] || 0);
                 const clase = valor < 0 ? "negativo" : "positivo";
+                const ayuda = limpiarTextoBD(tarjeta[2] || "");
 
                 return `
                     <div class="cash-classification-card ${clase}">
-                        <span>${tarjeta[0]}</span>
+                        <span>${tarjeta[0]} <button type="button" class="info-tip" data-tip="${ayuda}" aria-label="${ayuda}">?</button></span>
                         <strong>${formatoPrecioBD(valor)}</strong>
-                        <small>${tarjeta[2]}</small>
                     </div>
                 `;
             }).join("");
@@ -5443,15 +5452,8 @@
 
         contenedor.innerHTML = `
             <div>
-                <strong>Formula de ganancia</strong>
-                <p>Ventas netas - costo de mercancia vendida - gastos = utilidad neta.</p>
-            </div>
-            <div>
-                <strong>Porcentajes principales</strong>
-                <p>Costo mercancia: ${Number(resumen.porcentaje_costo_mercancia || 0).toFixed(2)}%</p>
-                <p>Gastos: ${Number(resumen.porcentaje_gastos || 0).toFixed(2)}%</p>
-                <p>Inversiones registradas: ${Number(resumen.porcentaje_inversiones || 0).toFixed(2)}%</p>
-                <p>Compras de mercancia: ${Number(resumen.porcentaje_compras_mercancia || 0).toFixed(2)}%</p>
+                <strong>Gastos registrados por tipo</strong>
+                <p>Esta sección detalla únicamente los gastos operativos para no repetir la distribución principal.</p>
             </div>
         `;
 
@@ -5485,6 +5487,51 @@
         } else {
             tarjeta.classList.add("estado-saludable");
         }
+    }
+
+    function obtenerTooltipFlotanteAdmin() {
+        let tooltip = document.getElementById("tooltipInfoAdmin");
+
+        if (!tooltip) {
+            tooltip = document.createElement("div");
+            tooltip.id = "tooltipInfoAdmin";
+            tooltip.className = "floating-info-tip";
+            document.body.appendChild(tooltip);
+        }
+
+        return tooltip;
+    }
+
+    function mostrarTooltipInfoAdmin(boton) {
+        const texto = boton?.dataset?.tip || "";
+        if (!texto) return;
+
+        const tooltip = obtenerTooltipFlotanteAdmin();
+        tooltip.textContent = texto;
+        tooltip.classList.add("visible");
+
+        const botonRect = boton.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+        const margen = 12;
+        let izquierda = botonRect.left + (botonRect.width / 2) - (tooltipRect.width / 2);
+        let arriba = botonRect.top - tooltipRect.height - 10;
+
+        if (izquierda < margen) izquierda = margen;
+        if (izquierda + tooltipRect.width > window.innerWidth - margen) {
+            izquierda = window.innerWidth - tooltipRect.width - margen;
+        }
+
+        if (arriba < margen) {
+            arriba = botonRect.bottom + 10;
+        }
+
+        tooltip.style.left = izquierda + "px";
+        tooltip.style.top = arriba + "px";
+    }
+
+    function ocultarTooltipInfoAdmin() {
+        const tooltip = document.getElementById("tooltipInfoAdmin");
+        if (tooltip) tooltip.classList.remove("visible");
     }
 
     function activarVistaResumenFinanzas(vista) {
@@ -5994,6 +6041,179 @@
             console.error(error);
         }
     }
+
+    function etiquetaPeriodoGrafico(periodo) {
+        const texto = String(periodo || "");
+        const partes = texto.split("-");
+        const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
+        if (partes.length >= 2) {
+            const mes = Number(partes[1]) - 1;
+            return meses[mes] || texto;
+        }
+
+        return texto;
+    }
+
+    function etiquetaDiaGrafico(fecha) {
+        const texto = String(fecha || "");
+        const partes = texto.split("-");
+
+        return partes.length >= 3 ? partes[2] : texto;
+    }
+
+    function valorGrafico(item) {
+        return Number(item.neto ?? item.ventas ?? item.total ?? 0);
+    }
+
+    function formatoCortoGrafico(valor) {
+        const numero = Math.abs(Number(valor || 0));
+
+        if (numero >= 1000000) {
+            return "$" + (Number(valor) / 1000000).toFixed(numero >= 10000000 ? 0 : 1).replace(".0", "") + "M";
+        }
+
+        if (numero >= 1000) {
+            return "$" + Math.round(Number(valor) / 1000) + "k";
+        }
+
+        return "$" + Number(valor || 0).toLocaleString("es-CO");
+    }
+
+    function etiquetaCompletaGrafico(item, opciones = {}) {
+        if (opciones.tipo === "dia") {
+            return "Día " + etiquetaDiaGrafico(item.fecha_dia || item.fecha || item.periodo);
+        }
+
+        return etiquetaPeriodoGrafico(item.periodo || item.fecha_dia || item.fecha);
+    }
+
+    function renderizarDatoDestacadoGrafico(idContenedor, datos, opciones = {}) {
+        const contenedor = document.getElementById(idContenedor);
+        const registros = Array.isArray(datos) ? datos.filter(Boolean) : [];
+
+        if (!contenedor) return;
+
+        if (registros.length === 0) {
+            contenedor.innerHTML = '<p class="empty-dashboard">Sin datos destacados.</p>';
+            return;
+        }
+
+        const mejor = registros.reduce(function(actual, item) {
+            return valorGrafico(item) > valorGrafico(actual) ? item : actual;
+        }, registros[0]);
+        const etiqueta = etiquetaCompletaGrafico(mejor, opciones);
+        const titulo = opciones.tipo === "dia" ? "Día con más ventas" : "Mejor mes";
+
+        contenedor.innerHTML = `
+            <span aria-hidden="true">${opciones.icono || "↗"}</span>
+            <div>
+                <strong>${titulo}: ${limpiarTextoBD(etiqueta)}</strong>
+                <small>${formatoPrecioBD(valorGrafico(mejor))}</small>
+            </div>
+        `;
+    }
+
+    function renderizarGraficoLinealAdmin(idContenedor, datos, opciones = {}) {
+        const contenedor = document.getElementById(idContenedor);
+        const registros = Array.isArray(datos) ? datos.filter(Boolean) : [];
+
+        if (!contenedor) return;
+
+        if (registros.length === 0) {
+            contenedor.innerHTML = '<p class="empty-dashboard">Sin datos para graficar.</p>';
+            return;
+        }
+
+        const valores = registros.map(valorGrafico);
+        const maximo = Math.max(...valores.map(function(valor) {
+            return Math.abs(valor);
+        }), 1);
+        const ancho = 420;
+        const alto = 270;
+        const margen = { arriba: 32, derecha: 22, abajo: 46, izquierda: 58 };
+        const anchoInterno = ancho - margen.izquierda - margen.derecha;
+        const altoInterno = alto - margen.arriba - margen.abajo;
+        const puntos = registros.map(function(item, indice) {
+            const x = registros.length === 1
+                ? margen.izquierda + (anchoInterno / 2)
+                : margen.izquierda + ((anchoInterno / (registros.length - 1)) * indice);
+            const y = margen.arriba + altoInterno - ((Math.abs(valorGrafico(item)) / maximo) * altoInterno);
+
+            return { x, y, item, valor: valorGrafico(item) };
+        });
+        const linea = puntos.map(function(punto) {
+            return punto.x + "," + punto.y;
+        }).join(" ");
+        const area = puntos.length
+            ? margen.izquierda + "," + (margen.arriba + altoInterno) + " " + linea + " " + puntos[puntos.length - 1].x + "," + (margen.arriba + altoInterno)
+            : "";
+        const marcasY = [maximo, maximo * 0.66, maximo * 0.33, 0];
+
+        contenedor.innerHTML = `
+            <svg viewBox="0 0 ${ancho} ${alto}" role="img" aria-label="${limpiarTextoBD(opciones.titulo || "Gráfico de ventas")}">
+                <defs>
+                    <linearGradient id="${idContenedor}Area" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#954053" stop-opacity="0.18" />
+                        <stop offset="100%" stop-color="#954053" stop-opacity="0" />
+                    </linearGradient>
+                </defs>
+                ${marcasY.map(function(valor, indice) {
+                    const y = margen.arriba + ((altoInterno / 3) * indice);
+                    return `
+                        <line class="chart-grid-line" x1="${margen.izquierda}" y1="${y}" x2="${ancho - margen.derecha}" y2="${y}" />
+                        <text class="chart-axis-label" x="${margen.izquierda - 8}" y="${y + 4}" text-anchor="end">${formatoCortoGrafico(valor)}</text>
+                    `;
+                }).join("")}
+                <line class="chart-axis-line" x1="${margen.izquierda}" y1="${margen.arriba}" x2="${margen.izquierda}" y2="${margen.arriba + altoInterno}" />
+                <line class="chart-axis-line" x1="${margen.izquierda}" y1="${margen.arriba + altoInterno}" x2="${ancho - margen.derecha}" y2="${margen.arriba + altoInterno}" />
+                <polygon class="chart-area" points="${area}" fill="url(#${idContenedor}Area)" />
+                <polyline class="chart-line" points="${linea}" />
+                ${puntos.map(function(punto) {
+                    const etiqueta = opciones.tipo === "dia"
+                        ? etiquetaDiaGrafico(punto.item.fecha_dia || punto.item.fecha || punto.item.periodo)
+                        : etiquetaPeriodoGrafico(punto.item.periodo || punto.item.fecha_dia || punto.item.fecha);
+                    return `
+                        <g>
+                            <text class="chart-value-label" x="${punto.x}" y="${Math.max(16, punto.y - 12)}" text-anchor="middle">${formatoCortoGrafico(punto.valor)}</text>
+                            <circle class="chart-point" cx="${punto.x}" cy="${punto.y}" r="5" />
+                            <text class="chart-x-label" x="${punto.x}" y="${alto - 16}" text-anchor="middle">${limpiarTextoBD(etiqueta)}</text>
+                        </g>
+                    `;
+                }).join("")}
+            </svg>
+        `;
+    }
+
+    function renderizarGraficosInicioAdmin(reportes) {
+        const graficos = reportes && reportes.graficos ? reportes.graficos : {};
+        const ventasMesDias = Array.isArray(graficos.ventas_mes_dias)
+            ? graficos.ventas_mes_dias.slice().reverse()
+            : [];
+        const ultimosMeses = graficos.ventas_ultimos_meses || [];
+        const ventasAnio = graficos.ventas_anio || [];
+        const totalMes = ventasMesDias.reduce(function(total, item) {
+            return total + valorGrafico(item);
+        }, 0);
+        const totalUltimosMeses = ultimosMeses.reduce(function(total, item) {
+            return total + valorGrafico(item);
+        }, 0);
+        const totalAnio = ventasAnio.reduce(function(total, item) {
+            return total + valorGrafico(item);
+        }, 0);
+        const promedioAnio = ventasAnio.length ? totalAnio / ventasAnio.length : 0;
+
+        document.getElementById("totalVentasMesGrafico").textContent = "Total: " + formatoPrecioBD(totalMes);
+        document.getElementById("totalVentasUltimosMesesGrafico").textContent = "Total: " + formatoPrecioBD(totalUltimosMeses);
+        document.getElementById("promedioVentasAnioGrafico").textContent = "Promedio: " + formatoPrecioBD(promedioAnio);
+
+        renderizarGraficoLinealAdmin("graficoVentasMes", ventasMesDias, { tipo: "dia", titulo: "Ventas por día" });
+        renderizarGraficoLinealAdmin("graficoVentasUltimosMeses", ultimosMeses, { titulo: "Ventas netas últimos meses" });
+        renderizarGraficoLinealAdmin("graficoVentasAnio", ventasAnio, { titulo: "Balance mensual del año" });
+        renderizarDatoDestacadoGrafico("datoDestacadoVentasMes", ventasMesDias, { tipo: "dia", icono: "♡" });
+        renderizarDatoDestacadoGrafico("datoDestacadoVentasUltimosMeses", ultimosMeses, { icono: "↗" });
+        renderizarDatoDestacadoGrafico("datoDestacadoVentasAnio", ventasAnio, { icono: "☆" });
+    }
     
     async function cargarInicioAdmin() {
         try {
@@ -6018,6 +6238,7 @@
             if (!reportes.error) {
                 document.getElementById("inicioVentasHoy").textContent = formatoPrecioBD(reportes.ventas_hoy || 0);
                 actualizarMetaDiariaAdmin(reportes.meta_diaria);
+                renderizarGraficosInicioAdmin(reportes);
             }
 
             if (Array.isArray(productos)) {
@@ -6359,6 +6580,15 @@
         buscadorClientes.addEventListener("input", renderizarClientesBD);
     }
 
+    const buscadorTrabajadores = document.getElementById("buscadorTrabajadores");
+
+    if (buscadorTrabajadores) {
+        buscadorTrabajadores.addEventListener("input", function() {
+            paginacionAdmin.trabajadores = 1;
+            cargarTrabajadoresBD();
+        });
+    }
+
     const formGasto = document.getElementById("formGasto");
     const formInversion = document.getElementById("formInversion");
     const formCategoria = document.getElementById("formCategoria");
@@ -6465,6 +6695,33 @@
             activarVistaResumenFinanzas(boton.dataset.financeSummaryTarget);
         });
     });
+    document.addEventListener("mouseover", function(evento) {
+        const boton = evento.target.closest(".info-tip");
+        if (boton) mostrarTooltipInfoAdmin(boton);
+    });
+    document.addEventListener("focusin", function(evento) {
+        const boton = evento.target.closest(".info-tip");
+        if (boton) mostrarTooltipInfoAdmin(boton);
+    });
+    document.addEventListener("mouseout", function(evento) {
+        if (evento.target.closest(".info-tip")) ocultarTooltipInfoAdmin();
+    });
+    document.addEventListener("focusout", function(evento) {
+        if (evento.target.closest(".info-tip")) ocultarTooltipInfoAdmin();
+    });
+    document.addEventListener("click", function(evento) {
+        const boton = evento.target.closest(".info-tip");
+
+        if (boton) {
+            evento.preventDefault();
+            mostrarTooltipInfoAdmin(boton);
+            return;
+        }
+
+        ocultarTooltipInfoAdmin();
+    });
+    window.addEventListener("scroll", ocultarTooltipInfoAdmin, true);
+    window.addEventListener("resize", ocultarTooltipInfoAdmin);
     document.getElementById("inp-precio")?.addEventListener("input", calcularPrecioProductoAdmin);
     document.getElementById("inp-costo")?.addEventListener("input", calcularPrecioProductoAdmin);
     document.getElementById("calcMargenObjetivo")?.addEventListener("input", calcularPrecioProductoAdmin);

@@ -32,9 +32,6 @@
             <aside class="stitch-filters">
                 <p id="resumenCatalogo">Cargando catalogo...</p>
 
-                <label class="filter-label" for="buscarProducto">Buscar</label>
-                <input id="buscarProducto" type="search" placeholder="Nombre, marca o codigo">
-
                 <label class="filter-label" for="filtroCategoria">Categoria</label>
                 <select id="filtroCategoria">
                     <option value="">Todas</option>
@@ -48,6 +45,18 @@
                     <option value="stock_desc">Mas disponibles</option>
                 </select>
 
+                <div class="price-range-filter">
+                    <div class="price-range-head">
+                        <label class="filter-label" for="filtroPrecioMaximo">Rango de precio</label>
+                        <strong id="precioMaximoTexto">Todos</strong>
+                    </div>
+                    <input id="filtroPrecioMaximo" type="range" min="0" max="0" step="1000" value="0">
+                    <div class="price-range-values">
+                        <span id="precioMinimoTexto">$0</span>
+                        <span id="precioTopeTexto">$0</span>
+                    </div>
+                </div>
+
                 <label class="check-control">
                     <input id="soloDisponibles" type="checkbox" checked>
                     Solo disponibles
@@ -59,6 +68,11 @@
             </aside>
 
             <section class="galeria tienda-galeria">
+                <div class="catalog-search-bar">
+                    <label class="filter-label" for="buscarProducto">Buscar producto</label>
+                    <input id="buscarProducto" type="search" placeholder="Buscar por nombre, marca o código">
+                </div>
+
                 <div id="contenedor-productos" class="contenedor-productos"></div>
             </section>
         </div>
@@ -163,6 +177,10 @@
         <span id="contadorImagenProducto" class="imagen-contador"></span>
     </div>
 
+    <a class="public-whatsapp-bubble" href="https://wa.me/573017674329" target="_blank" rel="noopener" aria-label="Escribir a Isa Boutique por WhatsApp" title="WhatsApp">
+        WA
+    </a>
+
     <script>
         function configurarFlechaRegresoPublica() {
             const flecha = document.querySelector(".nav-home-arrow");
@@ -198,6 +216,10 @@
         const buscador = document.getElementById("buscarProducto");
         const filtroCategoria = document.getElementById("filtroCategoria");
         const ordenProductos = document.getElementById("ordenProductos");
+        const filtroPrecioMaximo = document.getElementById("filtroPrecioMaximo");
+        const precioMaximoTexto = document.getElementById("precioMaximoTexto");
+        const precioMinimoTexto = document.getElementById("precioMinimoTexto");
+        const precioTopeTexto = document.getElementById("precioTopeTexto");
         const soloDisponibles = document.getElementById("soloDisponibles");
         const resumenCatalogo = document.getElementById("resumenCatalogo");
 
@@ -376,6 +398,52 @@
             return colores.map(function(item) {
                 return item.color;
             }).join(", ");
+        }
+
+        function valorColorVisual(nombre) {
+            const color = (nombre || "").toLowerCase().trim();
+            const mapa = {
+                amarillo: "#f5c84b",
+                azul: "#2f6db5",
+                beige: "#d9c6a5",
+                blanco: "#ffffff",
+                cafe: "#7a4f35",
+                café: "#7a4f35",
+                dorado: "#c9a66b",
+                fucsia: "#c23a7a",
+                gris: "#9ca3af",
+                morado: "#7c3a8a",
+                naranja: "#e98235",
+                negro: "#171717",
+                rojo: "#c0393f",
+                rosado: "#e8a5b5",
+                rosa: "#e8a5b5",
+                verde: "#3f8f5f",
+                vinotinto: "#7c3344",
+                vino: "#7c3344"
+            };
+
+            return mapa[color] || "#d9c1c3";
+        }
+
+        function puntosColoresProducto(producto) {
+            const colores = leerColores(producto ? producto.colores : []);
+            const nombres = colores.length > 0
+                ? colores.map(function(item) { return item.color; })
+                : (producto && producto.color ? [producto.color] : []);
+
+            const unicos = [...new Set(nombres.filter(Boolean))];
+
+            if (unicos.length === 0) {
+                return '<div class="producto-color-swatches producto-color-swatches-vacio">Color por confirmar</div>';
+            }
+
+            return '<div class="producto-color-swatches" aria-label="Colores disponibles">' +
+                unicos.slice(0, 7).map(function(nombre) {
+                    return '<span class="producto-color-dot" style="--dot-color:' + valorColorVisual(nombre) + '" title="' + nombre + '"></span>';
+                }).join("") +
+                (unicos.length > 7 ? '<small>+' + (unicos.length - 7) + '</small>' : '') +
+            '</div>';
         }
 
         function textoTallas(tallas) {
@@ -713,18 +781,22 @@
             const texto = buscador.value.trim().toLowerCase();
             const categoria = filtroCategoria.value;
             const soloStock = soloDisponibles.checked;
+            const precioMaximo = Number(filtroPrecioMaximo.value || 0);
+            const aplicarPrecio = precioMaximo > 0 && precioMaximo < Number(filtroPrecioMaximo.max || 0);
 
             let productos = productosCatalogo.filter(function(producto) {
                 const activo = producto.estado !== "inactivo";
                 const disponible = Number(producto.cantidad) > 0 && producto.estado !== "agotado";
+                const precioProducto = Number(producto.precio || 0);
                 const coincideTexto = (
                     (producto.nombre || "").toLowerCase().includes(texto) ||
                     (producto.marca || "").toLowerCase().includes(texto) ||
                     (producto.codigo || "").toLowerCase().includes(texto)
                 );
                 const coincideCategoria = !categoria || producto.categoria === categoria;
+                const coincidePrecio = !aplicarPrecio || precioProducto <= precioMaximo;
 
-                return activo && coincideTexto && coincideCategoria && (!soloStock || disponible);
+                return activo && coincideTexto && coincideCategoria && coincidePrecio && (!soloStock || disponible);
             });
 
             if (ordenProductos.value === "precio_asc") {
@@ -811,6 +883,54 @@
             renderizarProductos();
         }
 
+        function actualizarTextoPrecioMaximo() {
+            const valor = Number(filtroPrecioMaximo.value || 0);
+            const maximo = Number(filtroPrecioMaximo.max || 0);
+
+            if (!maximo || valor >= maximo) {
+                precioMaximoTexto.textContent = "Todos";
+                return;
+            }
+
+            precioMaximoTexto.textContent = "Hasta " + formatoPrecio(valor);
+        }
+
+        function configurarRangoPrecioCatalogo() {
+            const productosActivos = productosCatalogo.filter(function(producto) {
+                return producto.estado !== "inactivo";
+            });
+            const precios = productosActivos
+                .map(function(producto) {
+                    return Number(producto.precio || 0);
+                })
+                .filter(function(precio) {
+                    return precio > 0;
+                });
+
+            if (precios.length === 0) {
+                filtroPrecioMaximo.disabled = true;
+                filtroPrecioMaximo.min = 0;
+                filtroPrecioMaximo.max = 0;
+                filtroPrecioMaximo.value = 0;
+                precioMinimoTexto.textContent = "$0";
+                precioTopeTexto.textContent = "$0";
+                precioMaximoTexto.textContent = "Sin precios";
+                return;
+            }
+
+            const minimo = Math.min(...precios);
+            const maximo = Math.max(...precios);
+            const maximoRedondeado = Math.ceil(maximo / 1000) * 1000;
+
+            filtroPrecioMaximo.disabled = false;
+            filtroPrecioMaximo.min = Math.floor(minimo / 1000) * 1000;
+            filtroPrecioMaximo.max = maximoRedondeado;
+            filtroPrecioMaximo.value = maximoRedondeado;
+            precioMinimoTexto.textContent = formatoPrecio(minimo);
+            precioTopeTexto.textContent = formatoPrecio(maximo);
+            actualizarTextoPrecioMaximo();
+        }
+
         async function cargarCategoriasCatalogo() {
             try {
                 const respuesta = await fetch("../php/categorias_listar.php?solo_activas=1");
@@ -895,7 +1015,8 @@
                     '<div class="producto-card-body">' +
                         '<p class="producto-codigo">Codigo: ' + producto.codigo + '</p>' +
                         '<h3>' + producto.nombre + '</h3>' +
-                        '<p class="producto-meta">' + producto.marca + '  -  ' + formatearCategoria(producto.categoria) + (textoColores(producto) ? '  -  ' + textoColores(producto) : '') + '</p>' +
+                        '<p class="producto-meta">' + producto.marca + '  -  ' + formatearCategoria(producto.categoria) + '</p>' +
+                        puntosColoresProducto(producto) +
                         '<p class="producto-precio">' + formatoPrecio(producto.precio) + '</p>' +
                         '<p class="producto-stock">' + estadoTexto + '</p>' +
                         '<p class="producto-stock">' + textoTallas(producto.tallas) + '</p>' +
@@ -927,6 +1048,7 @@
                 }
 
                 productosCatalogo = productos;
+                configurarRangoPrecioCatalogo();
                 renderizarProductos();
             } catch (error) {
                 contenedor.innerHTML = "<p>Error al cargar productos desde la base de datos.</p>";
@@ -1003,6 +1125,10 @@
             reiniciarPaginaCatalogo();
         });
         ordenProductos.addEventListener("change", reiniciarPaginaCatalogo);
+        filtroPrecioMaximo.addEventListener("input", function() {
+            actualizarTextoPrecioMaximo();
+            reiniciarPaginaCatalogo();
+        });
         soloDisponibles.addEventListener("change", reiniciarPaginaCatalogo);
 
         actualizarContadorCarrito();

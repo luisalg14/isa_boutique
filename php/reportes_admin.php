@@ -304,6 +304,78 @@ try {
     $consultaCanalesVenta->execute($paramsRango);
     $canalesVenta = $consultaCanalesVenta->fetchAll();
 
+    $consultaVentasUltimosMeses = $conexion->prepare("
+        WITH meses AS (
+            SELECT generate_series(
+                DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota') - INTERVAL '5 months',
+                DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota'),
+                INTERVAL '1 month'
+            )::date AS mes
+        ),
+        ventas_mes AS (
+            SELECT DATE_TRUNC('month', fecha)::date AS mes, COALESCE(SUM(total), 0) AS ventas
+            FROM venta
+            WHERE estado IN ('pagada', 'devuelta')
+            GROUP BY DATE_TRUNC('month', fecha)::date
+        ),
+        devoluciones_mes AS (
+            SELECT DATE_TRUNC('month', fecha)::date AS mes, COALESCE(SUM(total_devuelto), 0) AS devoluciones
+            FROM devolucion
+            WHERE estado = 'aprobada'
+            GROUP BY DATE_TRUNC('month', fecha)::date
+        )
+        SELECT
+            TO_CHAR(m.mes, 'YYYY-MM') AS periodo,
+            COALESCE(v.ventas, 0) AS ventas,
+            COALESCE(d.devoluciones, 0) AS devoluciones,
+            COALESCE(v.ventas, 0) - COALESCE(d.devoluciones, 0) AS neto
+        FROM meses m
+        LEFT JOIN ventas_mes v
+            ON v.mes = m.mes
+        LEFT JOIN devoluciones_mes d
+            ON d.mes = m.mes
+        ORDER BY m.mes
+    ");
+    $consultaVentasUltimosMeses->execute();
+    $ventasUltimosMeses = $consultaVentasUltimosMeses->fetchAll();
+
+    $consultaVentasAnio = $conexion->prepare("
+        WITH meses AS (
+            SELECT generate_series(
+                DATE_TRUNC('year', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota'),
+                DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota'),
+                INTERVAL '1 month'
+            )::date AS mes
+        ),
+        ventas_mes AS (
+            SELECT DATE_TRUNC('month', fecha)::date AS mes, COALESCE(SUM(total), 0) AS ventas
+            FROM venta
+            WHERE estado IN ('pagada', 'devuelta')
+            AND DATE_TRUNC('year', fecha) = DATE_TRUNC('year', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
+            GROUP BY DATE_TRUNC('month', fecha)::date
+        ),
+        devoluciones_mes AS (
+            SELECT DATE_TRUNC('month', fecha)::date AS mes, COALESCE(SUM(total_devuelto), 0) AS devoluciones
+            FROM devolucion
+            WHERE estado = 'aprobada'
+            AND DATE_TRUNC('year', fecha) = DATE_TRUNC('year', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')
+            GROUP BY DATE_TRUNC('month', fecha)::date
+        )
+        SELECT
+            TO_CHAR(m.mes, 'YYYY-MM') AS periodo,
+            COALESCE(v.ventas, 0) AS ventas,
+            COALESCE(d.devoluciones, 0) AS devoluciones,
+            COALESCE(v.ventas, 0) - COALESCE(d.devoluciones, 0) AS neto
+        FROM meses m
+        LEFT JOIN ventas_mes v
+            ON v.mes = m.mes
+        LEFT JOIN devoluciones_mes d
+            ON d.mes = m.mes
+        ORDER BY m.mes
+    ");
+    $consultaVentasAnio->execute();
+    $ventasAnio = $consultaVentasAnio->fetchAll();
+
     $netoRango = $ventasRango - $devolucionesRango;
     $costoNetoRango = $costoVendidoRango - $costoDevueltoRango;
     $utilidadBrutaRango = $netoRango - $costoNetoRango;
@@ -367,6 +439,11 @@ try {
             "ventas_por_dia" => $ventasPorDia,
             "medios_pago" => $mediosPago,
             "canales_venta" => $canalesVenta
+        ],
+        "graficos" => [
+            "ventas_mes_dias" => $ventasPorDia,
+            "ventas_ultimos_meses" => $ventasUltimosMeses,
+            "ventas_anio" => $ventasAnio
         ]
     ], JSON_UNESCAPED_UNICODE);
 
