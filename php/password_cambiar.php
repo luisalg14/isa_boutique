@@ -2,20 +2,10 @@
 
 require_once "conexion.php";
 require_once "auth_guard.php";
+require_once "password_util.php";
+require_once "auditoria.php";
 
 header("Content-Type: application/json; charset=UTF-8");
-
-function validar_password_seguro($password) {
-    if (strlen($password) < 8) {
-        return "La nueva contraseña debe tener mínimo 8 caracteres";
-    }
-
-    if (!preg_match("/[A-Za-z]/", $password) || !preg_match("/[0-9]/", $password)) {
-        return "La nueva contraseña debe incluir letras y números";
-    }
-
-    return "";
-}
 
 try {
     $usuarioActual = exigir_sesion();
@@ -97,6 +87,11 @@ try {
         echo json_encode(["error" => true, "mensaje" => "Usuario no encontrado"], JSON_UNESCAPED_UNICODE);
         exit;
     }
+
+    registrar_auditoria($conexion, $modo === "restablecer" ? "password_restablecido" : "password_actualizado", "usuario_sistema", $idUsuario, [
+        "modo" => $modo,
+        "admin_id" => intval($usuarioActual["id_usuario"])
+    ]);
 
     echo json_encode([
         "error" => false,

@@ -2,6 +2,7 @@
 
 require_once "conexion.php";
 require_once "auth_guard.php";
+require_once "auditoria.php";
 
 header("Content-Type: application/json; charset=UTF-8");
 
@@ -221,6 +222,13 @@ try {
             ]);
         }
     }
+
+    registrar_auditoria($conexion, "producto_actualizado", "producto", $id_producto, [
+        "codigo" => $codigo,
+        "nombre" => $nombre,
+        "cantidad" => $cantidad,
+        "precio" => $precio
+    ]);
 
     $conexion->commit();
 

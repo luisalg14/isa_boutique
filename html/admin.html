@@ -18,8 +18,21 @@
             <input type="email" id="correo" placeholder="Correo">
             <input type="password" id="clave" placeholder="Contraseña">
 
+            <div class="captcha-login">
+                <label for="captchaRespuesta">Verificacion humana</label>
+                <div class="captcha-login-row">
+                    <span id="captchaPregunta" class="captcha-question">...</span>
+                    <input type="number" id="captchaRespuesta" placeholder="Respuesta" inputmode="numeric">
+                    <button type="button" id="btnRefrescarCaptcha" class="captcha-refresh" title="Nueva pregunta" aria-label="Nueva pregunta">&#8635;</button>
+                </div>
+            </div>
+
             <button id="btnEntrar">Ingresar</button>
 
+            <button type="button" id="btnRecuperarPassword" class="login-link mail-login-link">
+                <span class="gmail-mark" aria-hidden="true"><i></i><b></b><em></em></span>
+                Recuperar con mi correo
+            </button>
             <p id="mensaje"></p>
         </div>
     </div>
@@ -70,19 +83,9 @@
                 <div>
                     <span>Resumen general</span>
                     <h2>Inicio</h2>
-                    <button class="btn btn-secundario dashboard-inline-action" type="button" onclick="activarPanelAdmin('panel-menu-ventas')">Ver ventas</button>
+                    <p>Vista rápida del estado de Isa Boutique para tomar decisiones sin entrar a cada módulo.</p>
                 </div>
-                <div class="daily-goal-panel">
-                    <div>
-                        <span>Meta diaria</span>
-                        <h3 id="inicioMetaDiaria">$0</h3>
-                        <p id="inicioMetaDiariaTexto">Calculando avance del día...</p>
-                    </div>
-                    <div class="daily-goal-progress">
-                        <strong id="inicioMetaDiariaAvance">0%</strong>
-                        <span><i id="inicioMetaDiariaBarra"></i></span>
-                    </div>
-                </div>
+                <button class="btn btn-agregar" type="button" onclick="activarPanelAdmin('panel-menu-ventas')">Ver ventas</button>
             </div>
 
             <div class="dashboard-cards">
@@ -101,6 +104,18 @@
                 <div class="dashboard-card">
                     <span>Ganancia del mes</span>
                     <strong id="inicioGananciaMes">$0</strong>
+                </div>
+            </div>
+
+            <div class="daily-goal-panel">
+                <div>
+                    <span>Meta diaria</span>
+                    <h3 id="inicioMetaDiaria">$0</h3>
+                    <p id="inicioMetaDiariaTexto">Calculando avance del día...</p>
+                </div>
+                <div class="daily-goal-progress">
+                    <strong id="inicioMetaDiariaAvance">0%</strong>
+                    <span><i id="inicioMetaDiariaBarra"></i></span>
                 </div>
             </div>
 
@@ -397,6 +412,10 @@
                 <button type="button" onclick="activarPanelAdmin('panel-seguridad')">
                     <span>Seguridad</span>
                     <strong>Contraseñas, usuarios y roles</strong>
+                </button>
+                <button type="button" data-admin-only onclick="activarPanelAdmin('panel-auditoria')">
+                    <span>Auditoría</span>
+                    <strong>Eventos sensibles del sistema</strong>
                 </button>
             </div>
         </section>
@@ -1029,23 +1048,23 @@
                 </form>
 
                 <form id="formInversion" class="finance-form">
-                    <h3>Registrar inversión</h3>
+                    <h3>Registrar inversion</h3>
 
                     <div class="campo">
-                        <label>Tipo de inversión</label>
+                        <label>Tipo de inversion</label>
                         <select id="inversionTipo">
                             <option value="capital">Capital</option>
-                            <option value="mercancia">Mercancía</option>
-                            <option value="adecuacion">Adecuación</option>
+                            <option value="mercancia">Mercancia</option>
+                            <option value="adecuacion">Adecuacion</option>
                             <option value="publicidad">Publicidad</option>
-                            <option value="tecnologia">Tecnología</option>
+                            <option value="tecnologia">Tecnologia</option>
                             <option value="otro">Otro</option>
                         </select>
                     </div>
 
                     <div class="campo">
                         <label>Concepto</label>
-                        <input id="inversionConcepto" placeholder="Ej: Compra de nueva mercancía">
+                        <input id="inversionConcepto" placeholder="Ej: Compra de nueva mercancia">
                     </div>
 
                     <div class="campo">
@@ -1063,7 +1082,7 @@
                         <input id="inversionDetalle" placeholder="Opcional">
                     </div>
 
-                    <button class="btn btn-agregar" type="submit">Guardar inversión</button>
+                    <button class="btn btn-agregar" type="submit">Guardar inversion</button>
                 </form>
             </div>
             </div>
@@ -1277,17 +1296,24 @@
             </div>
 
             <div class="admin-subsection" data-subsection="proveedores-compras">
-            <h3 class="finance-subtitle proveedores-compras-title">Historial de compras de mercancía</h3>
+            <h3 class="finance-subtitle proveedores-compras-title">Historial de compras de mercancia</h3>
             <table class="tabla-inventario proveedores-compras-table">
                 <thead>
                     <tr>
                         <th>Fecha</th>
                         <th>Proveedor</th>
+                        <th>Tipo</th>
+                        <th>Código</th>
                         <th>Mercancía</th>
-                        <th>Variante</th>
+                        <th>Categoría</th>
+                        <th>Color</th>
+                        <th>Talla</th>
                         <th>Cantidad</th>
-                        <th>Costos</th>
+                        <th>Costo unitario</th>
+                        <th>Subtotal</th>
+                        <th>Envio</th>
                         <th>Total</th>
+                        <th>Usuario</th>
                         <th>Detalle</th>
                     </tr>
                 </thead>
@@ -1387,9 +1413,6 @@
 
             <div class="admin-subsection" data-subsection="trabajadores-lista">
             <h3 class="finance-subtitle trabajadores-lista-title">Lista de trabajadores</h3>
-            <div class="filtros trabajadores-search">
-                <input type="text" id="buscadorTrabajadores" placeholder="Buscar por ID, nombre, documento, teléfono o cargo...">
-            </div>
             <table class="tabla-inventario trabajadores-lista-table">
                 <thead>
                     <tr>
@@ -1531,7 +1554,63 @@
 
                     <button class="btn btn-agregar" type="submit">Restablecer contraseña</button>
                 </form>
+
+                <form id="formActualizarCorreoUsuario" class="finance-form" data-admin-only>
+                    <h3>Correo de ingreso</h3>
+
+                    <div class="campo">
+                        <label>Usuario interno</label>
+                        <select id="correoUsuarioSelect">
+                            <option value="">Seleccionar usuario</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Correo real</label>
+                        <input id="correoUsuarioNuevo" type="email" autocomplete="email" placeholder="usuario@gmail.com">
+                    </div>
+
+                    <button class="btn btn-agregar" type="submit">Actualizar correo</button>
+                </form>
             </div>
+        </section>
+
+        <section id="panel-auditoria" class="admin-panel" data-admin-only>
+            <h2>Auditoría</h2>
+
+            <div class="filtros audit-filters">
+                <input type="text" id="buscadorAuditoria" placeholder="Buscar accion, detalle, usuario o entidad...">
+                <select id="auditoriaAccion">
+                    <option value="">Todas las acciones</option>
+                    <option value="producto_creado">Producto creado</option>
+                    <option value="producto_actualizado">Producto actualizado</option>
+                    <option value="producto_eliminado">Producto eliminado</option>
+                    <option value="venta_estado_actualizado">Venta actualizada</option>
+                    <option value="password_actualizado">Contraseña cambiada</option>
+                    <option value="password_restablecido">Contraseña restablecida</option>
+                    <option value="usuario_correo_actualizado">Correo actualizado</option>
+                </select>
+                <select id="auditoriaUsuario">
+                    <option value="">Todos los usuarios</option>
+                </select>
+                <input type="date" id="auditoriaDesde" aria-label="Desde">
+                <input type="date" id="auditoriaHasta" aria-label="Hasta">
+                <button type="button" class="btn btn-agregar" id="btnLimpiarAuditoria">Limpiar</button>
+            </div>
+
+            <table class="tabla-inventario audit-table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Usuario</th>
+                        <th>Acción</th>
+                        <th>Entidad</th>
+                        <th>Detalle</th>
+                        <th>Origen</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaAuditoria"></tbody>
+            </table>
         </section>
 
         <div id="modalCodigoBarrasProducto" class="modal-barcode-producto" aria-hidden="true">
@@ -1553,7 +1632,7 @@
 
 
   <!-- SCRIPTS -->
-<script type="module" src="../js/script.js"></script>
+<script type="module" src="../js/script.js?v=20260608-captcha"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 
 
@@ -1639,7 +1718,8 @@
             "panel-trabajadores": "panel-menu-personas",
             "panel-clientes": "panel-menu-personas",
             "panel-menu-configuracion": "panel-menu-configuracion",
-            "panel-seguridad": "panel-menu-configuracion"
+            "panel-seguridad": "panel-menu-configuracion",
+            "panel-auditoria": "panel-menu-configuracion"
         };
 
         return mapa[idPanel] || idPanel;
@@ -2834,14 +2914,14 @@
 
             if (!confirmar) return;
         } else {
-            const confirmarLimpieza = confirm(
-                "ELIMINACIÓN ADMINISTRATIVA\n\n" +
+            const confirmarPrueba = confirm(
+                "BORRADO DE PRUEBA\n\n" +
                 "Esto eliminará el producto y también sus ventas/devoluciones relacionadas.\n" +
-                "Úsalo únicamente para depurar registros creados por error.\n\n" +
+                "Úsalo solo para limpiar datos de prueba.\n\n" +
                 "Producto: " + nombreProducto
             );
 
-            if (!confirmarLimpieza) return;
+            if (!confirmarPrueba) return;
         }
 
         const confirmarFinal = confirm("Esta acción no se puede deshacer. ¿Confirmas la eliminación?");
@@ -2867,7 +2947,7 @@
                 if (
                     !forzar &&
                     resultado.mensaje.includes("ventas o devoluciones") &&
-                    confirm(resultado.mensaje + "\n\n¿Quieres hacer una eliminación administrativa y limpiar también ese historial relacionado?")
+                    confirm(resultado.mensaje + "\n\n¿Quieres hacer un borrado de prueba y limpiar también ese historial relacionado?")
                 ) {
                     eliminarProductoBD(idProducto, nombreProducto, true);
                     return;
@@ -2894,7 +2974,7 @@
 
         const confirmar = confirm(
             "¿Deseas eliminar todo el historial de ventas y devoluciones?\n\n" +
-            "Esto limpiará los registros de ventas/devoluciones seleccionados para depuración y no se puede deshacer."
+            "Esto limpiará los registros de ventas/devoluciones de prueba y no se puede deshacer."
         );
 
         if (!confirmar) return;
@@ -4535,7 +4615,6 @@
     async function cargarTrabajadoresBD() {
         const tabla = document.getElementById("tablaTrabajadores");
         const selector = document.getElementById("pagoTrabajadorSelect");
-        const buscador = document.getElementById("buscadorTrabajadores");
 
         if (!tabla || !selector || !usuarioEsAdmin()) return;
 
@@ -4566,31 +4645,7 @@
                 }
             });
 
-            const textoBusqueda = buscador ? buscador.value.toLowerCase().trim() : "";
-            const trabajadoresFiltrados = textoBusqueda
-                ? trabajadores.filter(function(trabajador) {
-                    const texto = [
-                        trabajador.id_trabajador,
-                        trabajador.nombre,
-                        trabajador.documento,
-                        trabajador.telefono,
-                        trabajador.cargo,
-                        trabajador.salario_base,
-                        trabajador.fecha_ingreso,
-                        trabajador.estado ? "activo" : "inactivo"
-                    ].join(" ").toLowerCase();
-
-                    return texto.includes(textoBusqueda);
-                })
-                : trabajadores;
-
-            if (trabajadoresFiltrados.length === 0) {
-                tabla.innerHTML = '<tr><td colspan="7">No hay trabajadores que coincidan con la búsqueda</td></tr>';
-                ocultarPaginacionAdmin("trabajadores", tabla);
-                return;
-            }
-
-            prepararPaginaAdmin(trabajadoresFiltrados, "trabajadores", 20, tabla, cargarTrabajadoresBD).forEach(function(trabajador) {
+            prepararPaginaAdmin(trabajadores, "trabajadores", 20, tabla, cargarTrabajadoresBD).forEach(function(trabajador) {
                 tabla.innerHTML += `
                     <tr>
                         <td>${trabajador.nombre}</td>
@@ -4598,7 +4653,7 @@
                         <td>${trabajador.telefono || "-"}</td>
                         <td>${trabajador.cargo}</td>
                         <td>${formatoPrecioBD(trabajador.salario_base)}</td>
-                        <td>${formatoFechaBD(trabajador.fecha_ingreso)}</td>
+                        <td>${new Date(trabajador.fecha_ingreso + "T00:00:00").toLocaleDateString()}</td>
                         <td class="${trabajador.estado ? "stock-alto" : "stock-bajo"}">${trabajador.estado ? "Activo" : "Inactivo"}</td>
                     </tr>
                 `;
@@ -5221,12 +5276,12 @@
             tabla.innerHTML = "";
 
             if (compras.error) {
-                tabla.innerHTML = `<tr><td colspan="8">${compras.mensaje}</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="15">${compras.mensaje}</td></tr>`;
                 return;
             }
 
             if (compras.length === 0) {
-                tabla.innerHTML = '<tr><td colspan="8">No hay compras de mercancía registradas</td></tr>';
+                tabla.innerHTML = '<tr><td colspan="15">No hay compras de mercancía registradas</td></tr>';
                 ocultarPaginacionAdmin("compras-mercancia", tabla);
                 return;
             }
@@ -5238,41 +5293,26 @@
 
                 tabla.innerHTML += `
                     <tr>
-                        <td>${formatoFechaBD(compra.fecha)}</td>
+                        <td>${new Date(compra.fecha + "T00:00:00").toLocaleDateString()}</td>
                         <td>${limpiarTextoBD(compra.proveedor)}</td>
-                        <td>
-                            <div class="compact-stack-cell">
-                                <strong>${limpiarTextoBD(productoTexto)}</strong>
-                                <span>${limpiarTextoBD(compra.codigo || "Sin código")} | ${limpiarTextoBD(categoriaTexto)}</span>
-                                <small>${tipoTexto}</small>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="compact-stack-cell">
-                                <strong>${limpiarTextoBD(compra.color || "-")}</strong>
-                                <span>Talla ${limpiarTextoBD(compra.talla || "-")}</span>
-                            </div>
-                        </td>
+                        <td>${tipoTexto}</td>
+                        <td>${limpiarTextoBD(compra.codigo || "-")}</td>
+                        <td>${limpiarTextoBD(productoTexto)}</td>
+                        <td>${limpiarTextoBD(categoriaTexto)}</td>
+                        <td>${limpiarTextoBD(compra.color || "-")}</td>
+                        <td>${limpiarTextoBD(compra.talla || "-")}</td>
                         <td>${compra.cantidad}</td>
-                        <td>
-                            <div class="compact-stack-cell money-stack">
-                                <strong>${formatoPrecioBD(compra.costo_unitario)}</strong>
-                                <span>Subtotal: ${formatoPrecioBD(compra.subtotal)}</span>
-                                <small>Envío: ${formatoPrecioBD(compra.costo_envio)}</small>
-                            </div>
-                        </td>
+                        <td>${formatoPrecioBD(compra.costo_unitario)}</td>
+                        <td>${formatoPrecioBD(compra.subtotal)}</td>
+                        <td>${formatoPrecioBD(compra.costo_envio)}</td>
                         <td>${formatoPrecioBD(compra.total_compra)}</td>
-                        <td>
-                            <div class="compact-stack-cell purchase-detail-cell">
-                                <strong>${limpiarTextoBD(compra.usuario || "Sin usuario")}</strong>
-                                <span>${limpiarTextoBD(compra.detalle || "Sin detalle")}</span>
-                            </div>
-                        </td>
+                        <td>${limpiarTextoBD(compra.usuario || "Sin usuario")}</td>
+                        <td>${limpiarTextoBD(compra.detalle || "Sin detalle")}</td>
                     </tr>
                 `;
             });
         } catch (error) {
-            tabla.innerHTML = '<tr><td colspan="8">Error al cargar compras de mercancía</td></tr>';
+            tabla.innerHTML = '<tr><td colspan="15">Error al cargar compras de mercancía</td></tr>';
             console.error(error);
         }
     }
@@ -5333,16 +5373,48 @@
         }
     }
 
+    async function actualizarCorreoUsuarioBD(evento) {
+        evento.preventDefault();
+
+        if (!exigirAdminFrontend()) return;
+
+        const datos = new FormData();
+        datos.append("id_usuario", document.getElementById("correoUsuarioSelect").value);
+        datos.append("correo", document.getElementById("correoUsuarioNuevo").value);
+
+        try {
+            const respuesta = await fetch("../php/usuario_correo_actualizar.php", {
+                method: "POST",
+                body: datos
+            });
+            const resultado = await respuesta.json();
+
+            alert(resultado.mensaje);
+
+            if (!resultado.error) {
+                document.getElementById("formActualizarCorreoUsuario").reset();
+                cargarUsuariosSeguridadBD();
+            }
+        } catch (error) {
+            alert("Error al actualizar el correo.");
+            console.error(error);
+        }
+    }
+
     async function cargarUsuariosSeguridadBD() {
         const selector = document.getElementById("passwordUsuarioSelect");
+        const selectorCorreo = document.getElementById("correoUsuarioSelect");
+        const selectorAuditoria = document.getElementById("auditoriaUsuario");
 
-        if (!selector || !usuarioEsAdmin()) return;
+        if ((!selector && !selectorCorreo && !selectorAuditoria) || !usuarioEsAdmin()) return;
 
         try {
             const respuesta = await fetch("../php/usuarios_listar.php");
             const usuarios = await respuesta.json();
 
-            selector.innerHTML = '<option value="">Seleccionar usuario</option>';
+            if (selector) selector.innerHTML = '<option value="">Seleccionar usuario</option>';
+            if (selectorCorreo) selectorCorreo.innerHTML = '<option value="">Seleccionar usuario</option>';
+            if (selectorAuditoria) selectorAuditoria.innerHTML = '<option value="">Todos los usuarios</option>';
 
             if (usuarios.error) {
                 console.error(usuarios.mensaje);
@@ -5353,10 +5425,148 @@
                 const opcion = document.createElement("option");
                 opcion.value = usuario.id_usuario;
                 opcion.textContent = `${usuario.nombre} - ${usuario.rol} - ${usuario.correo}`;
-                selector.appendChild(opcion);
+                if (selector) selector.appendChild(opcion);
+
+                if (selectorCorreo) {
+                    const opcionCorreo = opcion.cloneNode(true);
+                    opcionCorreo.dataset.correo = usuario.correo;
+                    selectorCorreo.appendChild(opcionCorreo);
+                }
+
+                if (selectorAuditoria) {
+                    const opcionAuditoria = document.createElement("option");
+                    opcionAuditoria.value = usuario.id_usuario;
+                    opcionAuditoria.textContent = `${usuario.nombre} - ${usuario.rol}`;
+                    selectorAuditoria.appendChild(opcionAuditoria);
+                }
             });
         } catch (error) {
             console.error("Error al cargar usuarios", error);
+        }
+    }
+
+    function etiquetaAccionAuditoria(accion) {
+        const etiquetas = {
+            producto_creado: "Producto creado",
+            producto_actualizado: "Producto actualizado",
+            producto_eliminado: "Producto eliminado",
+            venta_estado_actualizado: "Venta actualizada",
+            password_actualizado: "Contraseña cambiada",
+            password_restablecido: "Contraseña restablecida",
+            usuario_correo_actualizado: "Correo actualizado"
+        };
+
+        return etiquetas[accion] || accion || "-";
+    }
+
+    function detalleAuditoriaLegible(detalle) {
+        if (!detalle) return "-";
+
+        let datos = detalle;
+
+        if (typeof detalle === "string") {
+            try {
+                datos = JSON.parse(detalle);
+            } catch (error) {
+                return limpiarTextoBD(detalle);
+            }
+        }
+
+        if (typeof datos !== "object") {
+            return limpiarTextoBD(datos);
+        }
+
+        const etiquetas = {
+            codigo: "Codigo",
+            nombre: "Nombre",
+            cantidad: "Cantidad",
+            precio: "Precio",
+            imagenes: "Imagenes",
+            forzado: "Forzado",
+            ventas_relacionadas: "Ventas relacionadas",
+            devoluciones_relacionadas: "Devoluciones relacionadas",
+            estado_anterior: "Estado anterior",
+            estado_nuevo: "Estado nuevo",
+            modo: "Modo",
+            admin_id: "Admin ID",
+            correo_nuevo: "Correo nuevo"
+        };
+
+        const partes = Object.entries(datos).map(function([clave, valor]) {
+            const etiqueta = etiquetas[clave] || clave.replaceAll("_", " ");
+            return `<span><strong>${limpiarTextoBD(etiqueta)}:</strong> ${limpiarTextoBD(valor)}</span>`;
+        });
+
+        return partes.length > 0 ? partes.join("") : "-";
+    }
+
+    function resumenDispositivoAuditoria(userAgent) {
+        const texto = String(userAgent || "");
+
+        if (texto.includes("Edg/")) return "Edge";
+        if (texto.includes("Chrome/")) return "Chrome";
+        if (texto.includes("Firefox/")) return "Firefox";
+        if (texto.includes("Safari/")) return "Safari";
+
+        return texto ? "Navegador" : "-";
+    }
+
+    async function cargarAuditoriaBD() {
+        const tabla = document.getElementById("tablaAuditoria");
+
+        if (!tabla || !usuarioEsAdmin()) return;
+
+        const parametros = new URLSearchParams();
+        const buscar = document.getElementById("buscadorAuditoria")?.value.trim() || "";
+        const accion = document.getElementById("auditoriaAccion")?.value || "";
+        const usuario = document.getElementById("auditoriaUsuario")?.value || "";
+        const desde = document.getElementById("auditoriaDesde")?.value || "";
+        const hasta = document.getElementById("auditoriaHasta")?.value || "";
+
+        if (buscar) parametros.append("buscar", buscar);
+        if (accion) parametros.append("accion", accion);
+        if (usuario) parametros.append("usuario", usuario);
+        if (desde) parametros.append("desde", desde);
+        if (hasta) parametros.append("hasta", hasta);
+
+        try {
+            const respuesta = await fetch("../php/auditoria_listar.php?" + parametros.toString());
+            const resultado = await respuesta.json();
+
+            tabla.innerHTML = "";
+
+            if (resultado.error) {
+                tabla.innerHTML = `<tr><td colspan="6">${limpiarTextoBD(resultado.mensaje)}</td></tr>`;
+                ocultarPaginacionAdmin("auditoria", tabla);
+                return;
+            }
+
+            const eventos = resultado.eventos || [];
+
+            if (eventos.length === 0) {
+                tabla.innerHTML = '<tr><td colspan="6">No hay eventos de auditoría para mostrar</td></tr>';
+                ocultarPaginacionAdmin("auditoria", tabla);
+                return;
+            }
+
+            prepararPaginaAdmin(eventos, "auditoria", 20, tabla, cargarAuditoriaBD).forEach(function(evento) {
+                const usuarioTexto = `${evento.usuario_nombre || "Sistema"}${evento.usuario_correo ? " - " + evento.usuario_correo : ""}`;
+
+                tabla.innerHTML += `
+                    <tr>
+                        <td>${formatoFechaBD(evento.fecha, true)}</td>
+                        <td>${limpiarTextoBD(usuarioTexto)}<br><small>${limpiarTextoBD(evento.rol || "-")}</small></td>
+                        <td><strong>${limpiarTextoBD(etiquetaAccionAuditoria(evento.accion))}</strong></td>
+                        <td>${limpiarTextoBD(evento.entidad || "-")}<br><small>${limpiarTextoBD(evento.id_entidad || "-")}</small></td>
+                        <td><div class="audit-detail-cell">${detalleAuditoriaLegible(evento.detalle)}</div></td>
+                        <td>${limpiarTextoBD(evento.ip || "-")}<br><small>${limpiarTextoBD(resumenDispositivoAuditoria(evento.user_agent))}</small></td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            tabla.innerHTML = '<tr><td colspan="6">Error al cargar auditoría</td></tr>';
+            ocultarPaginacionAdmin("auditoria", tabla);
+            console.error(error);
         }
     }
 
@@ -6041,7 +6251,6 @@
             console.error(error);
         }
     }
-
     function etiquetaPeriodoGrafico(periodo) {
         const texto = String(periodo || "");
         const partes = texto.split("-");
@@ -6066,6 +6275,12 @@
         return Number(item.neto ?? item.ventas ?? item.total ?? 0);
     }
 
+    function hayVentasGrafico(datos) {
+        return Array.isArray(datos) && datos.some(function(item) {
+            return valorGrafico(item) > 0;
+        });
+    }
+
     function formatoCortoGrafico(valor) {
         const numero = Math.abs(Number(valor || 0));
 
@@ -6082,7 +6297,7 @@
 
     function etiquetaCompletaGrafico(item, opciones = {}) {
         if (opciones.tipo === "dia") {
-            return "Día " + etiquetaDiaGrafico(item.fecha_dia || item.fecha || item.periodo);
+            return "Dia " + etiquetaDiaGrafico(item.fecha_dia || item.fecha || item.periodo);
         }
 
         return etiquetaPeriodoGrafico(item.periodo || item.fecha_dia || item.fecha);
@@ -6094,8 +6309,8 @@
 
         if (!contenedor) return;
 
-        if (registros.length === 0) {
-            contenedor.innerHTML = '<p class="empty-dashboard">Sin datos destacados.</p>';
+        if (registros.length === 0 || !hayVentasGrafico(registros)) {
+            contenedor.innerHTML = '<p class="empty-dashboard">Sin ventas registradas todavia.</p>';
             return;
         }
 
@@ -6103,10 +6318,10 @@
             return valorGrafico(item) > valorGrafico(actual) ? item : actual;
         }, registros[0]);
         const etiqueta = etiquetaCompletaGrafico(mejor, opciones);
-        const titulo = opciones.tipo === "dia" ? "Día con más ventas" : "Mejor mes";
+        const titulo = opciones.tipo === "dia" ? "Dia con mas ventas" : "Mejor mes";
 
         contenedor.innerHTML = `
-            <span aria-hidden="true">${opciones.icono || "↗"}</span>
+            <span aria-hidden="true">${opciones.icono || "+"}</span>
             <div>
                 <strong>${titulo}: ${limpiarTextoBD(etiqueta)}</strong>
                 <small>${formatoPrecioBD(valorGrafico(mejor))}</small>
@@ -6151,7 +6366,7 @@
         const marcasY = [maximo, maximo * 0.66, maximo * 0.33, 0];
 
         contenedor.innerHTML = `
-            <svg viewBox="0 0 ${ancho} ${alto}" role="img" aria-label="${limpiarTextoBD(opciones.titulo || "Gráfico de ventas")}">
+            <svg viewBox="0 0 ${ancho} ${alto}" role="img" aria-label="${limpiarTextoBD(opciones.titulo || "Grafico de ventas")}">
                 <defs>
                     <linearGradient id="${idContenedor}Area" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stop-color="#954053" stop-opacity="0.18" />
@@ -6207,12 +6422,12 @@
         document.getElementById("totalVentasUltimosMesesGrafico").textContent = "Total: " + formatoPrecioBD(totalUltimosMeses);
         document.getElementById("promedioVentasAnioGrafico").textContent = "Promedio: " + formatoPrecioBD(promedioAnio);
 
-        renderizarGraficoLinealAdmin("graficoVentasMes", ventasMesDias, { tipo: "dia", titulo: "Ventas por día" });
-        renderizarGraficoLinealAdmin("graficoVentasUltimosMeses", ultimosMeses, { titulo: "Ventas netas últimos meses" });
-        renderizarGraficoLinealAdmin("graficoVentasAnio", ventasAnio, { titulo: "Balance mensual del año" });
-        renderizarDatoDestacadoGrafico("datoDestacadoVentasMes", ventasMesDias, { tipo: "dia", icono: "♡" });
-        renderizarDatoDestacadoGrafico("datoDestacadoVentasUltimosMeses", ultimosMeses, { icono: "↗" });
-        renderizarDatoDestacadoGrafico("datoDestacadoVentasAnio", ventasAnio, { icono: "☆" });
+        renderizarGraficoLinealAdmin("graficoVentasMes", ventasMesDias, { tipo: "dia", titulo: "Ventas por dia" });
+        renderizarGraficoLinealAdmin("graficoVentasUltimosMeses", ultimosMeses, { titulo: "Ventas netas ultimos meses" });
+        renderizarGraficoLinealAdmin("graficoVentasAnio", ventasAnio, { titulo: "Balance mensual del ano" });
+        renderizarDatoDestacadoGrafico("datoDestacadoVentasMes", ventasMesDias, { tipo: "dia", icono: "*" });
+        renderizarDatoDestacadoGrafico("datoDestacadoVentasUltimosMeses", ultimosMeses, { icono: "+" });
+        renderizarDatoDestacadoGrafico("datoDestacadoVentasAnio", ventasAnio, { icono: "*" });
     }
     
     async function cargarInicioAdmin() {
@@ -6526,6 +6741,7 @@
             cargarComprasMercanciaBD();
             cargarMercanciaPendienteProductoBD();
             cargarUsuariosSeguridadBD();
+            cargarAuditoriaBD();
         }
     }
 
@@ -6580,14 +6796,30 @@
         buscadorClientes.addEventListener("input", renderizarClientesBD);
     }
 
-    const buscadorTrabajadores = document.getElementById("buscadorTrabajadores");
+    const buscadorAuditoria = document.getElementById("buscadorAuditoria");
 
-    if (buscadorTrabajadores) {
-        buscadorTrabajadores.addEventListener("input", function() {
-            paginacionAdmin.trabajadores = 1;
-            cargarTrabajadoresBD();
+    if (buscadorAuditoria) {
+        buscadorAuditoria.addEventListener("input", function() {
+            paginacionAdmin.auditoria = 1;
+            cargarAuditoriaBD();
         });
     }
+
+    ["auditoriaAccion", "auditoriaUsuario", "auditoriaDesde", "auditoriaHasta"].forEach(function(idFiltro) {
+        document.getElementById(idFiltro)?.addEventListener("change", function() {
+            paginacionAdmin.auditoria = 1;
+            cargarAuditoriaBD();
+        });
+    });
+
+    document.getElementById("btnLimpiarAuditoria")?.addEventListener("click", function() {
+        ["buscadorAuditoria", "auditoriaAccion", "auditoriaUsuario", "auditoriaDesde", "auditoriaHasta"].forEach(function(idFiltro) {
+            const elemento = document.getElementById(idFiltro);
+            if (elemento) elemento.value = "";
+        });
+        paginacionAdmin.auditoria = 1;
+        cargarAuditoriaBD();
+    });
 
     const formGasto = document.getElementById("formGasto");
     const formInversion = document.getElementById("formInversion");
@@ -6604,6 +6836,7 @@
     const mercanciaPendienteSelect = document.getElementById("mercanciaPendienteSelect");
     const formCambiarPassword = document.getElementById("formCambiarPassword");
     const formRestablecerPassword = document.getElementById("formRestablecerPassword");
+    const formActualizarCorreoUsuario = document.getElementById("formActualizarCorreoUsuario");
     const formReporteFechas = document.getElementById("formReporteFechas");
     const formVentaAdmin = document.getElementById("formVentaAdmin");
 
@@ -6672,6 +6905,15 @@
     if (formRestablecerPassword) {
         formRestablecerPassword.addEventListener("submit", restablecerPasswordUsuarioBD);
     }
+
+    if (formActualizarCorreoUsuario) {
+        formActualizarCorreoUsuario.addEventListener("submit", actualizarCorreoUsuarioBD);
+    }
+
+    document.getElementById("correoUsuarioSelect")?.addEventListener("change", function(evento) {
+        const seleccionado = evento.target.selectedOptions[0];
+        document.getElementById("correoUsuarioNuevo").value = seleccionado ? (seleccionado.dataset.correo || "") : "";
+    });
 
     if (formReporteFechas) {
         formReporteFechas.addEventListener("submit", function(evento) {

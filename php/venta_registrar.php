@@ -48,6 +48,8 @@ try {
     $talla = strtoupper(trim($_POST["talla"] ?? ""));
     $codigoBarras = strtoupper(trim($_POST["codigo_barras"] ?? ""));
     $usuarioActual = usuario_actual();
+    exigir_csrf_si_autenticado();
+    exigir_origen_mismo_sitio();
     $canal_venta = trim($_POST["canal_venta"] ?? ($usuarioActual ? "tienda_fisica" : "pagina_web"));
     $tipo_entrega = trim($_POST["tipo_entrega"] ?? ($usuarioActual ? "recoger_tienda" : "envio_local"));
     $esPedidoWeb = $canal_venta === "pagina_web";

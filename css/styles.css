@@ -103,6 +103,55 @@ a {
     box-shadow: 0 0 0 3px rgba(184, 92, 111, 0.14);
 }
 
+.captcha-login {
+    margin: 2px 0 14px;
+}
+
+.captcha-login label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.captcha-login-row {
+    display: grid;
+    grid-template-columns: minmax(82px, 0.8fr) minmax(0, 1fr) 44px;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.captcha-question {
+    display: grid;
+    place-items: center;
+    min-height: 44px;
+    border: 1px solid #d9c1c3;
+    border-radius: var(--radius);
+    background: #fff8f5;
+    color: var(--brand-dark);
+    font-weight: 800;
+}
+
+#loginBox .captcha-login-row input {
+    margin-bottom: 0;
+}
+
+#loginBox .captcha-refresh {
+    width: 44px;
+    padding: 0;
+    border: 1px solid #d9c1c3;
+    background: #fff;
+    color: var(--brand-dark);
+    font-size: 22px;
+    line-height: 1;
+}
+
+#loginBox .captcha-refresh:hover {
+    background: #fff8f5;
+    color: var(--brand);
+}
+
 #loginBox button,
 .btn,
 .btn-agregar,
@@ -140,6 +189,97 @@ a {
 .modal-acciones .btn-confirmar:hover {
     background: var(--brand-dark);
     transform: translateY(-1px);
+}
+
+#loginBox .login-link {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--brand-dark);
+    font-size: 14px;
+    text-align: center;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#loginBox .login-link:hover {
+    background: transparent;
+    color: var(--brand);
+}
+
+#loginBox .mail-login-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.gmail-mark {
+    position: relative;
+    display: inline-block;
+    width: 22px;
+    height: 16px;
+    border: 2px solid #dadce0;
+    border-radius: 3px;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.gmail-mark::before,
+.gmail-mark::after,
+.gmail-mark i,
+.gmail-mark b,
+.gmail-mark em {
+    content: "";
+    position: absolute;
+    display: block;
+}
+
+.gmail-mark::before {
+    left: 1px;
+    top: 1px;
+    width: 9px;
+    height: 2px;
+    background: #ea4335;
+    transform: rotate(34deg);
+    transform-origin: left center;
+}
+
+.gmail-mark::after {
+    right: 1px;
+    top: 1px;
+    width: 9px;
+    height: 2px;
+    background: #fbbc04;
+    transform: rotate(-34deg);
+    transform-origin: right center;
+}
+
+.gmail-mark i {
+    left: -2px;
+    top: -2px;
+    width: 3px;
+    height: 16px;
+    background: #ea4335;
+}
+
+.gmail-mark b {
+    right: -2px;
+    top: -2px;
+    width: 3px;
+    height: 16px;
+    background: #34a853;
+}
+
+.gmail-mark em {
+    left: 1px;
+    bottom: -2px;
+    width: 18px;
+    height: 3px;
+    background: #4285f4;
 }
 
 #mensaje,
@@ -2680,6 +2820,43 @@ h2 {
 
 .tabla-inventario .btn-eliminar:hover {
     background: #922b38;
+}
+
+.audit-filters {
+    flex-wrap: wrap;
+}
+
+.audit-filters input,
+.audit-filters select {
+    max-width: 260px;
+}
+
+.audit-filters #buscadorAuditoria {
+    max-width: 360px;
+}
+
+.audit-filters .btn {
+    width: auto;
+    min-width: 110px;
+}
+
+.audit-table {
+    min-width: 980px;
+}
+
+.audit-detail-cell {
+    display: grid;
+    gap: 4px;
+    max-width: 380px;
+}
+
+.audit-detail-cell span {
+    display: block;
+    line-height: 1.35;
+}
+
+.audit-table small {
+    color: var(--muted);
 }
 
 .inventory-product-cell {

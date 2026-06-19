@@ -24,6 +24,7 @@ if ($usuario) {
 echo json_encode([
     "autenticado" => $usuario !== null,
     "usuario" => $usuario,
+    "csrf_token" => $usuario !== null ? csrf_token_actual() : "",
     "mensaje" => $usuario === null ? mensaje_horario_vendedor() : ""
 ], JSON_UNESCAPED_UNICODE);
 

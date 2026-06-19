@@ -1,0 +1,227 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    font-family: 'Segoe UI', sans-serif;
+    background: #ffffff;
+    color: #4a2c35;
+}
+
+#loginBox{
+    text-align: center;
+    padding: 50px;
+}
+
+#loginBox input{
+    padding: 10px;
+    margin: 10px;
+}
+
+#loginBox button{
+    padding: 10px 20px;
+    background: #c77d9c;
+    color: white;
+    border: none;
+    border-radius: 10px;
+}
+
+/*HEADER*/
+header{
+    background: linear-gradient(135deg, #fff, #ffe6f0);
+    text-align: center;
+    padding: 60px 20px;
+}
+
+header img{
+    width: 160px;
+    margin-bottom: 15px;
+}
+
+header h1{
+    font-size: 3rem;
+    color: #c77d9c;
+}
+
+header p{
+    color: #7a5663;
+    margin-top: 10px;
+}
+
+/*NAV*/
+
+nav{
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding: 15px;
+    border-top: 1px solid #f3d9e5;
+    border-bottom: 1px solid #f3d9e5;
+    background: #fff;
+}
+
+nav a{
+    text-decoration: none;
+    color: #a85c79;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+nav a:hover{
+    color: #d4af37;
+}
+
+
+/*SECTIONS*/
+section{
+    padding: 60px 20px;
+    max-width: 1100px;
+    margin:auto;
+}
+
+h2{
+    text-align: center;
+    margin-bottom: 30px;
+    color: #c77d9c;
+    font-size: 2rem;
+}
+
+/*INICIO*/
+.inicio {
+    text-align: center;
+}
+
+.inicio h2 {
+    font-size: 2.2rem;
+}
+
+.galeria{
+    width: 100%;
+}
+/*PRODUCTOS*/
+.contenedor-productos{
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+.card{
+    max-width: 250PX;
+    margin: auto;
+    background: #ffffff;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+}
+
+.card:hover{
+    transform: translateY(-5px);
+}
+
+.card img{
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+}
+
+.card h3{
+    padding: 19px;
+    color: #a85c79;
+    font-size: 1.4rem;
+}
+
+.card p{
+    padding: 0 15px 20px;
+    color: #7a5663;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+
+
+/*CONTACTO*/
+.contacto{
+    background: #fff0f6;
+    border-radius: 25px;
+    text-align: center;
+    padding: 40px;
+}
+
+.botones a{
+    display: inline-block;
+    margin: 10px;
+    padding: 14px 28px;
+    border-radius: 30px;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-volver {
+    margin-left: 20px;
+    background: #d62976;
+    color: #ffe6f0;
+    border: none;
+}
+
+.cerrar-sesion{
+    display: flex;
+    justify-content: center;
+    margin-left: 150px;
+    margin: 40px 0;
+}
+
+#btnCerrar{
+    background: #d62976;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#btnCerrar:hover {
+    background: #a80000;
+}
+
+.whatsapp{background: #25d366;}
+.instagram{background: #d62976;}
+
+/*FOOTER*/
+footer{
+    text-align: center;
+    padding: 20px;
+    border-top:1px solid #eee ;
+    color: #7a5663;
+    margin-top: 30PX;
+}
+
+/*responsive*/
+@media (max-width: 768px){
+    header h1 {
+        font-size: 2.2rem;
+    }
+    nav{
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .contenedor-productos{
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .card{
+        width: 90%;
+        max-width: 320px;
+    }
+}

@@ -3,6 +3,7 @@
 require_once "conexion.php";
 require_once "auth_guard.php";
 require_once "factura_util.php";
+require_once "auditoria.php";
 
 header("Content-Type: application/json; charset=UTF-8");
 
@@ -131,6 +132,11 @@ try {
     if ($estadoNuevo === "pagada") {
         $factura = asegurar_factura_venta($conexion, $idVenta);
     }
+
+    registrar_auditoria($conexion, "venta_estado_actualizado", "venta", $idVenta, [
+        "estado_anterior" => $venta["estado"],
+        "estado_nuevo" => $estadoNuevo
+    ]);
 
     $conexion->commit();
 

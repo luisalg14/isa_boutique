@@ -2,6 +2,7 @@
 
 require_once "conexion.php";
 require_once "auth_guard.php";
+require_once "auditoria.php";
 
 header("Content-Type: application/json; charset=UTF-8");
 
@@ -158,6 +159,13 @@ try {
     $consultaEliminar = $conexion->prepare($sqlEliminar);
     $consultaEliminar->execute([
         ":id_producto" => $id_producto
+    ]);
+
+    registrar_auditoria($conexion, "producto_eliminado", "producto", $id_producto, [
+        "nombre" => $producto["nombre"],
+        "forzado" => $forzar,
+        "ventas_relacionadas" => intval($relaciones["ventas"]),
+        "devoluciones_relacionadas" => intval($relaciones["devoluciones"])
     ]);
 
     $conexion->commit();

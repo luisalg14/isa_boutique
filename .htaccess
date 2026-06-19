@@ -1,7 +1,7 @@
 Options -Indexes
 ServerSignature Off
 
-<FilesMatch "^(\\.env|\\.gitignore|composer\\.(json|lock))$">
+<FilesMatch "^(\\.env|\\.gitignore|composer\\.(json|lock)|.*\\.(sql|bak|backup|ini|log))$">
     Require all denied
 </FilesMatch>
 
@@ -13,4 +13,5 @@ ServerSignature Off
     Header always set X-Content-Type-Options "nosniff"
     Header always set X-Frame-Options "SAMEORIGIN"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
 </IfModule>

@@ -17,8 +17,21 @@
             <input type="email" id="correo" placeholder="Correo">
             <input type="password" id="clave" placeholder="Contraseña">
 
+            <div class="captcha-login">
+                <label for="captchaRespuesta">Verificacion humana</label>
+                <div class="captcha-login-row">
+                    <span id="captchaPregunta" class="captcha-question">...</span>
+                    <input type="number" id="captchaRespuesta" placeholder="Respuesta" inputmode="numeric">
+                    <button type="button" id="btnRefrescarCaptcha" class="captcha-refresh" title="Nueva pregunta" aria-label="Nueva pregunta">&#8635;</button>
+                </div>
+            </div>
+
             <button id="btnEntrar">Ingresar</button>
 
+            <button type="button" id="btnRecuperarPassword" class="login-link mail-login-link">
+                <span class="gmail-mark" aria-hidden="true"><i></i><b></b><em></em></span>
+                Recuperar con mi correo
+            </button>
             <p id="mensaje"></p>
         </div>
     </div>
@@ -315,7 +328,7 @@
 
     </div>
 
-    <script type="module" src="../js/script.js"></script>
+    <script type="module" src="../js/script.js?v=20260608-captcha"></script>
     <script src="../js/vendedor.js?v=20260528-2"></script>
 </body>
 </html>

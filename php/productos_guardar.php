@@ -2,6 +2,8 @@
 
 require_once "conexion.php";
 require_once "auth_guard.php";
+require_once "upload_seguro.php";
+require_once "auditoria.php";
 
 header("Content-Type: application/json; charset=UTF-8");
 
@@ -204,43 +206,7 @@ try {
         exit;
     }
 
-    $imagenesGuardadas = [];
-
-    if (isset($_FILES["imagenes"]) && is_array($_FILES["imagenes"]["name"])) {
-        $carpetaDestino = "../img/productos/";
-
-        if (!is_dir($carpetaDestino)) {
-            mkdir($carpetaDestino, 0777, true);
-        }
-
-        foreach ($_FILES["imagenes"]["name"] as $indice => $nombreOriginal) {
-            if ($_FILES["imagenes"]["error"][$indice] !== UPLOAD_ERR_OK) continue;
-
-            $extension = pathinfo(basename($nombreOriginal), PATHINFO_EXTENSION);
-            $nombreArchivo = uniqid("producto_") . "." . strtolower($extension);
-            $rutaServidor = $carpetaDestino . $nombreArchivo;
-            $rutaGuardarBD = "img/productos/" . $nombreArchivo;
-
-            if (move_uploaded_file($_FILES["imagenes"]["tmp_name"][$indice], $rutaServidor)) {
-                $imagenesGuardadas[] = $rutaGuardarBD;
-            }
-        }
-    } elseif (isset($_FILES["imagen"]) && $_FILES["imagen"]["error"] === UPLOAD_ERR_OK) {
-        $carpetaDestino = "../img/productos/";
-
-        if (!is_dir($carpetaDestino)) {
-            mkdir($carpetaDestino, 0777, true);
-        }
-
-        $extension = pathinfo(basename($_FILES["imagen"]["name"]), PATHINFO_EXTENSION);
-        $nombreArchivo = uniqid("producto_") . "." . strtolower($extension);
-        $rutaServidor = $carpetaDestino . $nombreArchivo;
-        $rutaGuardarBD = "img/productos/" . $nombreArchivo;
-
-        if (move_uploaded_file($_FILES["imagen"]["tmp_name"], $rutaServidor)) {
-            $imagenesGuardadas[] = $rutaGuardarBD;
-        }
-    }
+    $imagenesGuardadas = guardar_imagenes_producto_seguras();
 
     if (count($imagenesGuardadas) === 0) {
         $imagenesGuardadas[] = "img/logo.png.png";
@@ -428,6 +394,14 @@ try {
             ]);
         }
     }
+
+    registrar_auditoria($conexion, "producto_creado", "producto", $idProducto, [
+        "codigo" => $codigo,
+        "nombre" => $nombre,
+        "cantidad" => $cantidad,
+        "precio" => $precio,
+        "imagenes" => count($imagenesGuardadas)
+    ]);
 
     $conexion->commit();
 

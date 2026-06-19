@@ -5,9 +5,15 @@ require_once "conexion.php";
 
 header("Content-Type: application/json; charset=UTF-8");
 
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    responder_json_error("Metodo no permitido", 405);
+}
+
 $usuario = usuario_actual();
 
 if ($usuario) {
+    exigir_csrf_si_autenticado();
+
     limpiar_sesion_usuario(
         $conexion,
         intval($usuario["id_usuario"]),

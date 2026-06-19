@@ -2,6 +2,14 @@
 
 date_default_timezone_set("America/Bogota");
 
+if (PHP_SAPI !== "cli" && !headers_sent()) {
+    header("X-Content-Type-Options: nosniff");
+    header("X-Frame-Options: SAMEORIGIN");
+    header("Referrer-Policy: strict-origin-when-cross-origin");
+    header("Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()");
+    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+}
+
 $configLocal = __DIR__ . "/config.local.php";
 
 if (file_exists($configLocal)) {

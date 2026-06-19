@@ -1,6 +1,9 @@
 <?php
 
 if (session_status() === PHP_SESSION_NONE) {
+    ini_set("session.use_strict_mode", "1");
+    ini_set("session.cookie_httponly", "1");
+
     $esHttps = (
         (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") ||
         (($_SERVER["SERVER_PORT"] ?? "") === "443")
@@ -16,6 +19,70 @@ if (session_status() === PHP_SESSION_NONE) {
     ]);
 
     session_start();
+}
+
+function metodo_inseguro() {
+    return in_array($_SERVER["REQUEST_METHOD"] ?? "GET", ["POST", "PUT", "PATCH", "DELETE"], true);
+}
+
+function origen_mismo_sitio() {
+    $origen = $_SERVER["HTTP_ORIGIN"] ?? "";
+
+    if ($origen === "") {
+        return true;
+    }
+
+    $host = $_SERVER["HTTP_HOST"] ?? "";
+    $esHttps = (
+        (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") ||
+        (($_SERVER["SERVER_PORT"] ?? "") === "443")
+    );
+    $esperado = ($esHttps ? "https://" : "http://") . $host;
+
+    return strcasecmp(rtrim($origen, "/"), rtrim($esperado, "/")) === 0;
+}
+
+function exigir_origen_mismo_sitio() {
+    if (metodo_inseguro() && !origen_mismo_sitio()) {
+        responder_json_error("Solicitud rechazada por origen no permitido", 403);
+    }
+}
+
+function csrf_token_actual() {
+    if (empty($_SESSION["csrf_token"])) {
+        $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
+    }
+
+    $esHttps = (
+        (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") ||
+        (($_SERVER["SERVER_PORT"] ?? "") === "443")
+    );
+
+    setcookie("isa_csrf_token", $_SESSION["csrf_token"], [
+        "expires" => 0,
+        "path" => "/",
+        "domain" => "",
+        "secure" => $esHttps,
+        "httponly" => false,
+        "samesite" => "Lax"
+    ]);
+
+    return $_SESSION["csrf_token"];
+}
+
+function exigir_csrf_si_autenticado() {
+    if (!metodo_inseguro() || !usuario_actual()) {
+        return;
+    }
+
+    exigir_origen_mismo_sitio();
+
+    $tokenSesion = csrf_token_actual();
+    $tokenRecibido = $_SERVER["HTTP_X_CSRF_TOKEN"] ?? ($_POST["csrf_token"] ?? ($_COOKIE["isa_csrf_token"] ?? ""));
+
+    if ($tokenRecibido === "" || !hash_equals($tokenSesion, $tokenRecibido)) {
+        responder_json_error("Token de seguridad invalido. Recarga la pagina e intenta de nuevo.", 403);
+    }
 }
 
 function usuario_actual() {
@@ -134,6 +201,8 @@ function exigir_sesion() {
     if (!$usuario) {
         responder_no_autorizado();
     }
+
+    exigir_csrf_si_autenticado();
 
     return $usuario;
 }

@@ -1,6 +1,36 @@
 ﻿// ===============================
 // FUNCIONES DEL LOGIN
 // ===============================
+let csrfToken = "";
+const fetchOriginal = window.fetch.bind(window);
+
+function guardarCsrfToken(token) {
+    csrfToken = token || "";
+}
+
+function esMetodoProtegido(method) {
+    return ["POST", "PUT", "PATCH", "DELETE"].includes((method || "GET").toUpperCase());
+}
+
+function esUrlMismoOrigen(input) {
+    const url = typeof input === "string" ? input : input.url;
+    return new URL(url, window.location.href).origin === window.location.origin;
+}
+
+window.fetch = function(input, opciones = {}) {
+    const method = opciones.method || (typeof input !== "string" && input.method) || "GET";
+
+    if (csrfToken && esMetodoProtegido(method) && esUrlMismoOrigen(input)) {
+        const headers = new Headers(opciones.headers || {});
+        headers.set("X-CSRF-Token", csrfToken);
+        opciones = {
+            ...opciones,
+            headers
+        };
+    }
+
+    return fetchOriginal(input, opciones);
+};
 
 function mostrarLogin(loginBox, contenido) {
     loginBox.style.display = "flex";
@@ -79,6 +109,7 @@ export async function verificarSesion(loginBox, contenido) {
     try {
         const respuesta = await fetch(rutaApi("sesion_actual.php"));
         const sesion = await respuesta.json();
+        guardarCsrfToken(sesion.csrf_token);
 
         if (sesion.autenticado) {
             mostrarContenido(loginBox, contenido);
@@ -101,9 +132,11 @@ export async function verificarSesion(loginBox, contenido) {
 }
 
 export async function iniciarSesion(correo, contrasena, loginBox, contenido, mensaje) {
+    const captchaInput = document.getElementById("captchaRespuesta");
     const datos = new FormData();
     datos.append("correo", correo.trim());
     datos.append("contrasena", contrasena.trim());
+    datos.append("captcha_respuesta", captchaInput ? captchaInput.value.trim() : "");
 
     try {
         const respuesta = await fetch(rutaApi("login.php"), {
@@ -112,9 +145,11 @@ export async function iniciarSesion(correo, contrasena, loginBox, contenido, men
         });
 
         const resultado = await respuesta.json();
+        guardarCsrfToken(resultado.csrf_token);
 
         if (resultado.error) {
             mensaje.textContent = resultado.mensaje;
+            cargarCaptchaLogin();
             return;
         }
 
@@ -133,9 +168,49 @@ export async function iniciarSesion(correo, contrasena, loginBox, contenido, men
     }
 }
 
+export async function cargarCaptchaLogin() {
+    const pregunta = document.getElementById("captchaPregunta");
+    const respuesta = document.getElementById("captchaRespuesta");
+
+    if (!pregunta || !respuesta) return;
+
+    pregunta.textContent = "...";
+    respuesta.value = "";
+
+    try {
+        const respuestaHttp = await fetch(rutaApi("captcha_login.php"));
+        const resultado = await respuestaHttp.json();
+
+        pregunta.textContent = resultado.error ? "Nueva pregunta" : resultado.pregunta;
+    } catch (error) {
+        pregunta.textContent = "Recarga";
+        console.error("Error al cargar captcha", error);
+    }
+}
+
+export async function solicitarRecuperacionPassword(correo, mensaje) {
+    const datos = new FormData();
+    datos.append("correo", correo.trim());
+
+    try {
+        const respuesta = await fetch(rutaApi("password_recuperar_solicitar.php"), {
+            method: "POST",
+            body: datos
+        });
+        const resultado = await respuesta.json();
+
+        mensaje.textContent = resultado.mensaje || "Revisa tu correo para continuar.";
+    } catch (error) {
+        mensaje.textContent = "No se pudo enviar la solicitud de recuperacion.";
+        console.error(error);
+    }
+}
+
 export async function cerrarSesion(loginBox, contenido) {
     try {
-        await fetch(rutaApi("logout.php"));
+        await fetch(rutaApi("logout.php"), {
+            method: "POST"
+        });
     } catch (error) {
         console.error("Error al cerrar sesión", error);
     }
