@@ -6,6 +6,8 @@ function mail_configuracion() {
     $mail = $config["mail"] ?? [];
 
     return [
+        "provider" => strtolower($mail["provider"] ?? getenv("ISA_MAIL_PROVIDER") ?: "smtp"),
+        "api_key" => $mail["api_key"] ?? getenv("ISA_BREVO_API_KEY") ?: "",
         "host" => $mail["host"] ?? getenv("ISA_MAIL_HOST") ?: "",
         "port" => intval($mail["port"] ?? getenv("ISA_MAIL_PORT") ?: 587),
         "username" => $mail["username"] ?? getenv("ISA_MAIL_USERNAME") ?: "",
@@ -53,6 +55,15 @@ function smtp_codificar_header($texto) {
 
 function enviar_correo_smtp($para, $asunto, $html, $textoPlano = "") {
     $mail = mail_configuracion();
+
+    if ($mail["provider"] === "brevo") {
+        require_once __DIR__ . "/mailer_brevo.php";
+        return enviar_correo_brevo($mail, $para, $asunto, $html, $textoPlano);
+    }
+
+    if ($mail["provider"] !== "smtp") {
+        throw new RuntimeException("Proveedor de correo no reconocido.");
+    }
 
     if ($mail["host"] === "" || $mail["username"] === "" || $mail["password"] === "" || $mail["from_email"] === "") {
         throw new RuntimeException("Configuracion SMTP incompleta.");

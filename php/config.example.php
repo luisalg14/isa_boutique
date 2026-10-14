@@ -9,6 +9,8 @@ return [
     "sslmode" => "",
     "options" => "",
     "mail" => [
+        "provider" => "brevo",
+        "api_key" => "",
         "host" => "smtp.gmail.com",
         "port" => 587,
         "username" => "correo_del_negocio@gmail.com",

@@ -2,7 +2,7 @@
 // CONEXIÓN DEL LOGIN CON ADMIN.HTML
 // ===============================
 
-import { verificarSesion, iniciarSesion, cerrarSesion, solicitarRecuperacionPassword, cargarCaptchaLogin } from "./auth.js";
+import { verificarSesion, iniciarSesion, cerrarSesion, solicitarRecuperacionPassword, cargarCaptchaLogin } from "./auth.js?v=20261014-captcha";
 
 document.addEventListener("DOMContentLoaded", function() {
     const loginBox = document.getElementById("loginBox");

@@ -2,6 +2,7 @@
 // FUNCIONES DEL LOGIN
 // ===============================
 let csrfToken = "";
+let captchaLoginToken = "";
 const fetchOriginal = window.fetch.bind(window);
 
 function guardarCsrfToken(token) {
@@ -43,12 +44,7 @@ function mostrarContenido(loginBox, contenido) {
 }
 
 function rutaApi(archivo) {
-    const partesRuta = window.location.pathname.split("/").filter(Boolean);
-    const indiceHtml = partesRuta.indexOf("html");
-    const baseProyecto = indiceHtml > 0 ? "/" + partesRuta.slice(0, indiceHtml).join("/") + "/" : "/";
-    const base = window.location.hostname === "localhost" ? baseProyecto : "/";
-
-    return base + "php/" + archivo;
+    return new URL("../php/" + archivo, import.meta.url).href;
 }
 
 function panelPorRol(rol) {
@@ -137,6 +133,7 @@ export async function iniciarSesion(correo, contrasena, loginBox, contenido, men
     datos.append("correo", correo.trim());
     datos.append("contrasena", contrasena.trim());
     datos.append("captcha_respuesta", captchaInput ? captchaInput.value.trim() : "");
+    datos.append("captcha_token", captchaLoginToken);
 
     try {
         const respuesta = await fetch(rutaApi("login.php"), {
@@ -176,14 +173,27 @@ export async function cargarCaptchaLogin() {
 
     pregunta.textContent = "...";
     respuesta.value = "";
+    captchaLoginToken = "";
 
     try {
-        const respuestaHttp = await fetch(rutaApi("captcha_login.php"));
+        const respuestaHttp = await fetch(rutaApi("captcha_login.php"), {
+            cache: "no-store",
+            credentials: "same-origin"
+        });
+        if (!respuestaHttp.ok) {
+            throw new Error("No se pudo cargar la verificacion (HTTP " + respuestaHttp.status + ")");
+        }
         const resultado = await respuestaHttp.json();
 
-        pregunta.textContent = resultado.error ? "Nueva pregunta" : resultado.pregunta;
+        if (resultado.error || typeof resultado.pregunta !== "string" || !resultado.pregunta.trim()) {
+            throw new Error(resultado.mensaje || "La verificacion no contiene una pregunta");
+        }
+        pregunta.textContent = resultado.pregunta;
+        captchaLoginToken = resultado.token || "";
+        pregunta.title = "Resuelve la suma y escribe el resultado";
     } catch (error) {
-        pregunta.textContent = "Recarga";
+        pregunta.textContent = "No disponible";
+        pregunta.title = "No se pudo cargar la verificacion. Pulsa Nueva pregunta para reintentar.";
         console.error("Error al cargar captcha", error);
     }
 }

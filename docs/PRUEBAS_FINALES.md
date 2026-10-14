@@ -13,8 +13,8 @@ Marca cada punto después de probarlo en el navegador.
 
 ## Catálogo público
 
-- [ ] Abrir `index.html`.
-- [ ] Entrar a `Producto.html`.
+- [ ] Abrir la raíz del sitio y confirmar la redirección a `html/index.html`.
+- [ ] Entrar a `html/Producto.html`.
 - [ ] Entrar a una categoría desde el menú.
 - [ ] Ver productos activos desde PostgreSQL.
 - [ ] Seleccionar una talla disponible.

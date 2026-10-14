@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vendedor - Isa Boutique</title>
+    <script>
+        if (window.location.protocol === "file:") {
+            window.location.replace("http://localhost/isa_boutique/html/vendedor.html");
+        }
+    </script>
     <link rel="stylesheet" href="../css/styles.css?v=20260528-2">
     <link rel="stylesheet" href="../css/internal-system.css?v=20260528-2">
 </head>
@@ -328,8 +333,9 @@
 
     </div>
 
-    <script type="module" src="../js/script.js?v=20260608-captcha"></script>
-    <script src="../js/vendedor.js?v=20260528-2"></script>
+    <script type="module" src="../js/script.js?v=20261014-captcha"></script>
+    <script src="../js/sistema-comun.js?v=20261014-limpieza"></script>
+    <script src="../js/vendedor.js?v=20261014-limpieza"></script>
 </body>
 </html>
 

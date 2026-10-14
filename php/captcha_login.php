@@ -1,10 +1,12 @@
 <?php
 
-require_once "conexion.php";
+$config = require __DIR__ . "/configuracion.php";
 require_once "auth_guard.php";
 require_once "captcha_util.php";
 
 header("Content-Type: application/json; charset=UTF-8");
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("X-Content-Type-Options: nosniff");
 
 try {
     if ($_SERVER["REQUEST_METHOD"] !== "GET") {
@@ -33,6 +35,7 @@ try {
     ], JSON_UNESCAPED_UNICODE);
 } catch (Throwable $e) {
     error_log("Error al generar captcha: " . $e->getMessage());
+    http_response_code(500);
     echo json_encode([
         "error" => true,
         "mensaje" => "No se pudo generar la verificacion"

@@ -1,11 +1,11 @@
 Options -Indexes
 ServerSignature Off
 
-<FilesMatch "^(\\.env|\\.gitignore|composer\\.(json|lock)|.*\\.(sql|bak|backup|ini|log))$">
+<FilesMatch "^(\.env|\.gitignore|composer\.(json|lock)|.*\.(sql|bak|backup|ini|log|md|properties))$">
     Require all denied
 </FilesMatch>
 
-<FilesMatch "^(admin_local|categoria_local|producto_local)\\.html$">
+<FilesMatch "^(admin_local|categoria_local|producto_local)\.html$">
     Require all denied
 </FilesMatch>
 
