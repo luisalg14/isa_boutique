@@ -42,36 +42,3 @@ pruebas funcionales.
   que se quiera conservar.
 
 La revisión no modificó datos de la base ni ejecutó migraciones.
-
-## Segunda limpieza: auditoria del codigo
-
-- Separado el JavaScript de cinco paginas en `js/admin.js`, `js/catalogo.js`,
-  `js/categoria.js`, `js/inicio.js` y `js/restablecer-password.js`.
-- Centralizadas 27 funciones de tienda, incluido el carrito y el envio del pedido,
-  en `js/tienda-comun.js`. Las funciones especificas de cada pagina se conservan
-  en su propio archivo.
-- Centralizadas la paginacion interna y la impresion de facturas en
-  `js/sistema-comun.js`, manteniendo los formatos propios de cada panel.
-- Unificada la normalizacion de categorias de PHP en `php/categoria_util.php`.
-- Corregido el manejo de listas y carritos corruptos, y escapados los valores
-  insertados en los atributos de miniaturas, colores y el resumen del carrito.
-- Agregadas pruebas de regresion en `tests/` para comprobar la logica compartida.
-- Retiradas mas de 600 lineas de codigo no vacias respecto al estado anterior
-  de las paginas y scripts reorganizados.
-
-Validacion de esta etapa:
-
-- 64 archivos PHP y 10 JavaScript sin errores de sintaxis.
-- 7 pruebas de frontend y 12 comprobaciones de backend correctas.
-- 251 referencias locales revisadas sin archivos ausentes.
-- Seis paginas cargadas en Chrome de prueba sin excepciones JavaScript: inicio,
-  productos, categoria, administrador, vendedor y recuperacion de contrasena.
-- Captcha cargado en los dos paneles.
-- Acceso HTTP bloqueado con 403 a configuracion privada, SQL, documentos
-  y archivos de pruebas.
-- Ningun grupo de archivos de codigo identicos en `php/`, `js/`, `html/` y `css/`.
-- `git diff --check` sin errores.
-
-Las pruebas no registraron ventas ni enviaron correos. La carga de paginas no
-comprueba todos los flujos autenticados del negocio. Pueden quedar incidencias o
-duplicaciones parciales que requieran una revision adicional.
