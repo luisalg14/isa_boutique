@@ -66,7 +66,6 @@ verificación humana y procesar el acceso.
 - [Pruebas finales](docs/PRUEBAS_FINALES.md).
 - [Documento de desarrollo](docs/TERCERA_FASE_ISA_BOUTIQUE.md).
 - [Revisión de estructura y validaciones](docs/REVISION_ESTRUCTURA.md).
-- [Preparación para SonarQube y pruebas](docs/SONARQUBE.md).
 
 Las rutas de los documentos se expresan desde la raíz del proyecto. Las migraciones,
 los respaldos privados y las fotos de `img/productos/` se conservan porque pueden

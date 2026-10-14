@@ -1,7 +1,7 @@
 Options -Indexes
 ServerSignature Off
 
-<FilesMatch "^(\.env|\.gitignore|composer\.(json|lock)|.*\.(sql|bak|backup|ini|log|md|properties))$">
+<FilesMatch "^(\.env|\.gitignore|composer\.(json|lock)|.*\.(sql|bak|backup|ini|log|md))$">
     Require all denied
 </FilesMatch>
 

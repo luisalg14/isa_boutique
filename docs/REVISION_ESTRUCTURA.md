@@ -43,7 +43,7 @@ pruebas funcionales.
 
 La revisión no modificó datos de la base ni ejecutó migraciones.
 
-## Segunda limpieza: preparacion para SonarQube
+## Segunda limpieza: auditoria del codigo
 
 - Separado el JavaScript de cinco paginas en `js/admin.js`, `js/catalogo.js`,
   `js/categoria.js`, `js/inicio.js` y `js/restablecer-password.js`.
@@ -55,11 +55,9 @@ La revisión no modificó datos de la base ni ejecutó migraciones.
 - Unificada la normalizacion de categorias de PHP en `php/categoria_util.php`.
 - Corregido el manejo de listas y carritos corruptos, y escapados los valores
   insertados en los atributos de miniaturas, colores y el resumen del carrito.
-- Agregadas pruebas de regresion en `tests/` y configuracion en
-  `sonar-project.properties`. Las credenciales privadas estan excluidas del analisis.
+- Agregadas pruebas de regresion en `tests/` para comprobar la logica compartida.
 - Retiradas mas de 600 lineas de codigo no vacias respecto al estado anterior
-  de las paginas y scripts reorganizados. Este conteo local no es una metrica
-  de duplicacion de SonarQube.
+  de las paginas y scripts reorganizados.
 
 Validacion de esta etapa:
 
@@ -69,12 +67,11 @@ Validacion de esta etapa:
 - Seis paginas cargadas en Chrome de prueba sin excepciones JavaScript: inicio,
   productos, categoria, administrador, vendedor y recuperacion de contrasena.
 - Captcha cargado en los dos paneles.
-- Acceso HTTP bloqueado con 403 a configuracion privada, SQL, documentos,
-  configuracion de SonarQube y archivos de pruebas.
+- Acceso HTTP bloqueado con 403 a configuracion privada, SQL, documentos
+  y archivos de pruebas.
 - Ningun grupo de archivos de codigo identicos en `php/`, `js/`, `html/` y `css/`.
 - `git diff --check` sin errores.
 
 Las pruebas no registraron ventas ni enviaron correos. La carga de paginas no
-comprueba todos los flujos autenticados del negocio. SonarQube aun no se ejecuto:
-no habia un servidor ni SonarScanner configurados. Pueden quedar incidencias o
-duplicaciones parciales que deberan revisarse con el primer informe real.
+comprueba todos los flujos autenticados del negocio. Pueden quedar incidencias o
+duplicaciones parciales que requieran una revision adicional.
