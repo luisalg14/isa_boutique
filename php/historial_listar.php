@@ -12,6 +12,7 @@ try {
         SELECT
             v.id_venta,
             dv.id_producto,
+            dv.id_detalle_venta,
             cl.nombre AS cliente,
             cl.telefono,
             'Venta' AS tipo,
@@ -46,6 +47,7 @@ try {
         SELECT
             d.id_venta,
             dd.id_producto,
+            NULL::integer AS id_detalle_venta,
             cl.nombre AS cliente,
             cl.telefono,
             'Devolución' AS tipo,

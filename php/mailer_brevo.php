@@ -1,8 +1,9 @@
 <?php
+require_once 'correo_error.php';
 
 function brevo_preparar_mensaje($mail, $para, $asunto, $html, $textoPlano) {
     if (!filter_var($mail["from_email"] ?? "", FILTER_VALIDATE_EMAIL) || !filter_var($para, FILTER_VALIDATE_EMAIL)) {
-        throw new RuntimeException("El remitente o destinatario del correo no es valido.");
+        throw new CorreoNoAceptadoException("El remitente o destinatario del correo no es valido.");
     }
 
     $mensaje = [
@@ -16,7 +17,7 @@ function brevo_preparar_mensaje($mail, $para, $asunto, $html, $textoPlano) {
     } elseif ($textoPlano !== "") {
         $mensaje["textContent"] = $textoPlano;
     } else {
-        throw new RuntimeException("El correo no contiene un mensaje.");
+        throw new CorreoNoAceptadoException("El correo no contiene un mensaje.");
     }
 
     return $mensaje;
@@ -24,15 +25,18 @@ function brevo_preparar_mensaje($mail, $para, $asunto, $html, $textoPlano) {
 
 function brevo_validar_respuesta($estado, $respuesta) {
     if ($estado === 401) {
-        throw new RuntimeException("Brevo rechazo la clave API. Comprueba que sea una clave API activa.");
+        throw new CorreoNoAceptadoException("Brevo rechazo la clave API. Comprueba que sea una clave API activa.");
     }
     if ($estado === 403) {
-        throw new RuntimeException("Brevo rechazo el acceso. Revisa los permisos y las IP autorizadas de la cuenta.");
+        throw new CorreoNoAceptadoException("Brevo rechazo el acceso. Revisa los permisos y las IP autorizadas de la cuenta.");
     }
     if ($estado === 429) {
-        throw new RuntimeException("Brevo alcanzo el limite de solicitudes. Intenta nuevamente mas tarde.");
+        throw new CorreoNoAceptadoException("Brevo alcanzo el limite de solicitudes. Intenta nuevamente mas tarde.", true);
     }
     if ($estado !== 201) {
+        if (in_array($estado,[400,404,413,415,422],true)) {
+            throw new CorreoNoAceptadoException("Brevo no acepto el correo (HTTP " . $estado . "). Revisa el remitente y el contenido.");
+        }
         throw new RuntimeException("Brevo no acepto el correo (HTTP " . $estado . "). Revisa el remitente verificado y el estado de la cuenta.");
     }
 
@@ -47,16 +51,16 @@ function brevo_validar_respuesta($estado, $respuesta) {
 function enviar_correo_brevo($mail, $para, $asunto, $html, $textoPlano = "") {
     $clave = trim($mail["api_key"] ?? "");
     if ($clave === "" || preg_match('/[\r\n]/', $clave)) {
-        throw new RuntimeException("Falta configurar una clave API valida de Brevo.");
+        throw new CorreoNoAceptadoException("Falta configurar una clave API valida de Brevo.");
     }
     if (!function_exists("curl_init")) {
-        throw new RuntimeException("El envio por Brevo requiere la extension cURL de PHP.");
+        throw new CorreoNoAceptadoException("El envio por Brevo requiere la extension cURL de PHP.");
     }
 
     $mensaje = brevo_preparar_mensaje($mail, $para, $asunto, $html, $textoPlano);
     $socket = curl_init("https://api.brevo.com/v3/smtp/email");
     if ($socket === false) {
-        throw new RuntimeException("No se pudo iniciar la conexion con Brevo.");
+        throw new CorreoNoAceptadoException("No se pudo iniciar la conexion con Brevo.");
     }
 
     try {

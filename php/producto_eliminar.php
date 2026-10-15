@@ -18,7 +18,6 @@ try {
     }
 
     $id_producto = intval($_POST["id_producto"] ?? 0);
-    $forzar = ($_POST["forzar"] ?? "") === "1";
 
     if ($id_producto <= 0) {
         echo json_encode([
@@ -28,11 +27,13 @@ try {
         exit;
     }
 
+    $conexion->beginTransaction();
+
     $sqlProducto = "
         SELECT id_producto, nombre
         FROM producto
         WHERE id_producto = :id_producto
-        LIMIT 1
+        FOR UPDATE
     ";
 
     $consultaProducto = $conexion->prepare($sqlProducto);
@@ -43,6 +44,7 @@ try {
     $producto = $consultaProducto->fetch();
 
     if (!$producto) {
+        $conexion->rollBack();
         echo json_encode([
             "error" => true,
             "mensaje" => "Producto no encontrado"
@@ -63,72 +65,13 @@ try {
 
     $relaciones = $consultaRelaciones->fetch();
 
-    if (!$forzar && (intval($relaciones["ventas"]) > 0 || intval($relaciones["devoluciones"]) > 0)) {
+    if (intval($relaciones["ventas"]) > 0 || intval($relaciones["devoluciones"]) > 0) {
+        $conexion->rollBack();
         echo json_encode([
             "error" => true,
             "mensaje" => "No se puede eliminar porque el producto tiene ventas o devoluciones. Puedes desactivarlo para ocultarlo de la tienda."
         ], JSON_UNESCAPED_UNICODE);
         exit;
-    }
-
-    $conexion->beginTransaction();
-
-    if ($forzar) {
-        $sqlVentasProducto = "
-            SELECT DISTINCT id_venta
-            FROM detalle_venta
-            WHERE id_producto = :id_producto
-        ";
-
-        $consultaVentasProducto = $conexion->prepare($sqlVentasProducto);
-        $consultaVentasProducto->execute([
-            ":id_producto" => $id_producto
-        ]);
-
-        $idsVentas = $consultaVentasProducto->fetchAll(PDO::FETCH_COLUMN);
-
-        $sqlEliminarDevolucionesProducto = "
-            DELETE FROM devolucion
-            WHERE id_devolucion IN (
-                SELECT d.id_devolucion
-                FROM devolucion d
-                INNER JOIN detalle_devolucion dd
-                    ON d.id_devolucion = dd.id_devolucion
-                WHERE dd.id_producto = :id_producto
-            )
-        ";
-
-        $consultaEliminarDevolucionesProducto = $conexion->prepare($sqlEliminarDevolucionesProducto);
-        $consultaEliminarDevolucionesProducto->execute([
-            ":id_producto" => $id_producto
-        ]);
-
-        if (!empty($idsVentas)) {
-            $marcadores = [];
-            $parametros = [];
-
-            foreach ($idsVentas as $indice => $idVenta) {
-                $clave = ":id_venta_" . $indice;
-                $marcadores[] = $clave;
-                $parametros[$clave] = intval($idVenta);
-            }
-
-            $sqlEliminarDevolucionesVentas = "
-                DELETE FROM devolucion
-                WHERE id_venta IN (" . implode(",", $marcadores) . ")
-            ";
-
-            $consultaEliminarDevolucionesVentas = $conexion->prepare($sqlEliminarDevolucionesVentas);
-            $consultaEliminarDevolucionesVentas->execute($parametros);
-
-            $sqlEliminarVentas = "
-                DELETE FROM venta
-                WHERE id_venta IN (" . implode(",", $marcadores) . ")
-            ";
-
-            $consultaEliminarVentas = $conexion->prepare($sqlEliminarVentas);
-            $consultaEliminarVentas->execute($parametros);
-        }
     }
 
     $sqlLimpiarCambios = "
@@ -163,7 +106,6 @@ try {
 
     registrar_auditoria($conexion, "producto_eliminado", "producto", $id_producto, [
         "nombre" => $producto["nombre"],
-        "forzado" => $forzar,
         "ventas_relacionadas" => intval($relaciones["ventas"]),
         "devoluciones_relacionadas" => intval($relaciones["devoluciones"])
     ]);
@@ -172,9 +114,7 @@ try {
 
     echo json_encode([
         "error" => false,
-        "mensaje" => $forzar
-            ? "Producto eliminado junto con sus ventas/devoluciones relacionadas"
-            : "Producto eliminado correctamente"
+        "mensaje" => "Producto eliminado correctamente"
     ], JSON_UNESCAPED_UNICODE);
 
 } catch (PDOException $e) {

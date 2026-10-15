@@ -1,7 +1,5 @@
 <?php
 
-require_once "mailer_smtp.php";
-
 function encolar_notificacion_correo($correo, $asunto, $html, $texto) {
     global $conexion;
 

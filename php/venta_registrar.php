@@ -3,6 +3,8 @@
 require_once "conexion.php";
 require_once "auth_guard.php";
 require_once "factura_util.php";
+require_once "cliente_util.php";
+require_once "venta_util.php";
 
 header("Content-Type: application/json; charset=UTF-8");
 
@@ -48,7 +50,11 @@ try {
     $talla = strtoupper(trim($_POST["talla"] ?? ""));
     $codigoBarras = strtoupper(trim($_POST["codigo_barras"] ?? ""));
     $usuarioActual = usuario_actual();
-    exigir_csrf_si_autenticado();
+    if ($usuarioActual) {
+        $usuarioActual = exigir_roles(["admin", "vendedor"]);
+    } elseif ($descuentoValor != 0) {
+        responder_json_error("Los descuentos requieren un usuario autorizado", 403);
+    }
     exigir_origen_mismo_sitio();
     $canal_venta = trim($_POST["canal_venta"] ?? ($usuarioActual ? "tienda_fisica" : "pagina_web"));
     $tipo_entrega = trim($_POST["tipo_entrega"] ?? ($usuarioActual ? "recoger_tienda" : "envio_local"));
@@ -131,214 +137,27 @@ try {
 
     $conexion->beginTransaction();
 
-    // Buscar producto
-    $sqlProducto = "
-        SELECT id_producto, nombre, precio, costo_unitario, cantidad, estado
-        FROM producto
-        WHERE id_producto = :id_producto
-        LIMIT 1
-    ";
-
-    $consultaProducto = $conexion->prepare($sqlProducto);
-    $consultaProducto->execute([
-        ":id_producto" => $id_producto
-    ]);
-
-    $producto = $consultaProducto->fetch();
-
-    if (!$producto) {
-        $conexion->rollBack();
-        echo json_encode([
-            "error" => true,
-            "mensaje" => "Producto no encontrado"
-        ]);
-        exit;
-    }
-
-    if ($producto["estado"] === "inactivo") {
-        $conexion->rollBack();
-        echo json_encode([
-            "error" => true,
-            "mensaje" => "Este producto está inactivo y no se puede vender"
-        ]);
-        exit;
-    }
-
-    $sqlColores = "
-        SELECT pc.id_producto_color, pc.nombre_color
-        FROM producto_color pc
-        WHERE pc.id_producto = :id_producto
-        ORDER BY pc.orden, pc.nombre_color
-    ";
-
-    $consultaColores = $conexion->prepare($sqlColores);
-    $consultaColores->execute([
-        ":id_producto" => $id_producto
-    ]);
-
-    $coloresProducto = $consultaColores->fetchAll();
-    $colorSeleccionado = null;
-
-    if (count($coloresProducto) > 0) {
-        if ($idProductoColor <= 0 && count($coloresProducto) === 1) {
-            $idProductoColor = intval($coloresProducto[0]["id_producto_color"]);
-        }
-
-        foreach ($coloresProducto as $itemColor) {
-            if (intval($itemColor["id_producto_color"]) === $idProductoColor) {
-                $colorSeleccionado = $itemColor;
-                break;
-            }
-        }
-
-        if (!$colorSeleccionado) {
-            $conexion->rollBack();
-            echo json_encode([
-                "error" => true,
-                "mensaje" => "Selecciona un color disponible"
-            ], JSON_UNESCAPED_UNICODE);
-            exit;
-        }
-
-        $color = $colorSeleccionado["nombre_color"];
-    }
-
-    $tallasProducto = [];
-
-    if ($idProductoColor > 0) {
-        $sqlTallasColor = "
-            SELECT talla, cantidad
-            FROM producto_color_talla
-            WHERE id_producto_color = :id_producto_color
-            ORDER BY talla
-        ";
-
-        $consultaTallasColor = $conexion->prepare($sqlTallasColor);
-        $consultaTallasColor->execute([
-            ":id_producto_color" => $idProductoColor
-        ]);
-
-        $tallasProducto = $consultaTallasColor->fetchAll();
-    }
-
-    if (count($tallasProducto) === 0) {
-        $sqlTallas = "
-        SELECT talla, cantidad
-        FROM producto_talla
-        WHERE id_producto = :id_producto
-        ORDER BY talla
-        ";
-
-        $consultaTallas = $conexion->prepare($sqlTallas);
-        $consultaTallas->execute([
-            ":id_producto" => $id_producto
-        ]);
-
-        $tallasProducto = $consultaTallas->fetchAll();
-    }
-
-    if (count($tallasProducto) > 0) {
-        if ($talla === "") {
-            $conexion->rollBack();
-            echo json_encode([
-                "error" => true,
-                "mensaje" => "Selecciona una talla disponible"
-            ], JSON_UNESCAPED_UNICODE);
-            exit;
-        }
-
-        $tallaEncontrada = null;
-
-        foreach ($tallasProducto as $itemTalla) {
-            if (strtoupper($itemTalla["talla"]) === $talla) {
-                $tallaEncontrada = $itemTalla;
-                break;
-            }
-        }
-
-        if (!$tallaEncontrada || intval($tallaEncontrada["cantidad"]) < $cantidad) {
-            $conexion->rollBack();
-            echo json_encode([
-                "error" => true,
-                "mensaje" => "Stock insuficiente para la talla " . $talla
-            ], JSON_UNESCAPED_UNICODE);
-            exit;
-        }
-    }
-
-    if (intval($producto["cantidad"]) < $cantidad) {
-        $conexion->rollBack();
-        echo json_encode([
-            "error" => true,
-            "mensaje" => "Stock insuficiente. Solo hay " . $producto["cantidad"] . " unidades disponibles"
-        ]);
-        exit;
-    }
+    $detallePreparado = preparar_detalle_venta($conexion, $id_producto, $idProductoColor, $talla, $cantidad);
+    $producto = $detallePreparado['producto'];
+    $idProductoColor = $detallePreparado['id_producto_color'];
+    $color = $detallePreparado['color'] ?? '';
+    $talla = $detallePreparado['talla'] ?? '';
 
     $precioUnitario = floatval($producto["precio"]);
     $costoUnitario = floatval($producto["costo_unitario"]);
-    $subtotalBruto = $precioUnitario * $cantidad;
-    $descuento = $descuentoTipo === "porcentaje"
-        ? $subtotalBruto * ($descuentoValor / 100)
-        : $descuentoValor;
-    $descuento = min(max($descuento, 0), $subtotalBruto);
-    $subtotal = $subtotalBruto - $descuento;
-    $tarifaIva = 19.00;
-    $baseGravable = round($subtotal / (1 + ($tarifaIva / 100)), 2);
-    $iva = round($subtotal - $baseGravable, 2);
-    $subtotalCosto = $costoUnitario * $cantidad;
+    $importes = calcular_importes_venta($precioUnitario,$costoUnitario,$cantidad,$descuentoTipo,$descuentoValor);
+    $subtotalBruto = $importes['subtotal_bruto'];
+    $descuento = $importes['descuento'];
+    $subtotal = $importes['subtotal'];
+    $tarifaIva = $importes['tarifa_iva'];
+    $baseGravable = $importes['base_gravable'];
+    $iva = $importes['iva'];
+    $subtotalCosto = $importes['subtotal_costo'];
 
-    // Buscar cliente por teléfono
-    $sqlCliente = "
-        SELECT id_cliente
-        FROM cliente
-        WHERE telefono = :telefono
-        LIMIT 1
-    ";
-
-    $consultaCliente = $conexion->prepare($sqlCliente);
-    $consultaCliente->execute([
-        ":telefono" => $telefono
+    $idCliente = cliente_para_venta($conexion, [
+        'nombre'=>$cliente, 'telefono'=>$telefono, 'correo'=>$correo,
+        'tipo_documento'=>$tipoDocumento, 'numero_documento'=>$numeroDocumento
     ]);
-
-    $clienteEncontrado = $consultaCliente->fetch();
-
-    if ($clienteEncontrado) {
-        $idCliente = $clienteEncontrado["id_cliente"];
-        $consultaActualizarCliente = $conexion->prepare("
-            UPDATE cliente
-            SET
-                nombre = :nombre,
-                correo = COALESCE(NULLIF(:correo, ''), correo),
-                tipo_documento = :tipo_documento,
-                numero_documento = COALESCE(NULLIF(:numero_documento, ''), numero_documento)
-            WHERE id_cliente = :id_cliente
-        ");
-        $consultaActualizarCliente->execute([
-            ":nombre" => $cliente,
-            ":correo" => $correo,
-            ":tipo_documento" => $tipoDocumento,
-            ":numero_documento" => $numeroDocumento,
-            ":id_cliente" => $idCliente
-        ]);
-    } else {
-        $sqlInsertCliente = "
-            INSERT INTO cliente (nombre, telefono, correo, tipo_documento, numero_documento)
-            VALUES (:nombre, :telefono, NULLIF(:correo, ''), :tipo_documento, NULLIF(:numero_documento, ''))
-            RETURNING id_cliente
-        ";
-
-        $consultaInsertCliente = $conexion->prepare($sqlInsertCliente);
-        $consultaInsertCliente->execute([
-            ":nombre" => $cliente,
-            ":telefono" => $telefono,
-            ":correo" => $correo,
-            ":tipo_documento" => $tipoDocumento,
-            ":numero_documento" => $numeroDocumento
-        ]);
-
-        $idCliente = $consultaInsertCliente->fetch()["id_cliente"];
-    }
 
     $idUsuario = $usuarioActual ? intval($usuarioActual["id_usuario"]) : 1;
 
@@ -452,37 +271,7 @@ try {
         ":subtotal_costo" => $subtotalCosto
     ]);
 
-    if (count($tallasProducto) > 0) {
-        if ($idProductoColor > 0) {
-            $sqlActualizarTallaColor = "
-                UPDATE producto_color_talla
-                SET cantidad = cantidad - :cantidad
-                WHERE id_producto_color = :id_producto_color
-                AND UPPER(talla) = :talla
-            ";
-
-            $consultaActualizarTallaColor = $conexion->prepare($sqlActualizarTallaColor);
-            $consultaActualizarTallaColor->execute([
-                ":cantidad" => $cantidad,
-                ":id_producto_color" => $idProductoColor,
-                ":talla" => $talla
-            ]);
-        }
-
-        $sqlActualizarTalla = "
-            UPDATE producto_talla
-            SET cantidad = cantidad - :cantidad
-            WHERE id_producto = :id_producto
-            AND UPPER(talla) = :talla
-        ";
-
-        $consultaActualizarTalla = $conexion->prepare($sqlActualizarTalla);
-        $consultaActualizarTalla->execute([
-            ":cantidad" => $cantidad,
-            ":id_producto" => $id_producto,
-            ":talla" => $talla
-        ]);
-    }
+    descontar_tallas_venta($conexion, $detallePreparado);
 
     $factura = null;
 
@@ -502,7 +291,7 @@ try {
         "factura" => $factura
     ], JSON_UNESCAPED_UNICODE);
 
-} catch (PDOException $e) {
+} catch (Throwable $e) {
     if ($conexion->inTransaction()) {
         $conexion->rollBack();
     }
@@ -510,7 +299,7 @@ try {
     error_log("Error venta_registrar: " . $e->getMessage());
     echo json_encode([
         "error" => true,
-        "mensaje" => "No se pudo registrar la venta"
+        "mensaje" => $e instanceof DomainException ? $e->getMessage() : "No se pudo registrar la venta"
     ]);
 }
 

@@ -1,3 +1,5 @@
+BEGIN;
+
 CREATE TABLE IF NOT EXISTS auditoria_evento (
     id_auditoria BIGSERIAL PRIMARY KEY,
     id_usuario INTEGER NULL REFERENCES usuario_sistema(id_usuario) ON DELETE SET NULL,
@@ -37,6 +39,23 @@ BEGIN
             detalle = COALESCE(detalle, '{}'::jsonb)
         WHERE accion IS NULL;
     END IF;
+
+    -- Conservar los campos historicos sin exigirlos en los eventos nuevos.
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'auditoria_evento'
+        AND column_name = 'operacion'
+    ) THEN
+        ALTER TABLE auditoria_evento ALTER COLUMN operacion DROP NOT NULL;
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'auditoria_evento'
+        AND column_name = 'tabla_afectada'
+    ) THEN
+        ALTER TABLE auditoria_evento ALTER COLUMN tabla_afectada DROP NOT NULL;
+    END IF;
 END $$;
 
 CREATE INDEX IF NOT EXISTS idx_auditoria_evento_fecha
@@ -47,3 +66,5 @@ CREATE INDEX IF NOT EXISTS idx_auditoria_evento_accion
 
 CREATE INDEX IF NOT EXISTS idx_auditoria_evento_usuario
     ON auditoria_evento (id_usuario);
+
+COMMIT;

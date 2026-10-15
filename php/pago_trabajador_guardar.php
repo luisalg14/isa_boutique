@@ -2,6 +2,7 @@
 
 require_once "conexion.php";
 require_once "auth_guard.php";
+require_once "nomina_util.php";
 
 header("Content-Type: application/json; charset=UTF-8");
 
@@ -18,11 +19,11 @@ try {
 
     $idTrabajador = intval($_POST["id_trabajador"] ?? 0);
     $tipoPago = trim($_POST["tipo_pago"] ?? "");
-    $valor = floatval($_POST["valor"] ?? 0);
+    $valor = validar_pago_fijo($tipoPago, $_POST["valor"] ?? null);
     $fecha = trim($_POST["fecha"] ?? date("Y-m-d"));
     $detalle = trim($_POST["detalle"] ?? "");
 
-    $tiposPermitidos = ["salario", "comision", "adelanto", "bono", "deduccion", "otro"];
+    $tiposPermitidos = ["salario"];
 
     if ($idTrabajador <= 0 || !in_array($tipoPago, $tiposPermitidos, true) || $valor <= 0 || $fecha === "") {
         echo json_encode([
@@ -87,10 +88,11 @@ try {
         "mensaje" => "Pago registrado correctamente"
     ], JSON_UNESCAPED_UNICODE);
 
-} catch (PDOException $e) {
+} catch (Throwable $e) {
+    error_log('Error pago_trabajador_guardar: ' . $e->getMessage());
     echo json_encode([
         "error" => true,
-        "mensaje" => $e->getMessage()
+        "mensaje" => $e instanceof DomainException ? $e->getMessage() : 'No se pudo registrar el pago'
     ], JSON_UNESCAPED_UNICODE);
 }
 

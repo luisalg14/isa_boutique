@@ -1,56 +1,26 @@
 <?php
 
-function captcha_secreto() {
-    global $config;
-
-    $base = ($config["password"] ?? "") . "|" . ($config["database"] ?? "") . "|" . __DIR__;
-    return hash("sha256", $base);
-}
-
 function crear_captcha_token($respuesta) {
-    $payload = json_encode([
+    $token = bin2hex(random_bytes(32));
+    $_SESSION["login_captcha"] = [
+        "token" => $token,
         "respuesta" => (string) $respuesta,
-        "creado" => time(),
-        "nonce" => bin2hex(random_bytes(12))
-    ], JSON_UNESCAPED_UNICODE);
-
-    $payloadBase64 = rtrim(strtr(base64_encode($payload), "+/", "-_"), "=");
-    $firma = hash_hmac("sha256", $payloadBase64, captcha_secreto());
-
-    return $payloadBase64 . "." . $firma;
+        "creado" => time()
+    ];
+    return $token;
 }
 
 function validar_captcha_token($token, $respuestaUsuario) {
-    $partes = explode(".", (string) $token);
-
-    if (count($partes) !== 2) {
+    $captcha = $_SESSION["login_captcha"] ?? null;
+    // Cada pregunta admite un intento, incluso con una respuesta incorrecta.
+    unset($_SESSION["login_captcha"]);
+    if (!is_array($captcha) || !is_string($token) || !is_string($respuestaUsuario)) {
         return false;
     }
-
-    [$payloadBase64, $firmaRecibida] = $partes;
-    $firmaEsperada = hash_hmac("sha256", $payloadBase64, captcha_secreto());
-
-    if (!hash_equals($firmaEsperada, $firmaRecibida)) {
+    $creado = intval($captcha["creado"] ?? 0);
+    if ($creado < time() - 300 || $creado > time()) {
         return false;
     }
-
-    $payload = base64_decode(strtr($payloadBase64, "-_", "+/"), true);
-
-    if ($payload === false) {
-        return false;
-    }
-
-    $datos = json_decode($payload, true);
-
-    if (!is_array($datos)) {
-        return false;
-    }
-
-    if (intval($datos["creado"] ?? 0) < time() - 300) {
-        return false;
-    }
-
-    return hash_equals((string) ($datos["respuesta"] ?? ""), trim((string) $respuestaUsuario));
+    return hash_equals($captcha["token"], $token)
+        && hash_equals($captcha["respuesta"], trim($respuestaUsuario));
 }
-
-?>

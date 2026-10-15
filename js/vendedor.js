@@ -757,31 +757,31 @@ async function cargarHistorialVendedor() {
                     <button onclick="actualizarEstadoVentaVendedor(${registro.id_venta}, 'cancelada')">Cancelar</button>
                 `;
             } else if (registro.tipo === "Venta" && registro.estado === "pagada") {
-                accion = `<button onclick="registrarDevolucionVendedor(${registro.id_venta}, ${registro.id_producto})">Devolución</button>`;
+                accion = `<button onclick="registrarDevolucionVendedor(${Number(registro.id_venta)}, ${Number(registro.id_producto)}, ${Number(registro.id_detalle_venta)})">Devolución</button>`;
             }
 
             if (registro.tipo === "Venta" && (registro.estado === "pagada" || registro.estado === "devuelta")) {
-                botonFactura = `<button onclick="abrirFacturaVendedor(${registro.id_venta})">${registro.numero_factura || "Factura"}</button>`;
+                botonFactura = `<button onclick="abrirFacturaVendedor(${Number(registro.id_venta)})">${limpiarTextoVendedor(registro.numero_factura || "Factura")}</button>`;
             }
 
             tabla.innerHTML += `
                 <tr>
                     <td>
                         <div class="compact-stack-cell">
-                            <strong>${registro.cliente || "Sin nombre"}</strong>
-                            <span>${registro.telefono || "Sin telefono"}</span>
+                            <strong>${limpiarTextoVendedor(registro.cliente || "Sin nombre")}</strong>
+                            <span>${limpiarTextoVendedor(registro.telefono || "Sin telefono")}</span>
                         </div>
                     </td>
                     <td>
                         <div class="compact-stack-cell">
-                            <strong>${registro.producto}</strong>
-                            <span>${registro.codigo || "Sin codigo"}</span>
+                            <strong>${limpiarTextoVendedor(registro.producto)}</strong>
+                            <span>${limpiarTextoVendedor(registro.codigo || "Sin codigo")}</span>
                         </div>
                     </td>
                     <td>
                         <div class="compact-stack-cell">
-                            <strong>${registro.tipo}</strong>
-                            <span>Talla: ${registro.talla || "-"}</span>
+                            <strong>${limpiarTextoVendedor(registro.tipo)}</strong>
+                            <span>Talla: ${limpiarTextoVendedor(registro.talla || "-")}</span>
                         </div>
                     </td>
                     <td>
@@ -792,7 +792,7 @@ async function cargarHistorialVendedor() {
                     </td>
                     <td>
                         <div class="compact-stack-cell">
-                            <strong>${registro.medio_pago || "-"}</strong>
+                            <strong>${limpiarTextoVendedor(registro.medio_pago || "-")}</strong>
                             <span>${etiquetaCanalVendedor(registro.canal_venta)}</span>
                             <small>${etiquetaEntregaVendedor(registro.tipo_entrega)}</small>
                         </div>
@@ -1003,6 +1003,9 @@ async function abrirFacturaVendedor(idVenta) {
             return;
         }
 
+        if (!resultado.datos_emision_conservados) {
+            alert("Este comprobante anterior muestra datos actuales: no conserva una copia de los datos originales de emision.");
+        }
         imprimirFacturaVendedor(resultado.factura, resultado.detalles, resultado.empresa);
         await cargarHistorialVendedor();
     } catch (error) {
@@ -1208,7 +1211,7 @@ async function cargarReportesVendedor() {
     }
 }
 
-async function registrarDevolucionVendedor(idVenta, idProducto) {
+async function registrarDevolucionVendedor(idVenta, idProducto, idDetalle) {
     const cantidadTexto = prompt("Cuantas unidades deseas devolver?");
     if (cantidadTexto === null) return;
 
@@ -1229,6 +1232,7 @@ async function registrarDevolucionVendedor(idVenta, idProducto) {
     const datos = new FormData();
     datos.append("id_venta", idVenta);
     datos.append("id_producto", idProducto);
+    datos.append("id_detalle_venta", idDetalle || 0);
     datos.append("cantidad", cantidad);
     datos.append("motivo", motivo.trim());
 

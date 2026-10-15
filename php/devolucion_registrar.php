@@ -1,243 +1,26 @@
 <?php
-
 require_once "conexion.php";
 require_once "auth_guard.php";
-
+require_once "devolucion_util.php";
 header("Content-Type: application/json; charset=UTF-8");
-
 try {
     exigir_roles(["admin", "vendedor"]);
-
-    if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-        echo json_encode([
-            "error" => true,
-            "mensaje" => "Método no permitido"
-        ]);
-        exit;
-    }
-
-    $id_venta = intval($_POST["id_venta"] ?? 0);
-    $id_producto = intval($_POST["id_producto"] ?? 0);
-    $cantidad = intval($_POST["cantidad"] ?? 0);
+    if (($_SERVER["REQUEST_METHOD"] ?? "") !== "POST") responder_json_error("Metodo no permitido", 405);
+    $idVenta = filter_var($_POST["id_venta"] ?? null, FILTER_VALIDATE_INT);
+    $idProducto = filter_var($_POST["id_producto"] ?? null, FILTER_VALIDATE_INT);
+    $idDetalle = filter_var($_POST["id_detalle_venta"] ?? 0, FILTER_VALIDATE_INT);
+    $cantidad = filter_var($_POST["cantidad"] ?? null, FILTER_VALIDATE_INT);
     $motivo = trim($_POST["motivo"] ?? "");
-
-    if (
-        $id_venta <= 0 ||
-        $id_producto <= 0 ||
-        $cantidad <= 0 ||
-        $motivo === ""
-    ) {
-        echo json_encode([
-            "error" => true,
-            "mensaje" => "Datos incompletos o inválidos"
-        ]);
-        exit;
+    if ($idVenta <= 0 || $idProducto <= 0 || $cantidad <= 0 || $idDetalle === false || $idDetalle < 0 || $motivo === "") {
+        responder_json_error("Datos incompletos o invalidos", 400);
     }
-
     $conexion->beginTransaction();
-
-    // Buscar venta, cliente y producto vendido
-    $sqlVenta = "
-        SELECT 
-            v.id_venta,
-            v.id_cliente,
-            dv.id_producto,
-            dv.id_producto_color,
-            dv.talla,
-            dv.cantidad AS cantidad_vendida,
-            dv.precio_unitario,
-            dv.costo_unitario
-        FROM venta v
-        INNER JOIN detalle_venta dv
-            ON v.id_venta = dv.id_venta
-        WHERE v.id_venta = :id_venta
-        AND dv.id_producto = :id_producto
-        LIMIT 1
-    ";
-
-    $consultaVenta = $conexion->prepare($sqlVenta);
-    $consultaVenta->execute([
-        ":id_venta" => $id_venta,
-        ":id_producto" => $id_producto
-    ]);
-
-    $venta = $consultaVenta->fetch();
-
-    if (!$venta) {
-        $conexion->rollBack();
-        echo json_encode([
-            "error" => true,
-            "mensaje" => "No se encontró la venta o el producto vendido"
-        ]);
-        exit;
-    }
-
-    // Calcular cantidad ya devuelta de ese producto en esa venta
-    $sqlDevuelto = "
-        SELECT COALESCE(SUM(dd.cantidad), 0) AS cantidad_devuelta
-        FROM devolucion d
-        INNER JOIN detalle_devolucion dd
-            ON d.id_devolucion = dd.id_devolucion
-        WHERE d.id_venta = :id_venta
-        AND dd.id_producto = :id_producto
-        AND d.estado = 'aprobada'
-    ";
-
-    $consultaDevuelto = $conexion->prepare($sqlDevuelto);
-    $consultaDevuelto->execute([
-        ":id_venta" => $id_venta,
-        ":id_producto" => $id_producto
-    ]);
-
-    $cantidadDevuelta = intval($consultaDevuelto->fetch()["cantidad_devuelta"]);
-
-    $cantidadDisponible = intval($venta["cantidad_vendida"]) - $cantidadDevuelta;
-
-    if ($cantidad > $cantidadDisponible) {
-        $conexion->rollBack();
-        echo json_encode([
-            "error" => true,
-            "mensaje" => "No puedes devolver más unidades de las vendidas. Disponibles para devolución: " . $cantidadDisponible
-        ]);
-        exit;
-    }
-
-    $precioUnitario = floatval($venta["precio_unitario"]);
-    $costoUnitario = floatval($venta["costo_unitario"]);
-    $subtotalDevuelto = $precioUnitario * $cantidad;
-    $subtotalCostoDevuelto = $costoUnitario * $cantidad;
-    $talla = $venta["talla"];
-    $idProductoColor = intval($venta["id_producto_color"] ?? 0);
-
-    // Registrar devolución
-    $sqlDevolucion = "
-        INSERT INTO devolucion (
-            id_venta,
-            id_cliente,
-            motivo,
-            total_devuelto,
-            estado
-        )
-        VALUES (
-            :id_venta,
-            :id_cliente,
-            :motivo,
-            :total_devuelto,
-            'aprobada'
-        )
-        RETURNING id_devolucion
-    ";
-
-    $consultaDevolucion = $conexion->prepare($sqlDevolucion);
-    $consultaDevolucion->execute([
-        ":id_venta" => $id_venta,
-        ":id_cliente" => $venta["id_cliente"],
-        ":motivo" => $motivo,
-        ":total_devuelto" => $subtotalDevuelto
-    ]);
-
-    $idDevolucion = $consultaDevolucion->fetch()["id_devolucion"];
-
-    // Registrar detalle devolución
-    // El trigger de PostgreSQL aumenta el stock automáticamente
-    $sqlDetalleDevolucion = "
-        INSERT INTO detalle_devolucion (
-            id_devolucion,
-            id_producto,
-            talla,
-            cantidad,
-            precio_unitario,
-            costo_unitario,
-            subtotal_devuelto,
-            subtotal_costo_devuelto
-        )
-        VALUES (
-            :id_devolucion,
-            :id_producto,
-            :talla,
-            :cantidad,
-            :precio_unitario,
-            :costo_unitario,
-            :subtotal_devuelto,
-            :subtotal_costo_devuelto
-        )
-    ";
-
-    $consultaDetalle = $conexion->prepare($sqlDetalleDevolucion);
-    $consultaDetalle->execute([
-        ":id_devolucion" => $idDevolucion,
-        ":id_producto" => $id_producto,
-        ":talla" => $talla,
-        ":cantidad" => $cantidad,
-        ":precio_unitario" => $precioUnitario,
-        ":costo_unitario" => $costoUnitario,
-        ":subtotal_devuelto" => $subtotalDevuelto,
-        ":subtotal_costo_devuelto" => $subtotalCostoDevuelto
-    ]);
-
-    if ($talla !== null && $talla !== "") {
-        if ($idProductoColor > 0) {
-            $sqlActualizarTallaColor = "
-                UPDATE producto_color_talla
-                SET cantidad = cantidad + :cantidad
-                WHERE id_producto_color = :id_producto_color
-                AND UPPER(talla) = UPPER(:talla)
-            ";
-
-            $consultaActualizarTallaColor = $conexion->prepare($sqlActualizarTallaColor);
-            $consultaActualizarTallaColor->execute([
-                ":cantidad" => $cantidad,
-                ":id_producto_color" => $idProductoColor,
-                ":talla" => $talla
-            ]);
-        }
-
-        $sqlActualizarTalla = "
-            UPDATE producto_talla
-            SET cantidad = cantidad + :cantidad
-            WHERE id_producto = :id_producto
-            AND UPPER(talla) = UPPER(:talla)
-        ";
-
-        $consultaActualizarTalla = $conexion->prepare($sqlActualizarTalla);
-        $consultaActualizarTalla->execute([
-            ":cantidad" => $cantidad,
-            ":id_producto" => $id_producto,
-            ":talla" => $talla
-        ]);
-    }
-
-    // Marcar venta como devuelta si se devolvió todo ese producto
-    if ($cantidad == $cantidadDisponible) {
-        $sqlActualizarVenta = "
-            UPDATE venta
-            SET estado = 'devuelta'
-            WHERE id_venta = :id_venta
-        ";
-
-        $consultaActualizarVenta = $conexion->prepare($sqlActualizarVenta);
-        $consultaActualizarVenta->execute([
-            ":id_venta" => $id_venta
-        ]);
-    }
-
+    $importe = guardar_devolucion($conexion, $idVenta, $idProducto, $idDetalle, $cantidad, $motivo);
     $conexion->commit();
-
-    echo json_encode([
-        "error" => false,
-        "mensaje" => "Devolución registrada correctamente",
-        "total_devuelto" => $subtotalDevuelto
-    ]);
-
-} catch (PDOException $e) {
-    if ($conexion->inTransaction()) {
-        $conexion->rollBack();
-    }
-
-    echo json_encode([
-        "error" => true,
-        "mensaje" => $e->getMessage()
-    ]);
+    echo json_encode(["error"=>false,"mensaje"=>"Devolucion registrada correctamente","total_devuelto"=>$importe], JSON_UNESCAPED_UNICODE);
+} catch (Throwable $e) {
+    if (isset($conexion) && $conexion->inTransaction()) $conexion->rollBack();
+    if ($e instanceof DomainException) responder_json_error($e->getMessage(), 409);
+    error_log("Error devolucion_registrar: " . $e->getMessage());
+    responder_json_error("No se pudo registrar la devolucion", 500);
 }
-
-?>

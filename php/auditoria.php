@@ -39,6 +39,7 @@ function registrar_auditoria($conexion, $accion, $entidad = null, $idEntidad = n
         ]);
     } catch (Throwable $e) {
         error_log("Error auditoria: " . $e->getMessage());
+        throw new PDOException("No se pudo registrar la auditoria de la operacion", 0, $e);
     }
 }
 

@@ -3,6 +3,7 @@
 require_once "conexion.php";
 require_once "auth_guard.php";
 require_once "auditoria.php";
+require_once "inventario_util.php";
 
 header("Content-Type: application/json; charset=UTF-8");
 
@@ -156,6 +157,12 @@ try {
     ";
 
     $conexion->beginTransaction();
+    $consultaProducto = $conexion->prepare("SELECT * FROM producto WHERE id_producto = ? FOR UPDATE");
+    $consultaProducto->execute([$id_producto]);
+    $productoActual = $consultaProducto->fetch();
+    if (!$productoActual) throw new DomainException("Producto no encontrado");
+    conservar_variantes_edicion($conexion, $productoActual, $cantidad, $color, $tallas);
+
 
     $parametrosActualizar = [
         ":codigo" => $codigo,
@@ -174,54 +181,6 @@ try {
 
     $consultaActualizar = $conexion->prepare($sqlActualizar);
     $consultaActualizar->execute($parametrosActualizar);
-
-    if (count($tallas) > 0) {
-        $conexion->prepare("DELETE FROM producto_talla WHERE id_producto = :id_producto")
-            ->execute([":id_producto" => $id_producto]);
-
-        $consultaTalla = $conexion->prepare("
-            INSERT INTO producto_talla (id_producto, talla, cantidad)
-            VALUES (:id_producto, :talla, :cantidad)
-        ");
-
-        foreach ($tallas as $talla => $cantidadTalla) {
-            $consultaTalla->execute([
-                ":id_producto" => $id_producto,
-                ":talla" => $talla,
-                ":cantidad" => $cantidadTalla
-            ]);
-        }
-    }
-
-    $conexion->prepare("DELETE FROM producto_color WHERE id_producto = :id_producto")
-        ->execute([":id_producto" => $id_producto]);
-
-    $nombreColor = $color !== "" ? $color : "Único";
-    $consultaColorProducto = $conexion->prepare("
-        INSERT INTO producto_color (id_producto, nombre_color, codigo_hex, orden)
-        VALUES (:id_producto, :nombre_color, NULL, 0)
-        RETURNING id_producto_color
-    ");
-    $consultaColorProducto->execute([
-        ":id_producto" => $id_producto,
-        ":nombre_color" => $nombreColor
-    ]);
-    $idProductoColor = $consultaColorProducto->fetch()["id_producto_color"];
-
-    if (count($tallas) > 0) {
-        $consultaTallaColor = $conexion->prepare("
-            INSERT INTO producto_color_talla (id_producto_color, talla, cantidad)
-            VALUES (:id_producto_color, :talla, :cantidad)
-        ");
-
-        foreach ($tallas as $talla => $cantidadTalla) {
-            $consultaTallaColor->execute([
-                ":id_producto_color" => $idProductoColor,
-                ":talla" => $talla,
-                ":cantidad" => $cantidadTalla
-            ]);
-        }
-    }
 
     registrar_auditoria($conexion, "producto_actualizado", "producto", $id_producto, [
         "codigo" => $codigo,
@@ -244,18 +203,9 @@ try {
 
     echo json_encode([
         "error" => true,
-        "mensaje" => $e->getMessage()
+        "mensaje" => $e instanceof PDOException ? "No se pudo actualizar el producto" : $e->getMessage()
     ], JSON_UNESCAPED_UNICODE);
 
-} catch (PDOException $e) {
-    if ($conexion->inTransaction()) {
-        $conexion->rollBack();
-    }
-
-    echo json_encode([
-        "error" => true,
-        "mensaje" => $e->getMessage()
-    ], JSON_UNESCAPED_UNICODE);
 }
 
 ?>

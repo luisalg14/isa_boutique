@@ -23,11 +23,6 @@ try {
 
     $respuesta = (string) ($numeroA + $numeroB);
 
-    $_SESSION["login_captcha"] = [
-        "respuesta" => $respuesta,
-        "creado" => time()
-    ];
-
     echo json_encode([
         "error" => false,
         "pregunta" => $numeroA . " + " . $numeroB,

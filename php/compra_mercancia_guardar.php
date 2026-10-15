@@ -2,6 +2,7 @@
 
 require_once "conexion.php";
 require_once "auth_guard.php";
+require_once "inventario_util.php";
 
 header("Content-Type: application/json; charset=UTF-8");
 
@@ -58,6 +59,7 @@ try {
     foreach ($items as $item) {
         $tipoItem = trim($item["tipo_item"] ?? "reposicion");
         $idProducto = intval($item["id_producto"] ?? 0);
+        $idColor = intval($item["id_producto_color"] ?? 0);
         $categoria = trim($item["categoria"] ?? "");
         $descripcion = trim($item["descripcion"] ?? "");
         $color = trim($item["color"] ?? "");
@@ -99,7 +101,8 @@ try {
             "id_producto" => $tipoItem === "reposicion" ? $idProducto : null,
             "categoria" => $tipoItem === "mercancia_nueva" ? $categoria : null,
             "descripcion" => $tipoItem === "mercancia_nueva" ? $descripcion : null,
-            "color" => $tipoItem === "mercancia_nueva" ? $color : null,
+            "color" => $color,
+            "id_producto_color" => $idColor,
             "talla" => $talla,
             "cantidad" => $cantidad,
             "costo_unitario" => $costoUnitario,
@@ -200,7 +203,7 @@ try {
         SELECT id_producto, cantidad, costo_unitario
         FROM producto
         WHERE id_producto = :id_producto
-        LIMIT 1
+        FOR UPDATE
     ");
 
     $consultaDetalle = $conexion->prepare("
@@ -240,13 +243,6 @@ try {
         WHERE id_producto = :id_producto
     ");
 
-    $consultaTalla = $conexion->prepare("
-        INSERT INTO producto_talla (id_producto, talla, cantidad)
-        VALUES (:id_producto, :talla, :cantidad)
-        ON CONFLICT (id_producto, talla)
-        DO UPDATE SET cantidad = producto_talla.cantidad + EXCLUDED.cantidad
-    ");
-
     $consultaMovimiento = $conexion->prepare("
         INSERT INTO movimiento_inventario (
             id_producto,
@@ -264,12 +260,21 @@ try {
         )
     ");
 
-    $unidadesReposicion = array_reduce($itemsValidados, function($total, $item) {
-        return $total + ($item["tipo_item"] === "reposicion" ? $item["cantidad"] : 0);
-    }, 0);
-    $envioPorUnidadReposicion = $unidadesReposicion > 0 ? $costoEnvio / $unidadesReposicion : 0;
+    $envioPorUnidadReposicion = $costoEnvio / $totalUnidades;
+    // Orden comun de bloqueo para compras que contienen los mismos productos.
+    usort($itemsValidados, function ($a, $b) {
+        return ($a['id_producto'] ?? 0) <=> ($b['id_producto'] ?? 0);
+    });
 
     foreach ($itemsValidados as $item) {
+        if ($item['tipo_item'] === 'reposicion') {
+            $consultaProducto->execute([":id_producto" => $item["id_producto"]]);
+            $producto = $consultaProducto->fetch();
+            if (!$producto) throw new DomainException('Producto no encontrado en la reposicion');
+            $variante = reponer_variante($conexion, (int) $item['id_producto'], $item['id_producto_color'], $item['color'], $item['talla'], $item['cantidad']);
+            $item['color'] = $variante['color'];
+            $item['talla'] = $variante['talla'];
+        }
         $consultaDetalle->execute([
             ":id_compra" => $idCompra,
             ":id_producto" => $item["id_producto"],
@@ -288,15 +293,6 @@ try {
             continue;
         }
 
-        $consultaProducto->execute([":id_producto" => $item["id_producto"]]);
-        $producto = $consultaProducto->fetch();
-
-        if (!$producto) {
-            $conexion->rollBack();
-            echo json_encode(["error" => true, "mensaje" => "Producto no encontrado en la reposición"], JSON_UNESCAPED_UNICODE);
-            exit;
-        }
-
         $cantidadActual = intval($producto["cantidad"]);
         $costoActual = floatval($producto["costo_unitario"]);
         $nuevaCantidad = $cantidadActual + $item["cantidad"];
@@ -310,14 +306,6 @@ try {
             ":costo_unitario" => $nuevoCosto,
             ":id_producto" => $item["id_producto"]
         ]);
-
-        if ($item["talla"] !== "") {
-            $consultaTalla->execute([
-                ":id_producto" => $item["id_producto"],
-                ":talla" => $item["talla"],
-                ":cantidad" => $item["cantidad"]
-            ]);
-        }
 
         $detalleMovimiento = "Reposición por compra de mercancía";
 
@@ -355,12 +343,13 @@ try {
         "cantidad_items" => count($itemsValidados)
     ], JSON_UNESCAPED_UNICODE);
 
-} catch (PDOException $e) {
+} catch (Throwable $e) {
     if ($conexion->inTransaction()) {
         $conexion->rollBack();
     }
 
-    echo json_encode(["error" => true, "mensaje" => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+    error_log('Error compra_mercancia_guardar: ' . $e->getMessage());
+    echo json_encode(["error" => true, "mensaje" => $e instanceof DomainException ? $e->getMessage() : 'No se pudo registrar la compra'], JSON_UNESCAPED_UNICODE);
 }
 
 ?>

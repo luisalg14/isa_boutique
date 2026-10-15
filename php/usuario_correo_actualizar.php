@@ -41,6 +41,7 @@ try {
         responder_json_error("Ese correo ya esta asignado a otro usuario.", 409);
     }
 
+    $conexion->beginTransaction();
     $actualizar = $conexion->prepare("
         UPDATE usuario_sistema
         SET correo = :correo,
@@ -54,6 +55,7 @@ try {
     ]);
 
     if ($actualizar->rowCount() === 0) {
+        $conexion->rollBack();
         responder_json_error("Usuario no encontrado.", 404);
     }
 
@@ -66,13 +68,14 @@ try {
     $consultaUsuario->execute([":id_usuario" => $idUsuario]);
     $usuarioActualizado = $consultaUsuario->fetch();
 
-    if ($usuarioActualizado) {
-        notificar_correo_registrado($usuarioActualizado);
-    }
-
     registrar_auditoria($conexion, "usuario_correo_actualizado", "usuario_sistema", $idUsuario, [
         "correo_nuevo" => $correo
     ]);
+    $conexion->commit();
+
+    if ($usuarioActualizado) {
+        notificar_correo_registrado($usuarioActualizado);
+    }
 
     echo json_encode([
         "error" => false,
@@ -80,6 +83,9 @@ try {
     ], JSON_UNESCAPED_UNICODE);
 
 } catch (PDOException $e) {
+    if (isset($conexion) && $conexion->inTransaction()) {
+        $conexion->rollBack();
+    }
     error_log("Error usuario_correo_actualizar: " . $e->getMessage());
     responder_json_error("No se pudo actualizar el correo.", 500);
 }

@@ -14,6 +14,7 @@ try {
         exit;
     }
 
+    $datosEmision = factura_admite_datos_emision($conexion) ? "f.datos_emision" : "NULL::jsonb";
     $sql = "
         SELECT
             f.id_factura,
@@ -29,9 +30,9 @@ try {
             v.estado AS estado_venta,
             v.medio_pago,
             v.canal_venta,
-            cl.nombre AS cliente,
-            cl.telefono,
-            COALESCE(cl.numero_documento, '') AS numero_documento
+            COALESCE(($datosEmision)->'factura'->>'cliente',cl.nombre) AS cliente,
+            COALESCE(($datosEmision)->'factura'->>'telefono',cl.telefono) AS telefono,
+            COALESCE(($datosEmision)->'factura'->>'numero_documento',cl.numero_documento,'') AS numero_documento
         FROM factura f
         INNER JOIN venta v
             ON f.id_venta = v.id_venta

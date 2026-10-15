@@ -43,11 +43,7 @@ try {
         exit;
     }
 
-    $captcha = $_SESSION["login_captcha"] ?? null;
-    $captchaExpirado = !$captcha || intval($captcha["creado"] ?? 0) < time() - 300;
-    $captchaSesionCorrecto = !$captchaExpirado && hash_equals((string) ($captcha["respuesta"] ?? ""), $captchaRespuesta);
-    $captchaTokenCorrecto = $captchaToken !== "" && validar_captcha_token($captchaToken, $captchaRespuesta);
-    $captchaCorrecto = $captchaSesionCorrecto || $captchaTokenCorrecto;
+    $captchaCorrecto = validar_captcha_token($captchaToken, $captchaRespuesta);
 
     if (!$captchaCorrecto) {
         unset($_SESSION["login_captcha"]);

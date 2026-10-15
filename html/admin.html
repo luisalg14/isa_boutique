@@ -1178,6 +1178,13 @@
                         </select>
                     </div>
 
+                    <div class="campo compra-campo-reposicion">
+                        <label for="compraColorReposicion">Color que vas a reponer</label>
+                        <select id="compraColorReposicion" onchange="tallasCompraMercancia = []; renderizarTallasCompraMercancia(); actualizarTallasCompraMercancia();">
+                            <option value="">Seleccionar color</option>
+                        </select>
+                    </div>
+
                     <div class="campo compra-campo-nueva">
                         <label>Categoría</label>
                         <select id="compraCategoria">
@@ -1363,7 +1370,7 @@
 
                     <div class="campo">
                         <label>Salario base</label>
-                        <input id="trabajadorSalario" type="number" min="0" placeholder="0">
+                        <input id="trabajadorSalario" type="number" value="2000000" readonly aria-label="Salario fijo de dos millones de pesos">
                     </div>
 
                     <div class="campo">
@@ -1387,18 +1394,13 @@
                     <div class="campo">
                         <label>Tipo de pago</label>
                         <select id="pagoTipo">
-                            <option value="salario">Salario</option>
-                            <option value="comision">Comision</option>
-                            <option value="adelanto">Adelanto</option>
-                            <option value="bono">Bono</option>
-                            <option value="deduccion">Deduccion</option>
-                            <option value="otro">Otro</option>
+                            <option value="salario">Salario fijo</option>
                         </select>
                     </div>
 
                     <div class="campo">
                         <label>Valor</label>
-                        <input id="pagoValor" type="number" min="1" placeholder="0">
+                        <input id="pagoValor" type="number" value="2000000" readonly aria-label="Salario fijo de dos millones de pesos">
                     </div>
 
                     <div class="campo">
@@ -2907,116 +2909,28 @@
         }
     }
 
-    async function eliminarProductoBD(idProducto, nombreProducto, forzar = false) {
+    async function eliminarProductoBD(idProducto, nombreProducto) {
         if (!exigirAdminFrontend()) return;
-
-        if (!forzar) {
-            const confirmar = confirm(
-                "¿Deseas eliminar definitivamente este producto?\n\n" +
-                nombreProducto + "\n\n" +
-                "Si tiene ventas o devoluciones, el sistema no lo eliminará y deberás desactivarlo."
-            );
-
-            if (!confirmar) return;
-        } else {
-            const confirmarPrueba = confirm(
-                "BORRADO DE PRUEBA\n\n" +
-                "Esto eliminará el producto y también sus ventas/devoluciones relacionadas.\n" +
-                "Úsalo solo para limpiar datos de prueba.\n\n" +
-                "Producto: " + nombreProducto
-            );
-
-            if (!confirmarPrueba) return;
-        }
-
-        const confirmarFinal = confirm("Esta acción no se puede deshacer. ¿Confirmas la eliminación?");
-
-        if (!confirmarFinal) return;
-
+        if (!confirm("Eliminar producto sin historial: " + nombreProducto + ". Si tiene ventas, conserva el historial y desactivalo.")) return;
         const datos = new FormData();
         datos.append("id_producto", idProducto);
-
-        if (forzar) {
-            datos.append("forzar", "1");
-        }
-
         try {
-            const respuesta = await fetch("../php/producto_eliminar.php", {
-                method: "POST",
-                body: datos
-            });
-
+            const respuesta = await fetch("../php/producto_eliminar.php", {method:"POST",body:datos});
             const resultado = await respuesta.json();
-
-            if (resultado.error) {
-                if (
-                    !forzar &&
-                    resultado.mensaje.includes("ventas o devoluciones") &&
-                    confirm(resultado.mensaje + "\n\n¿Quieres hacer un borrado de prueba y limpiar también ese historial relacionado?")
-                ) {
-                    eliminarProductoBD(idProducto, nombreProducto, true);
-                    return;
-                }
-
-                alert(resultado.mensaje);
-                return;
-            }
-
             alert(resultado.mensaje);
+            if (resultado.error) return;
             cargarInventarioBD();
             cargarReportesBD();
             cargarMovimientosBD();
             cargarCambiosPrecioBD();
-
         } catch (error) {
-            alert("Error al eliminar el producto.");
+            alert("No se pudo eliminar el producto.");
             console.error(error);
         }
     }
 
-    async function limpiarHistorialAntiguo() {
-        if (!exigirAdminFrontend()) return;
-
-        const confirmar = confirm(
-            "¿Deseas eliminar todo el historial de ventas y devoluciones?\n\n" +
-            "Esto limpiará los registros de ventas/devoluciones de prueba y no se puede deshacer."
-        );
-
-        if (!confirmar) return;
-
-        const texto = prompt('Para confirmar escribe exactamente: ELIMINAR HISTORIAL');
-
-        if (texto !== "ELIMINAR HISTORIAL") {
-            alert("No se eliminó el historial porque la confirmación no coincide.");
-            return;
-        }
-
-        const datos = new FormData();
-        datos.append("confirmacion", texto);
-
-        try {
-            const respuesta = await fetch("../php/historial_eliminar.php", {
-                method: "POST",
-                body: datos
-            });
-
-            const resultado = await respuesta.json();
-
-            if (resultado.error) {
-                alert(resultado.mensaje);
-                return;
-            }
-
-            alert(resultado.mensaje);
-            cargarHistorialVentasBD();
-            cargarReportesBD();
-            cargarInventarioBD();
-            cargarMovimientosBD();
-
-        } catch (error) {
-            alert("Error al eliminar el historial.");
-            console.error(error);
-        }
+    function limpiarHistorialAntiguo() {
+        alert("El historial comercial y las facturas se conservan. No se pueden borrar desde el panel.");
     }
 
     async function cargarHistorialVentasBD() {
@@ -3096,7 +3010,7 @@
                         <button onclick="actualizarEstadoVentaBD(${venta.id_venta}, 'cancelada')">Cancelar</button>
                     `;
                 } else if (venta.tipo === "Venta" && venta.estado === "pagada") {
-                    accion = `<button onclick="registrarDevolucionBD(${venta.id_venta}, ${venta.id_producto})">Devolución</button>`;
+                    accion = `<button onclick="registrarDevolucionBD(${Number(venta.id_venta)}, ${Number(venta.id_producto)}, ${Number(venta.id_detalle_venta)})">Devolución</button>`;
                 }
 
                 if (venta.tipo === "Venta" && (venta.estado === "pagada" || venta.estado === "devuelta")) {
@@ -3137,7 +3051,7 @@
                     <td class="historial-actions-cell">
                       ${
                         false && venta.tipo === "Venta"
-                        ? `<button onclick="registrarDevolucionBD(${venta.id_venta}, ${venta.id_producto})">Devolución</button>`
+                        ? `<button onclick="registrarDevolucionBD(${Number(venta.id_venta)}, ${Number(venta.id_producto)}, ${Number(venta.id_detalle_venta)})">Devolución</button>`
                         : botonFactura + accion
                         }
                     </td>
@@ -3406,6 +3320,9 @@
                 return;
             }
 
+            if (!resultado.datos_emision_conservados) {
+                alert("Este comprobante anterior muestra datos actuales: no conserva una copia de los datos originales de emision.");
+            }
             imprimirFacturaBD(resultado.factura, resultado.detalles, resultado.empresa);
             cargarFacturasBD();
             cargarHistorialVentasBD();
@@ -3776,7 +3693,7 @@
                         </div>
                         <div>
                             <span>Producto lider</span>
-                            <strong>${(rango.productos_top && rango.productos_top[0]) ? rango.productos_top[0].producto + " (" + rango.productos_top[0].cantidad + ")" : "Sin ventas"}</strong>
+                            <strong>${(rango.productos_top && rango.productos_top[0]) ? limpiarTextoBD(rango.productos_top[0].producto) + " (" + Number(rango.productos_top[0].cantidad) + ")" : "Sin ventas"}</strong>
                         </div>
                         <div>
                             <span>Canal principal</span>
@@ -5029,7 +4946,21 @@
             inputCosto.value = Number(producto.costo_unitario || 0);
         }
 
-        const tallas = producto ? leerTallasBD(producto.tallas) : [];
+        const selectorColor = document.getElementById("compraColorReposicion");
+        const colores = leerColoresBD(producto ? producto.colores : []);
+        const colorPrevio = selectorColor.value;
+        selectorColor.innerHTML = '<option value="">Seleccionar color</option>';
+        colores.forEach(function(variante) {
+            const opcion = document.createElement("option");
+            opcion.value = variante.id_producto_color;
+            opcion.textContent = variante.color;
+            selectorColor.appendChild(opcion);
+        });
+        selectorColor.value = colores.some(item => String(item.id_producto_color) === colorPrevio)
+            ? colorPrevio : (colores.length === 1 ? String(colores[0].id_producto_color) : "");
+        const variante = colores.find(item => String(item.id_producto_color) === selectorColor.value);
+        const tallas = tipoItem === "reposicion" && colores.length > 0
+            ? (variante ? variante.tallas : []) : (producto ? leerTallasBD(producto.tallas) : []);
         const tallasUnicas = [];
 
         tallas.forEach(function(item) {
@@ -5038,7 +4969,7 @@
             }
         });
 
-        tallasLetras.concat(tallasNumeros).forEach(function(talla) {
+        (tipoItem === "reposicion" && colores.length > 0 ? [] : tallasLetras.concat(tallasNumeros)).forEach(function(talla) {
             if (!tallasUnicas.includes(talla)) {
                 tallasUnicas.push(talla);
             }
@@ -5168,6 +5099,14 @@
             return;
         }
 
+        const idColorReposicion = Number(document.getElementById("compraColorReposicion").value || 0);
+        const coloresReposicion = leerColoresBD(producto ? producto.colores : []);
+        const varianteReposicion = coloresReposicion.find(item => Number(item.id_producto_color) === idColorReposicion);
+        if (tipoItem === "reposicion" && coloresReposicion.length > 0 && !varianteReposicion) {
+            alert("Selecciona el color del producto que vas a reponer.");
+            return;
+        }
+
         const productoTexto = tipoItem === "reposicion"
             ? selectorProducto.options[selectorProducto.selectedIndex].textContent
             : etiquetaCategoriaAdmin(categoria) + " - " + descripcion;
@@ -5190,7 +5129,8 @@
                 id_producto: tipoItem === "reposicion" ? idProducto : null,
                 categoria: tipoItem === "mercancia_nueva" ? categoria : "",
                 descripcion: tipoItem === "mercancia_nueva" ? descripcion : "",
-                color: tipoItem === "mercancia_nueva" ? (entrada.color || "Unico") : "",
+                color: tipoItem === "mercancia_nueva" ? (entrada.color || "Unico") : (varianteReposicion?.color || ""),
+                id_producto_color: tipoItem === "reposicion" ? idColorReposicion : 0,
                 producto_texto: productoTexto,
                 talla: entrada.talla,
                 cantidad: entrada.cantidad,
@@ -5224,6 +5164,7 @@
             return {
                 tipo_item: item.tipo_item,
                 id_producto: item.id_producto,
+                id_producto_color: item.id_producto_color,
                 categoria: item.categoria,
                 descripcion: item.descripcion,
                 color: item.color,
@@ -6205,7 +6146,7 @@
         }
     }
 
-    async function registrarDevolucionBD(idVenta, idProducto) {
+    async function registrarDevolucionBD(idVenta, idProducto, idDetalle) {
         const cantidadTexto = prompt("¿Cuántas unidades deseas devolver?");
 
         if (cantidadTexto === null) return;
@@ -6227,6 +6168,7 @@
         const datos = new FormData();
         datos.append("id_venta", idVenta);
         datos.append("id_producto", idProducto);
+    datos.append("id_detalle_venta", idDetalle || 0);
         datos.append("cantidad", cantidad);
         datos.append("motivo", motivo.trim());
 
@@ -6885,6 +6827,7 @@
 
     if (compraProducto) {
         compraProducto.addEventListener("change", function() {
+            document.getElementById("compraColorReposicion").value = "";
             tallasCompraMercancia = [];
             renderizarTallasCompraMercancia();
             actualizarTallasCompraMercancia();

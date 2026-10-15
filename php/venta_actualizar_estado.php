@@ -67,6 +67,7 @@ try {
             SELECT id_producto, id_producto_color, talla, cantidad
             FROM detalle_venta
             WHERE id_venta = :id_venta
+            ORDER BY id_producto,id_producto_color,talla
         ");
         $consultaDetalles->execute([
             ":id_venta" => $idVenta

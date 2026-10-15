@@ -8,7 +8,7 @@ require_once "auditoria.php";
 header("Content-Type: application/json; charset=UTF-8");
 
 try {
-    $usuarioActual = exigir_sesion();
+    $usuarioActual = exigir_roles(["admin"]);
 
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
         echo json_encode(["error" => true, "mensaje" => "Método no permitido"], JSON_UNESCAPED_UNICODE);
@@ -73,17 +73,23 @@ try {
     }
 
     $hash = password_hash($passwordNueva, PASSWORD_DEFAULT);
+    $conexion->beginTransaction();
     $consulta = $conexion->prepare("
         UPDATE usuario_sistema
-        SET contrasena = :contrasena
+        SET contrasena = :contrasena,
+            sesion_token = :sesion_token,
+            sesion_actualizada = NOW()
         WHERE id_usuario = :id_usuario
     ");
     $consulta->execute([
         ":contrasena" => $hash,
+        ":sesion_token" => $idUsuario === intval($usuarioActual["id_usuario"])
+            ? $usuarioActual["sesion_token"] : null,
         ":id_usuario" => $idUsuario
     ]);
 
     if ($consulta->rowCount() === 0) {
+        $conexion->rollBack();
         echo json_encode(["error" => true, "mensaje" => "Usuario no encontrado"], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -92,13 +98,17 @@ try {
         "modo" => $modo,
         "admin_id" => intval($usuarioActual["id_usuario"])
     ]);
+    $conexion->commit();
 
     echo json_encode([
         "error" => false,
         "mensaje" => "Contraseña actualizada correctamente"
     ], JSON_UNESCAPED_UNICODE);
 
-} catch (PDOException $e) {
+} catch (Throwable $e) {
+    if (isset($conexion) && $conexion->inTransaction()) {
+        $conexion->rollBack();
+    }
     error_log("Error password_cambiar: " . $e->getMessage());
     echo json_encode([
         "error" => true,

@@ -420,15 +420,6 @@ try {
         "mensaje" => $e->getMessage()
     ], JSON_UNESCAPED_UNICODE);
 
-} catch (PDOException $e) {
-    if (isset($conexion) && $conexion->inTransaction()) {
-        $conexion->rollBack();
-    }
-
-    echo json_encode([
-        "error" => true,
-        "mensaje" => $e->getMessage()
-    ], JSON_UNESCAPED_UNICODE);
 }
 
 ?>

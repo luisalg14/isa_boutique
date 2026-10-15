@@ -78,9 +78,9 @@ function exigir_csrf_si_autenticado() {
     exigir_origen_mismo_sitio();
 
     $tokenSesion = csrf_token_actual();
-    $tokenRecibido = $_SERVER["HTTP_X_CSRF_TOKEN"] ?? ($_POST["csrf_token"] ?? ($_COOKIE["isa_csrf_token"] ?? ""));
+    $tokenRecibido = $_SERVER["HTTP_X_CSRF_TOKEN"] ?? ($_POST["csrf_token"] ?? "");
 
-    if ($tokenRecibido === "" || !hash_equals($tokenSesion, $tokenRecibido)) {
+    if (!is_string($tokenRecibido) || $tokenRecibido === "" || !hash_equals($tokenSesion, $tokenRecibido)) {
         responder_json_error("Token de seguridad invalido. Recarga la pagina e intenta de nuevo.", 403);
     }
 }
