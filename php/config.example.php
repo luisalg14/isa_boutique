@@ -1,6 +1,7 @@
 <?php
 
 return [
+    "app_env" => "production", // Usar local solo en desarrollo loopback con HTTP.
     "host" => "localhost",
     "port" => "5432",
     "database" => "nombre_base_datos",

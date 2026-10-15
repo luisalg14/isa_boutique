@@ -7,6 +7,7 @@ if (file_exists($configLocal)) {
 }
 
 return [
+    "app_env" => getenv("ISA_APP_ENV") ?: "production",
     "host" => getenv("ISA_DB_HOST") ?: "localhost",
     "port" => getenv("ISA_DB_PORT") ?: "5432",
     "database" => getenv("ISA_DB_NAME") ?: "",

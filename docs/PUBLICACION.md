@@ -21,6 +21,8 @@ En el servidor puedes usar variables de entorno:
 - `ISA_DB_PASSWORD`
 - `ISA_DB_SSLMODE` (`require` en Neon)
 - `ISA_DB_OPTIONS` (`endpoint=...` en Neon cuando el host lo pida)
+- `ISA_APP_ENV` (`production` al publicar; `local` solo para desarrollo HTTP en loopback).
+- `ISA_APP_URL` (URL HTTPS definitiva para los enlaces de recuperacion).
 
 Si el hosting no permite variables de entorno, copia `php/config.example.php` como `php/config.local.php` y llena los datos reales. Ese archivo no debe subirse a GitHub.
 
@@ -67,9 +69,26 @@ Documentacion oficial:
 - No usar `123456` en producción.
 - Mantener las contraseñas guardadas con hash.
 - Usar la pestaña `Seguridad` del panel interno para cambiar o restablecer contraseñas.
-- Si usas `produccion_datos_minimos.sql`, las claves temporales son:
-- Admin: `admin@isaboutique.com` / `Admin12345`
-- Vendedor: `vendedora@isaboutique.com` / `Vendedor12345`
+- `produccion_datos_minimos.sql` crea referencias inactivas, sin contrasenas utilizables. No hay claves predeterminadas.
+- Para una instalacion nueva, usa `scripts/crear_usuario_inicial.php` desde CLI con nombre, correo y rol (`admin` o `vendedor`). Recibe la clave mediante `ISA_USUARIO_PASSWORD`, exige 12 a 72 bytes con letras y numeros y genera el hash en el momento.
+- El comando solo crea una cuenta nueva o habilita un marcador inicial inactivo con el mismo rol. Rechaza sobrescribir cuentas normales. No usarlo para restablecer usuarios existentes.
+
+Ejemplo de creacion explicita en PowerShell; no ejecutarlo sobre una base existente sin comprobar antes la cuenta que se desea crear:
+
+```powershell
+$claveInicial = Read-Host 'Nueva contrasena propia' -AsSecureString
+try {
+    $env:ISA_USUARIO_PASSWORD = [System.Net.NetworkCredential]::new('', $claveInicial).Password
+    & 'C:\xampp\php\php.exe' scripts/crear_usuario_inicial.php 'Administrador' 'tu-correo@ejemplo.com' admin
+} finally {
+    Remove-Item Env:ISA_USUARIO_PASSWORD -ErrorAction SilentlyContinue
+    $claveInicial.Dispose()
+}
+```
+
+El script usa la base configurada: ejecutarlo es una operacion de escritura deliberada. No imprime claves ni hashes. Si la cuenta ya existe, cambiar su clave mediante el panel o recuperacion. Las cuentas ya configuradas en Neon no necesitan ejecutar estos datos iniciales otra vez.
+
+Las cookies requieren HTTPS en produccion. HTTP solo se permite si `app_env`/`ISA_APP_ENV` es `local` y tanto la conexion como el nombre del servidor son loopback. Un reverse proxy debe configurar correctamente HTTPS y el host canonico en el servidor; no se confia automaticamente en cabeceras reenviadas. Al publicar, no conservar `app_env=local`.
 
 ## Archivos sensibles
 

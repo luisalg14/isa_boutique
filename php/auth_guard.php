@@ -1,22 +1,16 @@
 <?php
+require_once __DIR__.'/cookie_segura.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     ini_set("session.use_strict_mode", "1");
     ini_set("session.cookie_httponly", "1");
 
-    $esHttps = (
-        (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") ||
-        (($_SERVER["SERVER_PORT"] ?? "") === "443")
-    );
-
-    session_set_cookie_params([
-        "lifetime" => 0,
-        "path" => "/",
-        "domain" => "",
-        "secure" => $esHttps,
-        "httponly" => true,
-        "samesite" => "Lax"
-    ]);
+    try {
+        $opcionesCookie=opciones_cookie_actuales();
+    } catch (DomainException $e) {
+        responder_json_error($e->getMessage(),426);
+    }
+    session_set_cookie_params($opcionesCookie);
 
     session_start();
 }
@@ -53,16 +47,13 @@ function csrf_token_actual() {
         $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
     }
 
-    $esHttps = (
-        (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") ||
-        (($_SERVER["SERVER_PORT"] ?? "") === "443")
-    );
+    $opcionesCookie=opciones_cookie_actuales();
 
     setcookie("isa_csrf_token", $_SESSION["csrf_token"], [
         "expires" => 0,
         "path" => "/",
         "domain" => "",
-        "secure" => $esHttps,
+        "secure" => $opcionesCookie["secure"],
         "httponly" => false,
         "samesite" => "Lax"
     ]);

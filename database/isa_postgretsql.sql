@@ -775,12 +775,12 @@ $$;
 -- DATOS DE PRUEBA
 -- =====================================================
 
--- Usuarios
-INSERT INTO usuario_sistema (nombre, correo, contrasena, rol)
-VALUES 
-('Administrador Isa Boutique', 'admin@isaboutique.com', '$2y$10$HmR7pPGkUHD.X9tPVgdo2OQfKQdZZsQV2PIFZ03QuIGWBDkenEAOG', 'admin'),
-('Vendedora Principal', 'vendedora@isaboutique.com', '$2y$10$E3k6Q4/e43fy3o.w6oUhMONgNXxBvgq/YJUAre3QlNHqFfUEFFnYm', 'vendedor');
-
+-- Usuarios de referencia para las ventas de ejemplo: inactivos y sin clave utilizable.
+-- Para habilitarlos, usar scripts/crear_usuario_inicial.php con una clave propia.
+INSERT INTO usuario_sistema (nombre, correo, contrasena, rol, estado)
+VALUES
+('Administrador Isa Boutique', 'admin@isaboutique.com', '!SIN_ACCESO_INICIAL!', 'admin', FALSE),
+('Vendedora Principal', 'vendedora@isaboutique.com', '!SIN_ACCESO_INICIAL!', 'vendedor', FALSE);
 
 -- Categorías
 INSERT INTO categoria (nombre, descripcion)

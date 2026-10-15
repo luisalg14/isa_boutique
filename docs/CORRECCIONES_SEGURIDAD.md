@@ -229,3 +229,31 @@ En `php/upload_seguro.php`, las carpetas nuevas se crean con 0750 y los archivos
 En Windows se mantienen las ACL heredadas; no se pretende configurar ACL con chmod, cuya compatibilidad con permisos Windows es limitada segun [PHP](https://www.php.net/manual/en/function.chmod.php). No se modificaron ACL del equipo. Un despliegue con PHP y servidor estatico separados debe asignar correctamente el grupo lector antes de usar 0640/0750. Se verifico sintaxis PHP; no se probo una subida multipart completa ni los modos Unix en este equipo Windows. Por tanto el funcionamiento de esa politica en Linux sigue pendiente de validacion de despliegue.
 
 Este bloque permanece local sin commit ni publicacion. La siguiente ejecucion de Sonar corresponde al usuario; las capturas no permiten afirmar una calificacion nueva ni una puerta de calidad superada.
+
+## Undecimo bloque: seis hashes SQL, integridad de CDN y cookies de produccion
+
+Preparado a partir del listado completo del analisis publicado el 15 de octubre de 2026 a las 11:40 (Bogota), revision b92e3a5e30815b8ae99f868eef9c6b9a3f437818. La lectura encontro 845 incidencias abiertas y 13 con impacto de seguridad: seis hashes bloqueadores, cinco cargas de pruebas con vm y dos bajas. No se cambio su estado en Sonar ni se ejecuto un analisis nuevo. No se considera superada la puerta de calidad.
+
+### Hashes de contrasenas en SQL
+
+Se retiraron los seis literales bcrypt de `database/isa_postgretsql.sql`, `database/migracion_seguridad_passwords.sql` y `database/produccion_datos_minimos.sql`. Las semillas conservan referencias de usuarios para las claves foraneas de los ejemplos, pero las dejan inactivas y con un marcador que password_verify no acepta como hash. No se distribuyen claves iniciales. La migracion heredada ya no actualiza contrasenas con valores comunes: comprueba el prefijo de hash en cuentas activas y se detiene ante claves sin hash; no sustituye el restablecimiento individual ni valida por completo todos los formatos de hash.
+
+Se preparo `scripts/crear_usuario_inicial.php`, solo CLI, para futuras instalaciones. Valida nombre/correo/rol y recibe una clave propia por una variable de entorno efimera. Genera el hash en ejecucion. El helper crea cuentas nuevas o habilita exclusivamente marcadores iniciales inactivos del mismo rol, con transaccion y bloqueo por correo; rechaza sobrescribir cuentas normales. No se ejecuto este comando sobre Neon. PUBLICACION.md documenta su uso y deja de anunciar contrasenas predeterminadas.
+
+Antes de retirar los literales se compararon con los hashes de las dos cuentas reales en una transaccion de solo lectura, sin imprimirlos. Ninguno coincidia; tampoco verificaron las antiguas claves de ejemplo. No fue necesario cambiar esas cuentas para esta correccion, y no se modificaron contrasenas, sesiones ni tokens reales. Esto no borra versiones historicas del repositorio ni acredita que esas claves nunca se hayan usado en otras instalaciones.
+
+### Integridad de JsBarcode
+
+El script remoto de `html/admin.html` ahora lleva integrity SHA-384 y crossorigin=anonymous, conservando la version fija 3.11.6. La huella se calculo sobre los 60817 bytes descargados del recurso exacto; el CDN devolvio Access-Control-Allow-Origin: *. No se ejecuto la libreria durante la descarga. La validacion de integridad sigue el [mecanismo SRI documentado por MDN](https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Subresource_Integrity). No demuestra ausencia de vulnerabilidades de la libreria ni sustituye una prueba de impresion de codigos en navegador.
+
+### Cookies
+
+`php/cookie_segura.php` define Secure por defecto y rechaza acceso HTTP fuera del entorno local autorizado con respuesta 426. La excepcion web exige app_env=local, conexion loopback y Host localhost/loopback; no basta falsificar el Host desde una conexion remota. CLI conserva su uso en pruebas sin leer las credenciales de configuracion. La cookie CSRF utiliza la misma politica de transporte, manteniendo HttpOnly=false para su cabecera explicita; la cookie de sesion conserva HttpOnly y SameSite=Lax.
+
+Se agrego app_env=production a la configuracion de ejemplo y al respaldo por variables de entorno. El archivo local ignorado se marco app_env=local para conservar XAMPP por HTTP sin cambiar las credenciales de conexion. Los despliegues nuevos requieren HTTPS y deben configurar el proxy y el host canonico correctamente; no se confia en X-Forwarded-Proto proporcionado por el cliente. La excepcion local es intencional y podria seguir requiriendo revision de php:S2092 en Sonar; no se da por cerrado ese aviso sin un nuevo analisis. [PHP documenta Secure en los parametros de sesion](https://www.php.net/session-set-cookie-params).
+
+### Verificacion y pendientes
+
+`tests/usuarios_iniciales.php` paso con PostgreSQL temporal autenticado: semillas inactivas/idempotentes, marcador no utilizable como clave, activacion con clave propia, creacion de usuario nuevo, rechazo de sobrescritura con datos conservados y comprobacion de cuentas heredadas. Probo cookies HTTPS, HTTP local autorizado, produccion sin HTTPS, Host local falsificado por IP remota y Host publico desde loopback. La regresion de endpoints de acceso y recuperacion paso en otra fixture temporal con correo simulado. El captcha real local respondio HTTP 200.
+
+Las cinco cargas vm ya documentadas siguen sujetas a revision individual: no se ocultaron mediante exclusiones ni se sustituyeron pruebas por omisiones. La confiabilidad y el resto de mantenimiento tambien siguen pendientes. No se aplicaron SQL de semillas ni esta comprobacion heredada a Neon, no se crearon cuentas reales ni se enviaron correos. No se probo HTTPS/proxy publico ni impresion real de codigos. Los cambios de este bloque siguen locales y no se publicaron en GitHub.
