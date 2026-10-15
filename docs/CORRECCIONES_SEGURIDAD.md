@@ -175,3 +175,25 @@ Se eliminaron los contadores de sesion sustituidos y se validan entradas escalar
 `node tests/panel_xss.cjs` paso con funciones reales extraidas de admin.html y DOM simulado: nombres con apostrofes, comillas y etiquetas, datos de variantes, atributos de imagen, acciones de dos filas conservadas, textos de movimientos/trabajadores/pagos y mensajes de error. No reemplaza la comprobacion visual en navegador ni una prueba de explotacion en todos los modulos. La verificacion de endpoints es CLI; no se probo el proxy/HTTPS de un despliegue publico ni una carga sostenida. Se retiraron las bases y archivos temporales. No se modificaron usuarios, contrasenas, tokens ni contadores en la base real; no se envio correo real. No se ejecuto SonarCloud ni se publicaron cambios en GitHub.
 
 Referencias: [OWASP, autenticacion y limites de intentos](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html) y [OWASP, prevencion de XSS y contextos de atributos](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html).
+
+## Noveno bloque: capturas de TLS y ejecucion dinamica en pruebas
+
+Cambios preparados el 15 de octubre de 2026 a partir de las capturas compartidas. No se ejecuto SonarCloud, no se cambiaron exclusiones, perfiles ni configuraciones de analisis y no se publicaron cambios en GitHub. No requieren migracion.
+
+### SMTP
+
+En `php/mailer_smtp.php`, el inicio de STARTTLS utilizaba STREAM_CRYPTO_METHOD_TLS_CLIENT. Se sustituyo por la mascara explicita TLSv1_2_CLIENT | TLSv1_3_CLIENT. El contexto de conexion impone la misma mascara para TLS implicito (la opcion historica ssl) y verifica certificado, nombre del servidor y ausencia de certificados autofirmados no confiables. Se rechazan configuraciones de SMTP sin cifrado antes de conectar o autenticar. La politica explicita usa las opciones documentadas por [PHP para habilitar cifrado](https://www.php.net/manual/en/function.stream-socket-enable-crypto.php) y [verificar certificados](https://www.php.net/manual/en/context.ssl.php).
+
+La configuracion actual selecciona Brevo, verificado sin imprimir claves. Ese proveedor retorna por su adaptador HTTPS antes del codigo SMTP; este cambio endurece el transporte SMTP alternativo, no demuestra un fallo de entrega en Brevo. No se alteraron claves, remitentes ni servicios externos.
+
+`tests/smtp_tls.php` paso: mascara exacta TLS 1.2/1.3, verificacion de identidad/certificados, conservacion de opciones al crear contexto y rechazo de tres configuraciones sin cifrado antes de abrir conexiones. Paso la sintaxis PHP. No se realizo handshake contra servidores TLS ni envio real de correo; el funcionamiento con certificados y protocolos de un proveedor debe verificarse en el entorno de despliegue.
+
+### Pruebas JavaScript mostradas
+
+Las capturas identifican llamadas de ejecucion dinamica en `tests/carrito_envio.cjs` y `tests/catalogo_comun.cjs`. Se reviso el origen del codigo: archivos fijos del repositorio y expresiones de prueba; no son llamadas usadas por las peticiones de la aplicacion. Esto no justifica ignorar todas las alertas ni acredita que las otras incidencias de seguridad sean inocuas.
+
+Se eliminaron diez llamadas innecesarias a runInContext: de catorce sitios a cuatro entre esos dos archivos. Las pruebas ahora invocan funciones directamente, transmiten productos mediante fetch simulado y leen el carrito persistido. No concatenan productos serializados dentro de codigo ejecutable. Los datos maliciosos de prueba siguen presentes para comprobar el escape HTML. La carga de paginas se limita explicitamente a Producto.html y categoria.html; los contextos deshabilitan generacion de codigo por strings/WebAssembly y los puntos de carga tienen timeout de un segundo.
+
+Las cuatro llamadas restantes cargan el JS local fijo y los scripts de las dos paginas previstas. Continuaran siendo puntos de ejecucion dinamica sujetos a revision; no se ocultaron mediante alias ni se eliminaron las pruebas. Node documenta que [vm no constituye una barrera de seguridad para codigo no confiable](https://nodejs.org/api/vm.html). Los limites indicados ayudan a contener errores de las pruebas, pero no permiten ejecutar archivos de terceros de forma segura. La revision depende de ejecutar una copia confiable del repositorio; no se cambiaron estados de incidencias en Sonar. Tambien quedan los puntos de ejecucion dinamica propios de `tests/panel_xss.cjs`, no incluidos en estas capturas, pendientes de su revision individual.
+
+Pasaron `node tests/carrito_envio.cjs`, `node tests/catalogo_comun.cjs` y la regresion `node tests/panel_xss.cjs`. Se conservan los casos de doble clic, respuesta perdida, reintento con misma clave, rechazo comercial, cambio de carrito incierto, arranque de ambas paginas, escape HTML y limite de stock por variante. Son pruebas con DOM/transporte simulados; no sustituyen una prueba real en navegador. Los cambios no permiten afirmar un nuevo numero de incidencias ni que la puerta de calidad haya pasado: eso requiere el siguiente analisis del usuario.

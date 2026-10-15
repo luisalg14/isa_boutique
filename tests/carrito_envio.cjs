@@ -10,13 +10,13 @@ function pagina(almacen,enviar){
  const valores={carritoCliente:'Cliente',carritoTelefono:'3001234567',carritoCorreo:'cliente@example.test',carritoMedioPago:'efectivo',carritoEntrega:'recoger_tienda'};
  const document={cookie:'isa_csrf_token=token-prueba',getElementById(id){if(!nodos.has(id))nodos.set(id,{value:valores[id]||'',textContent:'',disabled:false});return nodos.get(id);}};
  const avisos=[];
- const ctx=vm.createContext({document,crypto:webcrypto,TextEncoder,FormData,
+ const ctx=vm.createContext({document,crypto:webcrypto,TextEncoder,FormData,carrito:JSON.parse(almacen.get('isa_carrito')),
   localStorage:{getItem:clave=>almacen.get(clave)??null,setItem:(clave,valor)=>almacen.set(clave,valor),removeItem:clave=>almacen.delete(clave)},
   fetch:enviar,alert:mensaje=>avisos.push(mensaje),console:{error(){}},
-  renderizarCarrito(){},cerrarCarrito(){},cargarProductos:async()=>{}});
- vm.runInContext(codigo,ctx);
- vm.runInContext('let carrito = JSON.parse(localStorage.getItem("isa_carrito"));',ctx);
- return {ctx,nodos,avisos,confirmar:()=>vm.runInContext('finalizarCompraCarrito()',ctx)};
+  renderizarCarrito(){},cerrarCarrito(){},cargarProductos:async()=>{}}, {codeGeneration:{strings:false,wasm:false}});
+ // Solo se carga el archivo fijo del repositorio; los datos de prueba no se convierten en codigo.
+ vm.runInContext(codigo,ctx,{filename:'js/catalogo-comun.js',timeout:1000});
+ return {ctx,nodos,avisos,confirmar:()=>ctx.finalizarCompraCarrito()};
 }
 const exito={ok:true,json:async()=>({error:false,mensaje:'Pedido #17 registrado',id_venta:17,total:357,estado:'pendiente'})};
 (async()=>{
@@ -62,7 +62,8 @@ const exito={ok:true,json:async()=>({error:false,mensaje:'Pedido #17 registrado'
  almacen.set('isa_carrito',JSON.stringify(original));
  const incierta=pagina(almacen,async()=>{throw Error('Sin conexion');});
  await incierta.confirmar();let nuevosEnvios=0;
- vm.runInContext('carrito[0].cantidad=2;guardarCarrito();',incierta.ctx);
+ incierta.ctx.carrito[0].cantidad=2;
+ incierta.ctx.guardarCarrito();
  incierta.ctx.fetch=async()=>{nuevosEnvios++;return exito;};
  await incierta.confirmar();assert.equal(nuevosEnvios,0,'Un pedido incierto se reemplaza silenciosamente');
  assert.ok(incierta.nodos.get('mensajeCarrito').textContent.includes('pedido anterior'));

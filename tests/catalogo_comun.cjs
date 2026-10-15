@@ -4,8 +4,9 @@ const vm = require('node:vm');
 const path = require('node:path');
 const raiz = path.resolve(__dirname, '..');
 const compartido = fs.readFileSync(path.join(raiz, 'js/catalogo-comun.js'), 'utf8');
-const contexto = vm.createContext({localStorage:{getItem:()=>'{invalido'}});
-vm.runInContext(compartido, contexto);
+const contexto = vm.createContext({localStorage:{getItem:()=>'{invalido'}}, {codeGeneration:{strings:false,wasm:false}});
+// Carga exclusiva del archivo local fijo; vm no es una barrera para codigo no confiable.
+vm.runInContext(compartido, contexto, {filename:'js/catalogo-comun.js',timeout:1000});
 assert.equal(contexto.cargarCarritoCatalogo().length, 0);
 for (const valor of ['{}','null','false','[null,1,"texto"]','{roto']) {
     assert.equal(contexto.leerImagenesProducto(valor).length, 0);
@@ -37,6 +38,7 @@ function elemento(etiqueta) {
         querySelectorAll(){return[];},getBoundingClientRect(){return{top:0};},scrollIntoView(){}};
 }
 async function cargarPagina(archivo) {
+    assert.ok(['Producto.html','categoria.html'].includes(archivo),'Solo se cargan las dos paginas locales previstas');
     const html=fs.readFileSync(path.join(raiz,'html',archivo),'utf8');
     assert.equal((html.match(/src="\.\.\/js\/catalogo-comun\.js"/g)||[]).length,1);
     assert.ok(!/function formatoPrecio\(/.test(html),'La pagina conserva una copia del helper');
@@ -45,42 +47,47 @@ async function cargarPagina(archivo) {
         querySelector(){return elemento();},querySelectorAll(){return[];},createElement:elemento,
         addEventListener(){},body:elemento()};
     const errores=[];
+    const almacen=new Map([['isa_carrito','{carrito-roto']]);
     const window={location:{href:'http://localhost/isa_boutique/html/'+archivo,search:'?tipo=blusas',pathname:'/isa_boutique/html/'+archivo},
         addEventListener(){},scrollTo(){},innerWidth:1024};
     const ctx=vm.createContext({document,window,URL,URLSearchParams,
-        localStorage:{getItem:()=>'{carrito-roto',setItem(){}},sessionStorage:{getItem:()=>null},
+        localStorage:{getItem:clave=>almacen.get(clave)??null,setItem:(clave,valor)=>almacen.set(clave,valor)},sessionStorage:{getItem:()=>null},
         fetch:async()=>({ok:true,json:async()=>[]}),console:{error(...args){errores.push(args);},log(){}},
-        alert(){},setTimeout(){},clearTimeout(){}});
-    vm.runInContext(compartido,ctx,{filename:'catalogo-comun.js'});
+        alert(){},setTimeout(){},clearTimeout(){}}, {codeGeneration:{strings:false,wasm:false}});
+    vm.runInContext(compartido,ctx,{filename:'catalogo-comun.js',timeout:1000});
     for(const script of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
         if(/\bsrc\s*=/.test(script[1]))continue;
-        vm.runInContext(script[2],ctx,{filename:archivo});
+        vm.runInContext(script[2],ctx,{filename:archivo,timeout:1000});
     }
     await new Promise(resolve=>setImmediate(resolve));
     assert.equal(errores.length,0,'Error de arranque en '+archivo+': '+JSON.stringify(errores));
-    assert.equal(vm.runInContext('carrito.length',ctx),0);
+    assert.equal(ctx.cargarCarritoCatalogo().length,0);
     assert.equal(typeof ctx.llenarColoresCompra,'function');
     assert.equal(typeof ctx.cambiarImagenCarrusel,'function');
     const productoPrueba={id_producto:1,nombre:'<img src=x onerror=alert(1)>',codigo:'P" onclick="x',marca:'<b>Marca</b>',
         categoria:'<img src=x onerror=alert(1)>',precio:100,cantidad:2,estado:'activo',imagenes:[],colores:[],tallas:[]};
     if (archivo==='Producto.html') {
         document.getElementById('filtroPrecioMaximo').disabled=true;
-        vm.runInContext('productosCatalogo='+JSON.stringify([productoPrueba])+';renderizarProductos();',ctx);
+        ctx.fetch=async()=>({json:async()=>[productoPrueba]});
+        await ctx.cargarProductos();
     } else {
-        vm.runInContext('productosCategoriaActual='+JSON.stringify([productoPrueba])+';renderizarProductosCategoria();',ctx);
+        window.location.search='?tipo='+encodeURIComponent(productoPrueba.categoria);
+        ctx.fetch=async()=>({json:async()=>[productoPrueba]});
+        await ctx.cargarCategoria();
     }
     const tarjeta=document.getElementById(archivo==='Producto.html'?'contenedor-productos':'contenedor').children[0];
     assert.ok(tarjeta && tarjeta.innerHTML.includes('&lt;img'),'Falta escape en ficha de '+archivo);
     assert.ok(!tarjeta.innerHTML.includes('<img src=x onerror='),'HTML de producto sin escapar');
     const comprable={id_producto:3,codigo:'P3',nombre:'Prenda',precio:119,cantidad:2,estado:'activo',
         tallas:[{talla:'M',cantidad:2}],colores:[{id_producto_color:31,color:'Rojo',tallas:[{talla:'M',cantidad:2}]}]};
-    ctx.productoPruebaCompra=comprable;
     for(let intento=0;intento<3;intento++) {
-        vm.runInContext('abrirModalCompra(productoPruebaCompra);agregarProductoAlCarrito();',ctx);
+        ctx.abrirModalCompra(comprable);
+        ctx.agregarProductoAlCarrito();
     }
-    assert.equal(vm.runInContext('carrito.length',ctx),1);
-    assert.equal(vm.runInContext('carrito[0].cantidad',ctx),2,'El carrito supera el stock por talla');
-    assert.equal(Number(vm.runInContext('carrito[0].id_producto_color',ctx)),31);
+    const guardado=JSON.parse(almacen.get('isa_carrito'));
+    assert.equal(guardado.length,1);
+    assert.equal(guardado[0].cantidad,2,'El carrito supera el stock por talla');
+    assert.equal(Number(guardado[0].id_producto_color),31);
     console.log('PASS arranque con dependencia compartida y carrito corrupto: '+archivo);
 }
 (async()=>{await cargarPagina('Producto.html');await cargarPagina('categoria.html');})().catch(error=>{console.error(error);process.exitCode=1;});

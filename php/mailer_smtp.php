@@ -53,6 +53,16 @@ function smtp_codificar_header($texto) {
     return mb_encode_mimeheader($texto, "UTF-8", "B", "\r\n");
 }
 
+function opciones_tls_smtp($host) {
+    return [
+        "crypto_method" => STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT | STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT,
+        "verify_peer" => true,
+        "verify_peer_name" => true,
+        "allow_self_signed" => false,
+        "peer_name" => $host
+    ];
+}
+
 function enviar_correo_smtp($para, $asunto, $html, $textoPlano = "") {
     $mail = mail_configuracion();
 
@@ -69,6 +79,11 @@ function enviar_correo_smtp($para, $asunto, $html, $textoPlano = "") {
         throw new RuntimeException("Configuracion SMTP incompleta.");
     }
 
+    if (!in_array($mail["encryption"], ["tls", "ssl"], true)) {
+        throw new RuntimeException("El envio SMTP requiere TLS o TLS implicito (ssl).");
+    }
+
+    $contexto = stream_context_create(["ssl" => opciones_tls_smtp($mail["host"])]);
     $hostConexion = $mail["encryption"] === "ssl"
         ? "ssl://" . $mail["host"]
         : $mail["host"];
@@ -78,7 +93,8 @@ function enviar_correo_smtp($para, $asunto, $html, $textoPlano = "") {
         $errno,
         $errstr,
         $mail["timeout"],
-        STREAM_CLIENT_CONNECT
+        STREAM_CLIENT_CONNECT,
+        $contexto
     );
 
     if (!$socket) {
@@ -99,7 +115,7 @@ function enviar_correo_smtp($para, $asunto, $html, $textoPlano = "") {
     if ($mail["encryption"] === "tls") {
         smtp_comando($socket, "STARTTLS", [220]);
 
-        if (!stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
+        if (!stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT | STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT)) {
             fclose($socket);
             throw new RuntimeException("No se pudo iniciar TLS con el servidor SMTP.");
         }
