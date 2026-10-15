@@ -751,7 +751,8 @@
     align-items: start;
 }
 
-.admin-page .campo label {
+.admin-page .campo label,
+.admin-page .campo .campo-titulo {
     margin-bottom: 7px;
     color: var(--sys-rose);
     font-size: 11px;

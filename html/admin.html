@@ -20,8 +20,8 @@
         <div class="login-content">
             <h2>Panel Interno</h2>
 
-            <input type="email" id="correo" placeholder="Correo">
-            <input type="password" id="clave" placeholder="Contraseña">
+            <input type="email" id="correo" aria-label="Correo de acceso" placeholder="Correo">
+            <input type="password" id="clave" aria-label="Contrasena de acceso" placeholder="Contraseña">
 
             <div class="captcha-login">
                 <label for="captchaRespuesta">Verificacion humana</label>
@@ -257,7 +257,7 @@
             <div class="venta-layout">
                 <form id="formVentaAdmin" class="venta-form">
                     <div class="campo venta-scan-field">
-                        <label>Código de barras</label>
+                        <label for="ventaAdminCodigoBarras">Código de barras</label>
                         <div class="scan-code-row">
                             <input id="ventaAdminCodigoBarras" placeholder="Escanea o escribe el código">
                             <button type="button" onclick="buscarProductoVentaAdminPorCodigo()">Buscar</button>
@@ -266,38 +266,38 @@
                     </div>
 
                     <div class="campo">
-                        <label>Producto</label>
+                        <label for="ventaAdminProducto">Producto</label>
                         <select id="ventaAdminProducto" required>
                             <option value="">Seleccionar producto</option>
                         </select>
                     </div>
 
                     <div class="campo">
-                        <label>Color</label>
+                        <label for="ventaAdminColor">Color</label>
                         <select id="ventaAdminColor" required>
                             <option value="">Seleccionar color</option>
                         </select>
                     </div>
 
                     <div class="campo">
-                        <label>Talla</label>
+                        <label for="ventaAdminTalla">Talla</label>
                         <select id="ventaAdminTalla" required>
                             <option value="">Seleccionar talla</option>
                         </select>
                     </div>
 
                     <div class="campo">
-                        <label>Cliente</label>
+                        <label for="ventaAdminCliente">Cliente</label>
                         <input id="ventaAdminCliente" placeholder="Nombre del cliente" required>
                     </div>
 
                     <div class="campo">
-                        <label>Teléfono</label>
+                        <label for="ventaAdminTelefono">Teléfono</label>
                         <input id="ventaAdminTelefono" placeholder="Teléfono o WhatsApp" required>
                     </div>
 
                     <div class="campo">
-                        <label>Tipo de documento</label>
+                        <label for="ventaAdminTipoDocumento">Tipo de documento</label>
                         <select id="ventaAdminTipoDocumento">
                             <option value="CC">Cédula de ciudadanía</option>
                             <option value="CE">Cédula de extranjería</option>
@@ -308,24 +308,24 @@
                     </div>
 
                     <div class="campo">
-                        <label>Número de documento</label>
+                        <label for="ventaAdminNumeroDocumento">Número de documento</label>
                         <input id="ventaAdminNumeroDocumento" placeholder="Documento del cliente">
                     </div>
 
                     <div class="campo">
-                        <label>Correo</label>
+                        <label for="ventaAdminCorreo">Correo</label>
                         <input id="ventaAdminCorreo" type="email" placeholder="correo@cliente.com">
                     </div>
 
                     <div class="campo">
-                        <label>Cantidad</label>
+                        <label for="ventaAdminCantidad">Cantidad</label>
                         <input id="ventaAdminCantidad" type="number" min="1" value="1" required>
                     </div>
 
                     <div class="campo">
-                        <label>Descuento</label>
+                        <label for="ventaAdminDescuentoValor">Descuento</label>
                         <div class="discount-row">
-                            <select id="ventaAdminDescuentoTipo">
+                            <select id="ventaAdminDescuentoTipo" aria-label="Tipo de descuento de la venta">
                                 <option value="valor">$</option>
                                 <option value="porcentaje">%</option>
                             </select>
@@ -334,7 +334,7 @@
                     </div>
 
                     <div class="campo">
-                        <label>Medio de pago</label>
+                        <label for="ventaAdminMedioPago">Medio de pago</label>
                         <select id="ventaAdminMedioPago" required>
                             <option value="efectivo">Efectivo</option>
                             <option value="transferencia">Transferencia</option>
@@ -344,7 +344,7 @@
                     </div>
 
                     <div class="campo">
-                        <label>Canal de venta</label>
+                        <label for="ventaAdminCanal">Canal de venta</label>
                         <select id="ventaAdminCanal" required>
                             <option value="tienda_fisica">Tienda física</option>
                             <option value="whatsapp">WhatsApp</option>
@@ -354,7 +354,7 @@
                     </div>
 
                     <div class="campo">
-                        <label>Entrega</label>
+                        <label for="ventaAdminEntrega">Entrega</label>
                         <select id="ventaAdminEntrega" required>
                             <option value="recoger_tienda">Recoge en tienda</option>
                             <option value="envio_local">Envío local</option>
@@ -435,7 +435,7 @@
                 <div id="mercanciaPendienteVariantes" class="pending-variants-preview" hidden></div>
                 <div class="pending-merchandise-grid">
                     <div class="campo">
-                        <label>Crear desde compra registrada</label>
+                        <label for="mercanciaPendienteSelect">Crear desde compra registrada</label>
                         <select id="mercanciaPendienteSelect">
                             <option value="">Producto manual / sin compra pendiente</option>
                         </select>
@@ -453,7 +453,7 @@
                 <h3>1. Información comercial</h3>
                 <div class="product-basic-grid">
                     <div class="campo">
-                        <label>Código</label>
+                        <label for="inp-codigo">Código</label>
                         <div class="code-field-row">
                             <input id="inp-codigo" placeholder="Generando código..." readonly>
                             <button type="button" class="btn-code-refresh" onclick="cargarCodigoSugeridoProducto()" title="Actualizar código sugerido">↻</button>
@@ -471,19 +471,19 @@
 
                     <div class="product-basic-fields">
                         <div class="campo product-name-field">
-                            <label>Nombre</label>
+                            <label for="inp-nombre">Nombre</label>
                             <input id="inp-nombre" placeholder="Ej: Top corto negro">
                         </div>
 
                         <div class="campo">
-                            <label>Categoría</label>
+                            <label for="inp-tipo">Categoría</label>
                             <select id="inp-tipo">
                                 <option value="">Seleccionar</option>
                             </select>
                         </div>
 
                         <div class="campo">
-                            <label>Marca</label>
+                            <label for="inp-marca">Marca</label>
                             <input id="inp-marca" placeholder="Ej: ANWND">
                         </div>
                     </div>
@@ -494,12 +494,12 @@
                 <h3>2. Costos y precio</h3>
                 <div class="product-form-grid">
                     <div class="campo">
-                        <label>Costo de compra</label>
+                        <label for="inp-costo">Costo de compra</label>
                         <input id="inp-costo" type="number" step="1000" placeholder="Ej: 100000">
                     </div>
 
                     <div class="campo">
-                        <label>Precio de venta</label>
+                        <label for="inp-precio">Precio de venta</label>
                         <input id="inp-precio" type="number" step="1000" placeholder="Ej: 185000">
                     </div>
                 </div>
@@ -510,7 +510,7 @@
                             <strong>Calculadora de precio</strong>
                             <small>Calcula con IVA colombiano incluido en el precio final.</small>
                         </div>
-                        <label>
+                        <label for="calcMargenObjetivo">
                             Ganancia objetivo
                             <input id="calcMargenObjetivo" type="number" min="1" max="95" value="35">
                             <span>%</span>
@@ -549,7 +549,7 @@
             <div class="product-form-block">
                 <h3>3. Imágenes</h3>
                 <div class="campo">
-                    <label>Fotos del producto</label>
+                    <label for="inp-img">Fotos del producto</label>
                     <input id="inp-img" type="file" multiple accept="image/*">
                     <small>Puedes elegir varias fotos. La primera será la principal.</small>
                     <div id="previewImagenesProducto" class="product-image-preview"></div>
@@ -566,16 +566,16 @@
                 </summary>
 
                 <div class="campo">
-                    <label>Color, tallas y cantidades</label>
+                    <div class="campo-titulo" id="inventarioVariantesTitulo">Color, tallas y cantidades</div>
                     <input id="inp-color" type="hidden">
                     <input id="inp-tallas" type="hidden">
-                    <div class="variant-builder">
+                    <div class="variant-builder" role="group" aria-labelledby="inventarioVariantesTitulo">
                         <div class="variant-step">
                             <strong>Color</strong>
                             <div class="color-builder">
                                 <div id="colorOptions" class="color-options"></div>
                                 <div class="variant-custom-color">
-                                    <input id="customColorInput" placeholder="Agregar otro color">
+                                    <input id="customColorInput" aria-label="Color personalizado del producto" placeholder="Agregar otro color">
                                     <button type="button" onclick="agregarColorPersonalizado()">Agregar</button>
                                 </div>
                                 <small id="selectedColorLabel">Selecciona un color antes de agregar tallas</small>
@@ -592,7 +592,7 @@
                                 <div id="sizeOptions" class="size-options compact-size-options"></div>
                                 <div class="size-quantity-row">
                                     <span id="selectedSizeLabel">Selecciona una talla</span>
-                                    <input id="selectedSizeQty" type="number" min="0" placeholder="Cantidad">
+                                    <input id="selectedSizeQty" aria-label="Cantidad de la talla seleccionada" type="number" min="0" placeholder="Cantidad">
                                     <button type="button" onclick="agregarTallaSeleccionada()">Agregar</button>
                                 </div>
                                 <div id="selectedSizesList" class="selected-sizes-list compact-selected-list"></div>
@@ -610,7 +610,7 @@
                     </div>
 
                     <div class="campo compact-total-field">
-                        <label>Cantidad total</label>
+                        <label for="inp-cantidad">Cantidad total</label>
                         <input id="inp-cantidad" type="number" placeholder="0" readonly>
                         <small>Se calcula automáticamente con las tallas.</small>
                     </div>
@@ -633,12 +633,12 @@
                     <h3>Crear categoría</h3>
 
                     <div class="campo">
-                        <label>Nombre</label>
+                        <label for="categoriaNombre">Nombre</label>
                         <input id="categoriaNombre" placeholder="Ej: enterizos">
                     </div>
 
                     <div class="campo">
-                        <label>Descripción</label>
+                        <label for="categoriaDescripcion">Descripción</label>
                         <input id="categoriaDescripcion" placeholder="Ej: Enterizos y prendas completas">
                     </div>
 
@@ -666,7 +666,7 @@
             <h2>Inventario</h2>
 
             <div class="filtros">
-                <input type="text" id="buscador" placeholder="Buscar por código, nombre, marca, color o categoría...">
+                <input type="text" id="buscador" aria-label="Buscar productos en inventario" placeholder="Buscar por código, nombre, marca, color o categoría...">
             </div>
 
             <table class="tabla-inventario tabla-inventario-productos">
@@ -706,12 +706,12 @@
 
                 <div class="finance-grid">
                     <div class="campo">
-                        <label>Fecha inicial</label>
+                        <label for="reporteFechaInicio">Fecha inicial</label>
                         <input id="reporteFechaInicio" type="date">
                     </div>
 
                     <div class="campo">
-                        <label>Fecha final</label>
+                        <label for="reporteFechaFin">Fecha final</label>
                         <input id="reporteFechaFin" type="date">
                     </div>
                 </div>
@@ -833,7 +833,7 @@
             <h2>Ventas y devoluciones</h2>
 
             <div class="filtros historial-search">
-                <input type="text" id="buscadorHistorial" placeholder="Buscar por producto, código, cliente, teléfono, factura o estado...">
+                <input type="text" id="buscadorHistorial" aria-label="Buscar en el historial de ventas" placeholder="Buscar por producto, código, cliente, teléfono, factura o estado...">
             </div>
 
             <table class="tabla-inventario tabla-historial-ventas">
@@ -861,7 +861,7 @@
             <h2>Facturas</h2>
 
             <div class="filtros facturas-filtros">
-                <input type="text" id="buscadorFacturas" placeholder="Buscar factura, venta, cliente, documento, teléfono, medio o canal...">
+                <input type="text" id="buscadorFacturas" aria-label="Buscar facturas" placeholder="Buscar factura, venta, cliente, documento, teléfono, medio o canal...">
             </div>
 
             <div class="facturas-table-wrap">
@@ -887,7 +887,7 @@
     <h2>Movimientos de Inventario</h2>
 
     <div class="filtros movimientos-search">
-        <input type="text" id="buscadorMovimientos" placeholder="Buscar por producto, código, tipo, fecha, marca o detalle...">
+        <input type="text" id="buscadorMovimientos" aria-label="Buscar movimientos de inventario" placeholder="Buscar por producto, código, tipo, fecha, marca o detalle...">
     </div>
     
     <table class="tabla-inventario">
@@ -907,7 +907,7 @@
     </table>
 
     <div class="filtros movimientos-actions acciones-movimientos-inventario">
-        <input type="date" id="fechaMovimientoEliminar">
+        <input type="date" id="fechaMovimientoEliminar" aria-label="Fecha de los movimientos que se desea eliminar">
         
         <button class="btn-eliminar movement-delete-btn" data-admin-only onclick="eliminarMovimientosPorFecha()">
             Eliminar movimientos de esa fecha
@@ -994,11 +994,11 @@
 
                         <div class="profitability-progress">
                             <div>
-                                <label>Avance punto de equilibrio <strong id="finAvanceEquilibrioTexto">0%</strong></label>
+                                <div class="profitability-progress-label">Avance punto de equilibrio <strong id="finAvanceEquilibrioTexto">0%</strong></div>
                                 <span><i id="finAvanceEquilibrioBarra"></i></span>
                             </div>
                             <div>
-                                <label>Avance meta con ganancia <strong id="finAvanceMetaTexto">0%</strong></label>
+                                <div class="profitability-progress-label">Avance meta con ganancia <strong id="finAvanceMetaTexto">0%</strong></div>
                                 <span><i id="finAvanceMetaBarra"></i></span>
                             </div>
                         </div>
@@ -1015,7 +1015,7 @@
                     <h3>Registrar gasto</h3>
 
                     <div class="campo">
-                        <label>Tipo de gasto</label>
+                        <label for="gastoTipo">Tipo de gasto</label>
                         <select id="gastoTipo">
                             <option value="primario">Primario</option>
                             <option value="secundario">Secundario</option>
@@ -1030,22 +1030,22 @@
                     </div>
 
                     <div class="campo">
-                        <label>Concepto</label>
+                        <label for="gastoConcepto">Concepto</label>
                         <input id="gastoConcepto" placeholder="Ej: Servicio de energia">
                     </div>
 
                     <div class="campo">
-                        <label>Valor</label>
+                        <label for="gastoValor">Valor</label>
                         <input id="gastoValor" type="number" min="1" placeholder="0">
                     </div>
 
                     <div class="campo">
-                        <label>Fecha</label>
+                        <label for="gastoFecha">Fecha</label>
                         <input id="gastoFecha" type="date">
                     </div>
 
                     <div class="campo">
-                        <label>Detalle</label>
+                        <label for="gastoDetalle">Detalle</label>
                         <input id="gastoDetalle" placeholder="Opcional">
                     </div>
 
@@ -1056,7 +1056,7 @@
                     <h3>Registrar inversion</h3>
 
                     <div class="campo">
-                        <label>Tipo de inversion</label>
+                        <label for="inversionTipo">Tipo de inversion</label>
                         <select id="inversionTipo">
                             <option value="capital">Capital</option>
                             <option value="mercancia">Mercancia</option>
@@ -1068,22 +1068,22 @@
                     </div>
 
                     <div class="campo">
-                        <label>Concepto</label>
+                        <label for="inversionConcepto">Concepto</label>
                         <input id="inversionConcepto" placeholder="Ej: Compra de nueva mercancia">
                     </div>
 
                     <div class="campo">
-                        <label>Valor</label>
+                        <label for="inversionValor">Valor</label>
                         <input id="inversionValor" type="number" min="1" placeholder="0">
                     </div>
 
                     <div class="campo">
-                        <label>Fecha</label>
+                        <label for="inversionFecha">Fecha</label>
                         <input id="inversionFecha" type="date">
                     </div>
 
                     <div class="campo">
-                        <label>Detalle</label>
+                        <label for="inversionDetalle">Detalle</label>
                         <input id="inversionDetalle" placeholder="Opcional">
                     </div>
 
@@ -1126,22 +1126,22 @@
                     <h3>Registrar proveedor</h3>
 
                     <div class="campo">
-                        <label>Nombre</label>
+                        <label for="proveedorNombre">Nombre</label>
                         <input id="proveedorNombre" placeholder="Ej: Moda Colombia SAS">
                     </div>
 
                     <div class="campo">
-                        <label>Teléfono</label>
+                        <label for="proveedorTelefono">Teléfono</label>
                         <input id="proveedorTelefono" placeholder="Teléfono o WhatsApp">
                     </div>
 
                     <div class="campo">
-                        <label>Ciudad</label>
+                        <label for="proveedorCiudad">Ciudad</label>
                         <input id="proveedorCiudad" placeholder="Ej: Medellin">
                     </div>
 
                     <div class="campo">
-                        <label>Producto que suministra</label>
+                        <label for="proveedorProducto">Producto que suministra</label>
                         <input id="proveedorProducto" placeholder="Ej: vestidos, blusas, accesorios">
                     </div>
 
@@ -1152,19 +1152,19 @@
                     <h3>Registrar compra de mercancía</h3>
 
                     <div class="campo">
-                        <label>Proveedor</label>
+                        <label for="compraProveedorBusqueda">Proveedor</label>
                         <input id="compraProveedorBusqueda" list="listaProveedoresCompra" placeholder="Buscar o escribir proveedor">
                         <datalist id="listaProveedoresCompra"></datalist>
                         <input id="compraProveedor" type="hidden">
                     </div>
 
                     <div class="campo">
-                        <label>Proveedor no registrado</label>
+                        <label for="compraProveedorReferencia">Proveedor no registrado</label>
                         <input id="compraProveedorReferencia" placeholder="Ej: NN, otro, compra local">
                     </div>
 
                     <div class="campo">
-                        <label>Tipo de compra</label>
+                        <label for="compraTipoItem">Tipo de compra</label>
                         <select id="compraTipoItem">
                             <option value="mercancia_nueva">Mercancía nueva por clasificar</option>
                             <option value="reposicion">Reposición de producto existente</option>
@@ -1172,7 +1172,7 @@
                     </div>
 
                     <div class="campo compra-campo-reposicion">
-                        <label>Producto</label>
+                        <label for="compraProducto">Producto</label>
                         <select id="compraProducto">
                             <option value="">Seleccionar producto</option>
                         </select>
@@ -1186,19 +1186,19 @@
                     </div>
 
                     <div class="campo compra-campo-nueva">
-                        <label>Categoría</label>
+                        <label for="compraCategoria">Categoría</label>
                         <select id="compraCategoria">
                             <option value="">Seleccionar categoría</option>
                         </select>
                     </div>
 
                     <div class="campo compra-campo-nueva">
-                        <label>Descripción de la mercancía</label>
+                        <label for="compraDescripcion">Descripción de la mercancía</label>
                         <input id="compraDescripcion" placeholder="Ej: blusas estampadas nueva colección">
                     </div>
 
                     <div class="campo compra-campo-nueva compra-color-panel">
-                        <label>Color</label>
+                        <label for="compraCustomColorInput">Color</label>
                         <input id="compraColor" type="hidden">
                         <div class="color-builder compra-color-builder">
                             <div id="compraColorOptions" class="color-options"></div>
@@ -1211,12 +1211,12 @@
                     </div>
 
                     <div class="campo compra-tallas-panel">
-                        <label>Tallas de esta entrada</label>
+                        <label for="compraTalla">Tallas de esta entrada</label>
                         <div class="compra-talla-builder">
                             <select id="compraTalla">
                                 <option value="">Sin talla</option>
                             </select>
-                            <input id="compraCantidadTalla" type="number" min="1" placeholder="Cant.">
+                            <input id="compraCantidadTalla" aria-label="Cantidad de unidades de la talla de compra" type="number" min="1" placeholder="Cant.">
                             <button class="btn" type="button" id="btnAgregarTallaCompra">Agregar talla</button>
                         </div>
                         <div class="compra-tallas-lista" id="compraTallasSeleccionadas">
@@ -1228,12 +1228,12 @@
                     </div>
 
                     <div class="campo">
-                        <label>Cantidad sin talla</label>
+                        <label for="compraCantidad">Cantidad sin talla</label>
                         <input id="compraCantidad" type="number" min="1" placeholder="0">
                     </div>
 
                     <div class="campo">
-                        <label>Costo unitario</label>
+                        <label for="compraCostoUnitario">Costo unitario</label>
                         <input id="compraCostoUnitario" type="number" min="0" placeholder="0">
                     </div>
 
@@ -1272,17 +1272,17 @@
                     </div>
 
                     <div class="campo">
-                        <label>Costo de envio o transporte</label>
+                        <label for="compraCostoEnvio">Costo de envio o transporte</label>
                         <input id="compraCostoEnvio" type="number" min="0" placeholder="0">
                     </div>
 
                     <div class="campo">
-                        <label>Fecha</label>
+                        <label for="compraFecha">Fecha</label>
                         <input id="compraFecha" type="date">
                     </div>
 
                     <div class="campo">
-                        <label>Detalle</label>
+                        <label for="compraDetalle">Detalle</label>
                         <input id="compraDetalle" placeholder="Ej: Pedido inicial, factura, guia">
                     </div>
 
@@ -1349,32 +1349,32 @@
                     <h3>Registrar trabajador</h3>
 
                     <div class="campo">
-                        <label>Nombre</label>
+                        <label for="trabajadorNombre">Nombre</label>
                         <input id="trabajadorNombre" placeholder="Nombre completo">
                     </div>
 
                     <div class="campo">
-                        <label>Documento</label>
+                        <label for="trabajadorDocumento">Documento</label>
                         <input id="trabajadorDocumento" placeholder="Opcional">
                     </div>
 
                     <div class="campo">
-                        <label>Teléfono</label>
+                        <label for="trabajadorTelefono">Teléfono</label>
                         <input id="trabajadorTelefono" placeholder="Teléfono o WhatsApp">
                     </div>
 
                     <div class="campo">
-                        <label>Cargo</label>
+                        <label for="trabajadorCargo">Cargo</label>
                         <input id="trabajadorCargo" placeholder="Ej: Asesora de ventas">
                     </div>
 
                     <div class="campo">
-                        <label>Salario base</label>
+                        <label for="trabajadorSalario">Salario base</label>
                         <input id="trabajadorSalario" type="number" value="2000000" readonly aria-label="Salario fijo de dos millones de pesos">
                     </div>
 
                     <div class="campo">
-                        <label>Fecha de ingreso</label>
+                        <label for="trabajadorFechaIngreso">Fecha de ingreso</label>
                         <input id="trabajadorFechaIngreso" type="date">
                     </div>
 
@@ -1385,31 +1385,31 @@
                     <h3>Registrar pago</h3>
 
                     <div class="campo">
-                        <label>Trabajador</label>
+                        <label for="pagoTrabajadorSelect">Trabajador</label>
                         <select id="pagoTrabajadorSelect">
                             <option value="">Seleccionar trabajador</option>
                         </select>
                     </div>
 
                     <div class="campo">
-                        <label>Tipo de pago</label>
+                        <label for="pagoTipo">Tipo de pago</label>
                         <select id="pagoTipo">
                             <option value="salario">Salario fijo</option>
                         </select>
                     </div>
 
                     <div class="campo">
-                        <label>Valor</label>
+                        <label for="pagoValor">Valor</label>
                         <input id="pagoValor" type="number" value="2000000" readonly aria-label="Salario fijo de dos millones de pesos">
                     </div>
 
                     <div class="campo">
-                        <label>Fecha</label>
+                        <label for="pagoFecha">Fecha</label>
                         <input id="pagoFecha" type="date">
                     </div>
 
                     <div class="campo">
-                        <label>Detalle</label>
+                        <label for="pagoDetalle">Detalle</label>
                         <input id="pagoDetalle" placeholder="Opcional">
                     </div>
 
@@ -1459,7 +1459,7 @@
             <h2>Clientes</h2>
 
             <div class="filtros">
-                <input type="text" id="buscadorClientes" placeholder="Buscar por nombre, teléfono o correo...">
+                <input type="text" id="buscadorClientes" aria-label="Buscar clientes" placeholder="Buscar por nombre, teléfono o correo...">
             </div>
 
             <div class="client-summary-grid">
@@ -1522,17 +1522,17 @@
                     <h3>Cambiar mi contraseña</h3>
 
                     <div class="campo">
-                        <label>Contraseña actual</label>
+                        <label for="passwordActual">Contraseña actual</label>
                         <input id="passwordActual" type="password" autocomplete="current-password">
                     </div>
 
                     <div class="campo">
-                        <label>Nueva contraseña</label>
+                        <label for="passwordNueva">Nueva contraseña</label>
                         <input id="passwordNueva" type="password" autocomplete="new-password">
                     </div>
 
                     <div class="campo">
-                        <label>Confirmar nueva contraseña</label>
+                        <label for="passwordConfirmar">Confirmar nueva contraseña</label>
                         <input id="passwordConfirmar" type="password" autocomplete="new-password">
                     </div>
 
@@ -1543,19 +1543,19 @@
                     <h3>Restablecer contraseña</h3>
 
                     <div class="campo">
-                        <label>Usuario interno</label>
+                        <label for="passwordUsuarioSelect">Usuario interno</label>
                         <select id="passwordUsuarioSelect">
                             <option value="">Seleccionar usuario</option>
                         </select>
                     </div>
 
                     <div class="campo">
-                        <label>Nueva contraseña</label>
+                        <label for="passwordResetNueva">Nueva contraseña</label>
                         <input id="passwordResetNueva" type="password" autocomplete="new-password">
                     </div>
 
                     <div class="campo">
-                        <label>Confirmar nueva contraseña</label>
+                        <label for="passwordResetConfirmar">Confirmar nueva contraseña</label>
                         <input id="passwordResetConfirmar" type="password" autocomplete="new-password">
                     </div>
 
@@ -1566,14 +1566,14 @@
                     <h3>Correo de ingreso</h3>
 
                     <div class="campo">
-                        <label>Usuario interno</label>
+                        <label for="correoUsuarioSelect">Usuario interno</label>
                         <select id="correoUsuarioSelect">
                             <option value="">Seleccionar usuario</option>
                         </select>
                     </div>
 
                     <div class="campo">
-                        <label>Correo real</label>
+                        <label for="correoUsuarioNuevo">Correo real</label>
                         <input id="correoUsuarioNuevo" type="email" autocomplete="email" placeholder="usuario@gmail.com">
                     </div>
 
@@ -1586,8 +1586,8 @@
             <h2>Auditoría</h2>
 
             <div class="filtros audit-filters">
-                <input type="text" id="buscadorAuditoria" placeholder="Buscar accion, detalle, usuario o entidad...">
-                <select id="auditoriaAccion">
+                <input type="text" id="buscadorAuditoria" aria-label="Buscar eventos de auditoria" placeholder="Buscar accion, detalle, usuario o entidad...">
+                <select id="auditoriaAccion" aria-label="Filtrar auditoria por accion">
                     <option value="">Todas las acciones</option>
                     <option value="producto_creado">Producto creado</option>
                     <option value="producto_actualizado">Producto actualizado</option>
@@ -1597,7 +1597,7 @@
                     <option value="password_restablecido">Contraseña restablecida</option>
                     <option value="usuario_correo_actualizado">Correo actualizado</option>
                 </select>
-                <select id="auditoriaUsuario">
+                <select id="auditoriaUsuario" aria-label="Filtrar auditoria por usuario">
                     <option value="">Todos los usuarios</option>
                 </select>
                 <input type="date" id="auditoriaDesde" aria-label="Desde">

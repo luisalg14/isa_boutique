@@ -1148,7 +1148,8 @@ h2 {
     margin-bottom: 14px;
 }
 
-.campo label {
+.campo label,
+.campo .campo-titulo {
     font-size: 13px;
     margin-bottom: 6px;
     color: var(--muted);
@@ -2031,7 +2032,7 @@ h2 {
     margin-top: 16px;
 }
 
-.profitability-progress label {
+.profitability-progress-label {
     display: flex;
     justify-content: space-between;
     gap: 12px;

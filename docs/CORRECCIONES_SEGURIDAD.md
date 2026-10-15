@@ -257,3 +257,27 @@ Se agrego app_env=production a la configuracion de ejemplo y al respaldo por var
 `tests/usuarios_iniciales.php` paso con PostgreSQL temporal autenticado: semillas inactivas/idempotentes, marcador no utilizable como clave, activacion con clave propia, creacion de usuario nuevo, rechazo de sobrescritura con datos conservados y comprobacion de cuentas heredadas. Probo cookies HTTPS, HTTP local autorizado, produccion sin HTTPS, Host local falsificado por IP remota y Host publico desde loopback. La regresion de endpoints de acceso y recuperacion paso en otra fixture temporal con correo simulado. El captcha real local respondio HTTP 200.
 
 Las cinco cargas vm ya documentadas siguen sujetas a revision individual: no se ocultaron mediante exclusiones ni se sustituyeron pruebas por omisiones. La confiabilidad y el resto de mantenimiento tambien siguen pendientes. No se aplicaron SQL de semillas ni esta comprobacion heredada a Neon, no se crearon cuentas reales ni se enviaron correos. No se probo HTTPS/proxy publico ni impresion real de codigos. Los cambios de este bloque siguen locales y no se publicaron en GitHub.
+
+## Duodecimo bloque: asociaciones de formularios y analisis del Host de cookies
+
+Preparado el 15 de octubre de 2026 despues de confirmar que el analisis publicado de ea7823eb0b41650270bd936a083829d3c711e77b incluia las correcciones anteriores. La puerta seguia en C de confiabilidad y D de seguridad. Se trabajaron las reglas Web:InputWithoutLabelCheck y Web:S6853 y el aviso php:S5332 del helper de cookies. No se ejecutaron analisis ni cambios en la configuracion o estados de Sonar.
+
+### Formularios
+
+Se asociaron explicitamente 88 etiquetas existentes mediante for/id: 74 en admin.html y 14 en vendedor.html. Los campos de descuento se identifican por separado como tipo y valor; las cantidades de talla tambien tienen nombre propio. Se agregaron 22 nombres accesibles a los controles que carecian de una asociacion, incluidos ingreso, recuperacion y filtros de busqueda/auditoria. Se usan los [mecanismos de etiquetado descritos por W3C](https://www.w3.org/WAI/tutorials/forms/labels/).
+
+Se sustituyeron tres labels que no etiquetaban entradas: el titulo de un grupo de variantes y dos textos de avance financiero. El grupo usa role=group y aria-labelledby hacia su titulo; los porcentajes conservan sus identificadores y actualizaciones. Los selectores CSS equivalentes mantienen el estilo de los titulos. Se actualizo la version de las hojas de estilo en ambos paneles para evitar usar la version anterior desde cache.
+
+Una comparacion con HEAD confirmo que se conservan el orden y los atributos funcionales de input/select/textarea/button/form, excluyendo los nuevos atributos de nombre accesible. No se cambiaron id, name, valores, tipos, min/max, required, readonly ni acciones. La comprobacion semantica encontro 93 controles en administrador, 20 en vendedor y 2 en restablecimiento, todos con nombre accesible y etiquetas/referencias validas. Comprueba tambien IDs duplicados y referencias inexistentes. Es una revision del HTML estatico, no una certificacion completa de accesibilidad ni una prueba con lector de pantalla.
+
+El listado previo contenia 107 avisos InputWithoutLabelCheck y 90 S6853 entre estas tres paginas. Son los grupos que esta correccion aborda; no se afirma que Sonar haya cerrado 197 incidencias sin volver a analizar. Quedan otras reglas de confiabilidad, por ejemplo las relacionadas con conversiones PHP, expresiones regulares y APIs JavaScript. Este bloque no acredita una calificacion A.
+
+### Cookies
+
+El helper construia una cadena con prefijo http:// solo para parse_url y obtener el host, sin abrir una conexion. Ahora utiliza una referencia de autoridad sin protocolo, manteniendo el mismo analisis de hostname y puertos. Se retira el protocolo ficticio que originaba el aviso php:S5332; no se oculta una llamada HTTP real. Secure sigue siendo obligatorio en produccion y la excepcion HTTP sigue limitada al entorno local autorizado con IP y Host loopback. El aviso php:S2092 de la excepcion local y los cinco puntos vm siguen sujetos a revision; no se cambiaron sus estados ni se desactivaron reglas.
+
+### Verificacion
+
+Pasaron `python tests/formularios_accesibles.py` (incluye casos negativos de IDs/nombres/referencias rotos), `php tests/usuarios_iniciales.php` sin puerto (politica de cookies, incluidos IPv4/IPv6 con puerto y rechazo de HTTP publico), captcha/auditoria, pruebas de envio del carrito y catalogo, y regresion XSS del panel. Se verifico sintaxis de cookie_segura.php; la comprobacion del panel analiza tambien sus scripts reales. En HTTP local el captcha respondio 200; la misma ruta con Host publico respondio 426, sin acceder a cuentas ni enviar correos.
+
+No se probo visualmente el foco al pulsar cada label, ni HTTPS/proxy de produccion, ni la impresion de codigos en navegador. No se modifico Neon, no hubo migraciones ni operaciones comerciales y no se publicaron cambios en GitHub. Las correcciones estan locales para el siguiente commit y analisis del usuario.

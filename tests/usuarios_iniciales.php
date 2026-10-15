@@ -7,6 +7,10 @@ function comprobar_inicial($ok,$mensaje){if(!$ok)throw new RuntimeException($men
 $local=['HTTP_HOST'=>'localhost','REMOTE_ADDR'=>'127.0.0.1'];
 comprobar_inicial(opciones_cookie_sesion($local,false,'local')['secure']===false,'HTTP local no funciona');
 comprobar_inicial(opciones_cookie_sesion($local+['HTTPS'=>'on'],false,'production')['secure']===true,'HTTPS no exige cookie segura');
+foreach(['localhost:8080','127.0.0.1:8080','[::1]:8080'] as $hostLocal){
+    $servidorLocal=['HTTP_HOST'=>$hostLocal,'REMOTE_ADDR'=>$hostLocal==='[::1]:8080'?'::1':'127.0.0.1'];
+    comprobar_inicial(opciones_cookie_sesion($servidorLocal,false,'local')['secure']===false,'Analisis de host local con puerto incorrecto');
+}
 foreach([[$local,'production'],[['HTTP_HOST'=>'localhost','REMOTE_ADDR'=>'192.0.2.1'],'local'],[['HTTP_HOST'=>'tienda.example','REMOTE_ADDR'=>'127.0.0.1'],'local']] as [$servidor,$entorno]){
     $rechazado=false;try{opciones_cookie_sesion($servidor,false,$entorno);}catch(DomainException $e){$rechazado=true;}
     comprobar_inicial($rechazado,'HTTP publico elude HTTPS');

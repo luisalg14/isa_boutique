@@ -5,7 +5,8 @@ function opciones_cookie_sesion(array $servidor, bool $esCli=false, string $ento
         || (string)($servidor['SERVER_PORT']??'')==='443';
     $opciones=['lifetime'=>0,'path'=>'/','domain'=>'','secure'=>true,'httponly'=>true,'samesite'=>'Lax'];
     if ($https) return $opciones;
-    $host=parse_url('http://'.($servidor['HTTP_HOST']??''),PHP_URL_HOST);
+    // Solo analizar el nombre recibido, sin construir una URL con protocolo HTTP.
+    $host=parse_url('//'.($servidor['HTTP_HOST']??''),PHP_URL_HOST);
     $local=in_array($servidor['REMOTE_ADDR']??'', ['127.0.0.1','::1'],true)
         && in_array(strtolower((string)$host),['localhost','127.0.0.1','[::1]'],true);
     if (!$esCli && !($entorno==='local' && $local)) throw new DomainException('El acceso requiere HTTPS fuera del desarrollo local autorizado');
