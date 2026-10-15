@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__.'/postgres_temporal.php';
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 $puerto=filter_var($argv[1]??0,FILTER_VALIDATE_INT);
 if($puerto<55000||$puerto>55999) throw new RuntimeException('Solo PostgreSQL temporal');
@@ -15,15 +16,16 @@ if(($argv[2]??'')==='worker') {
     ob_start();register_shutdown_function(function(){ $cuerpo=ob_get_clean();echo json_encode(['estado'=>http_response_code()?:200,'respuesta'=>json_decode($cuerpo,true)]); });
     require __DIR__.'/../php/'.$datos['endpoint'].'.php';exit;
 }
-$db=new PDO('pgsql:host=127.0.0.1;port='.$puerto.';dbname=postgres','postgres','',$opciones);
+$db=conexion_postgres_prueba($puerto,$opciones);
 if($db->query("SELECT to_regclass('public.usuario_sistema')")->fetchColumn()!==null) throw new RuntimeException('La fixture requiere ausencia de usuarios');
+$db->exec(file_get_contents(__DIR__.'/../database/migracion_limites_acceso.sql'));
 $db->exec("CREATE TABLE usuario_sistema(id_usuario serial PRIMARY KEY,nombre text,correo text,contrasena text,rol text,estado boolean,sesion_token text,sesion_actualizada timestamptz);
 CREATE TABLE password_reset_token(id_reset serial PRIMARY KEY,id_usuario integer,token_hash text,expira_en timestamptz,usado boolean DEFAULT false,fecha_uso timestamptz,ip_solicitud text);
 CREATE TABLE correo_prueba(cuerpo text);");
 $q=$db->prepare("INSERT INTO usuario_sistema(nombre,correo,contrasena,rol,estado) VALUES('Prueba',?,?, 'admin',true)");
 $q->execute(['correcto@example.test',password_hash(' Clave12345 ',PASSWORD_DEFAULT)]);
 $carpeta=sys_get_temp_dir().'/isa_endpoints_'.bin2hex(random_bytes(12));mkdir($carpeta);
-file_put_contents($carpeta.'/conexion.php', '<?php $config=["app_url"=>"https://tienda.example/isa"]; $conexion=new PDO("pgsql:host=127.0.0.1;port='.$puerto.';dbname=postgres","postgres","",[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>true]);');
+file_put_contents($carpeta.'/conexion.php', '<?php require_once '.var_export(__DIR__.'/postgres_temporal.php',true).'; $config=["app_url"=>"https://tienda.example/isa"]; $conexion=conexion_postgres_prueba('.$puerto.');');
 file_put_contents($carpeta.'/mailer_smtp.php','<?php function enviar_correo_smtp($correo,$asunto,$html,$texto){global $conexion; $q=$conexion->prepare("INSERT INTO correo_prueba VALUES(?)");$q->execute([$texto]);}');
 file_put_contents($carpeta.'/notificaciones_seguridad.php','<?php function notificar_inicio_sesion($usuario){} function notificar_intento_otro_dispositivo($usuario){}');
 function peticion_prueba($datos) {

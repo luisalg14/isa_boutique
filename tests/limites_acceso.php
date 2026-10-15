@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__.'/postgres_temporal.php';
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require __DIR__.'/../php/limite_acceso.php';
 require __DIR__.'/../php/app_url.php';
@@ -16,7 +17,7 @@ foreach(['http://tienda.example','https://user:pass@tienda.example','https://tie
 if (!isset($argv[1])) { echo "PASS identidad, IP y URL configurada\n"; exit; }
 $puerto=filter_var($argv[1],FILTER_VALIDATE_INT);
 if($puerto<55000||$puerto>55999) throw new RuntimeException('Solo PostgreSQL temporal');
-$db=new PDO('pgsql:host=127.0.0.1;port='.$puerto.';dbname=postgres','postgres','',[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_EMULATE_PREPARES=>true]);
+$db=conexion_postgres_prueba($puerto,[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_EMULATE_PREPARES=>true]);
 if(($argv[2]??'')==='worker') {
     echo json_encode(consumir_limite_acceso($db,'login','concurrente@example.test',['REMOTE_ADDR'=>'192.0.2.55'])); exit;
 }
@@ -54,7 +55,7 @@ verificar_limite($permitidos===5&&$rechazados===3,'La concurrencia excede la cuo
 // Mantener una fila bloqueada debe fallar, nunca permitir acceso por omision.
 $reglas=reglas_limite_acceso('login','bloqueada@example.test',$servidor);
 consumir_limite_acceso($db,'login','bloqueada@example.test',$servidor);
-$otra=new PDO('pgsql:host=127.0.0.1;port='.$puerto.';dbname=postgres','postgres','',[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
+$otra=conexion_postgres_prueba($puerto,[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
 $db->beginTransaction();$q=$db->prepare('SELECT clave FROM limite_acceso WHERE clave=? FOR UPDATE');$q->execute([$reglas[0]['clave']]);
 $fallo=false;try{consumir_limite_acceso($otra,'login','bloqueada@example.test',$servidor);}catch(PDOException $e){$fallo=$e->getCode()==='55P03';}
 $db->rollBack();verificar_limite($fallo&&!$otra->inTransaction(),'Bloqueo permite acceso o deja transaccion');

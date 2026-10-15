@@ -197,3 +197,35 @@ Se eliminaron diez llamadas innecesarias a runInContext: de catorce sitios a cua
 Las cuatro llamadas restantes cargan el JS local fijo y los scripts de las dos paginas previstas. Continuaran siendo puntos de ejecucion dinamica sujetos a revision; no se ocultaron mediante alias ni se eliminaron las pruebas. Node documenta que [vm no constituye una barrera de seguridad para codigo no confiable](https://nodejs.org/api/vm.html). Los limites indicados ayudan a contener errores de las pruebas, pero no permiten ejecutar archivos de terceros de forma segura. La revision depende de ejecutar una copia confiable del repositorio; no se cambiaron estados de incidencias en Sonar. Tambien quedan los puntos de ejecucion dinamica propios de `tests/panel_xss.cjs`, no incluidos en estas capturas, pendientes de su revision individual.
 
 Pasaron `node tests/carrito_envio.cjs`, `node tests/catalogo_comun.cjs` y la regresion `node tests/panel_xss.cjs`. Se conservan los casos de doble clic, respuesta perdida, reintento con misma clave, rechazo comercial, cambio de carrito incierto, arranque de ambas paginas, escape HTML y limite de stock por variante. Son pruebas con DOM/transporte simulados; no sustituyen una prueba real en navegador. Los cambios no permiten afirmar un nuevo numero de incidencias ni que la puerta de calidad haya pasado: eso requiere el siguiente analisis del usuario.
+
+## Decimo bloque: conexiones temporales autenticadas, prueba del panel y permisos de imagen
+
+Cambios preparados el 15 de octubre de 2026 a partir del segundo grupo de capturas. No requieren migracion ni cambios en Neon. No se ejecutaron analisis, exclusiones o cambios de estado en SonarCloud.
+
+### Bases de datos de prueba
+
+Las conexiones con password vacio estaban en las fixtures temporales, no en la conexion de produccion. Se reemplazaron en los siete archivos de integracion, incluidas segundas conexiones y procesos auxiliares, por `conexion_postgres_prueba()` de `tests/postgres_temporal.php`. Ya no hay una alternativa de password vacio en estas conexiones.
+
+El helper requiere CLI, host fijo 127.0.0.1, puerto entre 55000 y 55999, password efimero de 256 bits y marca aleatoria del cluster recibidos por entorno. Antes de usar la fixture compara la marca del servidor y comprueba que las reglas de autenticacion son SCRAM-SHA-256. No lee configuracion.php ni credenciales de la aplicacion. Sin el entorno de pruebas se detiene antes de conectar.
+
+`tests/ejecutar_postgres.ps1` crea un cluster temporal nuevo con autenticacion SCRAM, genera una clave criptograficamente aleatoria por ejecucion y no la imprime ni la incluye en argumentos del proceso. initdb la recibe por un archivo temporal que se retira tras inicializar. Los procesos PHP la heredan por entorno; la configuracion temporal de endpoints carga el helper, sin escribir la clave en PHP. El ejecutor comprueba el rechazo de una clave incorrecta, prepara cada fixture por separado, detiene el servidor, restaura las variables de entorno y elimina los archivos temporales despues de verificar sus rutas y la ausencia del servidor activo. Usa el [mecanismo --pwfile y autenticacion de initdb](https://www.postgresql.org/docs/current/app-initdb.html).
+
+Comando en PowerShell con scripts permitidos: `./tests/ejecutar_postgres.ps1`. Para una seleccion: `./tests/ejecutar_postgres.ps1 -Pruebas clientes_facturas`. En este equipo la politica bloquea scripts; la verificacion autorizada se ejecuto con `powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests/ejecutar_postgres.ps1`, excepcion limitada al proceso, sin cambiar la politica persistente.
+
+Pasaron las siete integraciones: inventario/devoluciones, finanzas/reportes (incluidos indices), clientes/facturas, notificaciones simuladas, pedido/carrito, limites concurrentes y endpoints de acceso con correo simulado. El servidor rechazo la clave incorrecta y las conexiones correctas comprobaron las reglas SCRAM. Se detecto y corrigio un error de validacion de rutas en la limpieza final del ejecutor; despues se verifico un ciclo completo con clientes/facturas y limpieza automatica satisfactoria. Se retiraron tambien los archivos de la primera ejecucion, con el servidor detenido. No se utilizo Neon ni se enviaron correos reales.
+
+### Ejecucion dinamica en panel_xss.cjs
+
+Se retiro `new Function` de la comprobacion de sintaxis. Node ahora recibe el texto por stdin con `--check`, ejecutable fijo, sin shell y con timeout; analiza la sintaxis sin ejecutar ese texto. Se usa windowsHide al iniciar ese proceso. La lectura de admin.html se resuelve desde __dirname y no desde el directorio de trabajo.
+
+La carga de las funciones del panel sigue necesitando un punto de `vm.runInContext` sobre nombres literales previstos, extraidos del admin.html fijo del repositorio. El contexto deshabilita generacion de codigo por strings/WebAssembly y cada carga tiene timeout. Paso `node tests/panel_xss.cjs`, conservando la comprobacion de XSS y las acciones de las filas. El entorno de aislamiento bloqueo inicialmente el subproceso Node con EPERM; la misma prueba paso al autorizar su ejecucion fuera de ese aislamiento.
+
+Permanecen cinco sitios de runInContext entre las tres pruebas JavaScript (cuatro documentados en el noveno bloque y uno en panel_xss). Se revisaron sus fuentes como codigo local del repositorio; no se convierten datos de usuarios en codigo. Son puntos sujetos a revision de seguridad en Sonar, no se afirman eliminados. vm no permite ejecutar codigo de terceros con seguridad. No se sustituyeron por alias para ocultarlos ni se eliminaron pruebas para reducir el conteo.
+
+### Permisos de imagenes
+
+En `php/upload_seguro.php`, las carpetas nuevas se crean con 0750 y los archivos nuevos con 0640 en Unix: acceso del propietario y lectura del grupo del servidor, sin permisos para otros usuarios del sistema. Se quito la supresion de error de chmod; si falla, se intenta retirar el archivo recien subido y se rechaza la operacion. No se cambiaron permisos de imagenes o carpetas existentes.
+
+En Windows se mantienen las ACL heredadas; no se pretende configurar ACL con chmod, cuya compatibilidad con permisos Windows es limitada segun [PHP](https://www.php.net/manual/en/function.chmod.php). No se modificaron ACL del equipo. Un despliegue con PHP y servidor estatico separados debe asignar correctamente el grupo lector antes de usar 0640/0750. Se verifico sintaxis PHP; no se probo una subida multipart completa ni los modos Unix en este equipo Windows. Por tanto el funcionamiento de esa politica en Linux sigue pendiente de validacion de despliegue.
+
+Este bloque permanece local sin commit ni publicacion. La siguiente ejecucion de Sonar corresponde al usuario; las capturas no permiten afirmar una calificacion nueva ni una puerta de calidad superada.

@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__.'/postgres_temporal.php';
 // Solo admite un PostgreSQL temporal en localhost, nunca la configuracion del proyecto.
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require __DIR__ . '/../php/devolucion_util.php';
@@ -21,8 +22,7 @@ echo "PASS importes, descuentos, redondeo y limites\n";
 if (!isset($argv[1])) exit;
 $puerto = filter_var($argv[1], FILTER_VALIDATE_INT);
 if ($puerto < 55000 || $puerto > 55999) throw new RuntimeException('Puerto de pruebas invalido');
-$dsn = 'pgsql:host=127.0.0.1;port='.$puerto.';dbname=postgres';
-$db = new PDO($dsn, 'postgres', '', [PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC, PDO::ATTR_EMULATE_PREPARES=>true]);
+$db = conexion_postgres_prueba($puerto, [PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC, PDO::ATTR_EMULATE_PREPARES=>true]);
 $db->exec(<<<'SQL'
 CREATE TABLE producto (id_producto integer PRIMARY KEY, cantidad integer NOT NULL CHECK(cantidad>=0), color text);
 CREATE TABLE producto_color (id_producto_color integer PRIMARY KEY,id_producto integer REFERENCES producto,nombre_color text);
@@ -59,7 +59,7 @@ $db->exec($sql); // Repetir la migracion no elimina datos ni crea columnas dupli
 // El bloqueo de la venta debe impedir otra devolucion simultanea.
 $db->beginTransaction();
 $db->query('SELECT id_venta FROM venta WHERE id_venta=1 FOR UPDATE')->fetch();
-$otra=new PDO($dsn,'postgres','',[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>true]);
+$otra=conexion_postgres_prueba($puerto,[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>true]);
 $otra->beginTransaction(); $otra->exec("SET LOCAL lock_timeout='200ms'"); $bloqueada=false;
 try { guardar_devolucion($otra,1,1,101,1,'concurrente'); } catch (PDOException $e) { $bloqueada=$e->getCode()==='55P03'; }
 $otra->rollBack(); $db->rollBack();

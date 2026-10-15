@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__.'/postgres_temporal.php';
 if(PHP_SAPI!=='cli'){http_response_code(404);exit;}
 require __DIR__.'/../php/pedido_util.php';
 function verificar_pedido($valor,$mensaje){if(!$valor)throw new RuntimeException($mensaje);}
@@ -15,9 +16,8 @@ echo "PASS validacion, agrupacion de variantes y precios ignorados del cliente\n
 if(!isset($argv[1]))exit;
 $puerto=filter_var($argv[1],FILTER_VALIDATE_INT);
 if($puerto<55000||$puerto>55999)throw new RuntimeException('Puerto de pruebas invalido');
-$dsn='pgsql:host=127.0.0.1;port='.$puerto.';dbname=postgres';
 $opciones=[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>true];
-$db=new PDO($dsn,'postgres','',$opciones);
+$db=conexion_postgres_prueba($puerto,$opciones);
 if((int)$db->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public'")->fetchColumn()!==0)throw new RuntimeException('Base temporal no vacia');
 $db->exec(<<<'SQL'
 CREATE TABLE cliente(id_cliente serial PRIMARY KEY,nombre text,telefono text,correo text,tipo_documento text,numero_documento text);
@@ -55,7 +55,7 @@ verificar_pedido((int)$db->query('SELECT cantidad FROM producto WHERE id_product
 $cambiado=$datos;$cambiado['items'][0]['cantidad']=2;
 rechazar_pedido(function()use($db,$cambiado,$clave){registrar_pedido_carrito($db,$cambiado,$clave);},'Clave aceptada con otro contenido');
 // Una segunda conexion no puede procesar la misma clave mientras esta bloqueada.
-$otra=new PDO($dsn,'postgres','',$opciones);$db->beginTransaction();
+$otra=conexion_postgres_prueba($puerto,$opciones);$db->beginTransaction();
 $q=$db->prepare('SELECT pg_advisory_xact_lock(hashtextextended(?,0))');$q->execute(['pedido-carrito:'.$clave]);
 $bloqueado=false;try{registrar_pedido_carrito($otra,$datos,$clave);}catch(PDOException $e){$bloqueado=$e->getCode()==='55P03';}
 $db->rollBack();verificar_pedido($bloqueado&&!$otra->inTransaction(),'Clave concurrente no serializada');

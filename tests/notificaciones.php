@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__.'/postgres_temporal.php';
 if(PHP_SAPI!=='cli'){http_response_code(404);exit;}
 require __DIR__.'/../php/notificaciones_util.php';
 require __DIR__.'/../php/mailer_brevo.php';
@@ -16,9 +17,8 @@ echo "PASS respuestas simuladas del proveedor\n";
 if(!isset($argv[1]))exit;
 $puerto=filter_var($argv[1],FILTER_VALIDATE_INT);
 if($puerto<55000||$puerto>55999)throw new RuntimeException('Puerto temporal invalido');
-$dsn='pgsql:host=127.0.0.1;port='.$puerto.';dbname=postgres';
 $opciones=[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>true];
-$db=new PDO($dsn,'postgres','',$opciones);$otra=new PDO($dsn,'postgres','',$opciones);
+$db=conexion_postgres_prueba($puerto,$opciones);$otra=conexion_postgres_prueba($puerto,$opciones);
 if((int)$db->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public'")->fetchColumn()!==0)throw new RuntimeException('Base temporal no vacia');
 $db->exec("CREATE TABLE notificacion_correo(id_notificacion serial PRIMARY KEY,destinatario varchar(150),asunto varchar(200),cuerpo_html text,cuerpo_texto text,estado varchar(20) DEFAULT 'pendiente',intentos integer DEFAULT 0,error_ultimo text,fecha_creacion timestamp DEFAULT CURRENT_TIMESTAMP,fecha_envio timestamp)");
 function agregar_correo(PDO $db,$asunto='Prueba'){

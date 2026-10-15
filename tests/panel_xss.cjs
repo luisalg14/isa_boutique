@@ -1,9 +1,16 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const html = fs.readFileSync('html/admin.html','utf8');
+const path = require('node:path');
+const {spawnSync} = require('node:child_process');
+const html = fs.readFileSync(path.join(__dirname,'../html/admin.html'),'utf8');
 const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)].filter(m=>!/\bsrc\s*=/.test(m[1])).map(m=>m[2]);
-scripts.forEach(s=>new Function(s));
+// Comprobar sintaxis sin crear funciones ejecutables con el texto del archivo.
+for (const fuente of scripts) {
+    const revision = spawnSync(process.execPath,['--check'],{input:fuente,encoding:'utf8',timeout:5000,windowsHide:true});
+    assert.ifError(revision.error);
+    assert.equal(revision.status,0,revision.stderr);
+}
 const script = scripts.join('\n');
 function funcion(nombre) {
     const inicio = script.search(new RegExp('^    (?:async )?function '+nombre+'\\(', 'm'));
@@ -33,9 +40,11 @@ const document={getElementById(id){if(!elementos.has(id))elementos.set(id,nodo()
 const contexto=vm.createContext({document,console,fetch:async()=>({json:async()=>respuesta}),
     prepararPaginaAdmin:datos=>datos,ocultarPaginacionAdmin(){},usuarioEsAdmin:()=>true,
     editarProductoBD:id=>llamadas.push(['editar',id]),cambiarEstadoProductoBD:(...datos)=>llamadas.push(['estado',...datos]),
-    eliminarProductoBD:(...datos)=>llamadas.push(['eliminar',...datos]),abrirCodigosBarrasVariantesProducto:(...datos)=>llamadas.push(['variantes',...datos])});
+    eliminarProductoBD:(...datos)=>llamadas.push(['eliminar',...datos]),abrirCodigosBarrasVariantesProducto:(...datos)=>llamadas.push(['variantes',...datos])},
+    {codeGeneration:{strings:false,wasm:false}});
+// Solo funciones con nombres literales previstos, extraidas del admin.html local fijo.
 for(const nombre of ['limpiarTextoBD','formatoPrecioBD','leerTallasBD','leerColoresBD','textoColoresBD','leerImagenesBD','rutaImagenAdmin','textoTallasBD','codigosBarrasVariantesBD',
-    'cargarInventarioBD','cargarMovimientosBD','cargarTrabajadoresBD','cargarPagosTrabajadoresBD']) vm.runInContext(funcion(nombre),contexto);
+    'cargarInventarioBD','cargarMovimientosBD','cargarTrabajadoresBD','cargarPagosTrabajadoresBD']) vm.runInContext(funcion(nombre),contexto,{filename:'html/admin.html:'+nombre,timeout:1000});
 function verificarHtml(texto){
     assert.ok(!texto.includes('<img src=x'),texto);
     assert.ok(!texto.includes(' onerror="ataque()'),texto);

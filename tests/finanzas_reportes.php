@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__.'/postgres_temporal.php';
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 date_default_timezone_set('America/Bogota');
 require __DIR__.'/../php/finanzas_resumen_util.php';
@@ -23,7 +24,7 @@ echo "PASS permisos de respuesta, fechas y salario fijo\n";
 if (!isset($argv[1])) exit;
 $puerto=filter_var($argv[1],FILTER_VALIDATE_INT);
 if ($puerto<55000 || $puerto>55999) throw new RuntimeException('Puerto local de pruebas invalido');
-$db=new PDO('pgsql:host=127.0.0.1;port='.$puerto.';dbname=postgres','postgres','',[
+$db=conexion_postgres_prueba($puerto,[
     PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>true]);
 if ((int)$db->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public'")->fetchColumn()!==0) throw new RuntimeException('Se requiere una base de pruebas vacia');
 $db->exec("SET TIME ZONE 'America/Bogota'");

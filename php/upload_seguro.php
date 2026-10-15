@@ -56,7 +56,7 @@ function validar_y_guardar_imagen_producto($archivo, $indice = null) {
 
     $carpetaDestino = dirname(__DIR__) . DIRECTORY_SEPARATOR . "img" . DIRECTORY_SEPARATOR . "productos";
 
-    if (!is_dir($carpetaDestino) && !mkdir($carpetaDestino, 0755, true)) {
+    if (!is_dir($carpetaDestino) && !mkdir($carpetaDestino, 0750, true)) {
         throw new Exception("No se pudo preparar la carpeta de imagenes.");
     }
 
@@ -67,7 +67,12 @@ function validar_y_guardar_imagen_producto($archivo, $indice = null) {
         throw new Exception("No se pudo guardar la imagen del producto.");
     }
 
-    @chmod($rutaServidor, 0644);
+    // En Unix, solo propietario y grupo del servidor pueden leer la imagen.
+    // En Windows se aplican las ACL heredadas; chmod no configura esas ACL.
+    if (PHP_OS_FAMILY !== 'Windows' && !chmod($rutaServidor, 0640)) {
+        unlink($rutaServidor);
+        throw new Exception("No se pudieron establecer permisos seguros para la imagen.");
+    }
 
     return "img/productos/" . $nombreArchivo;
 }

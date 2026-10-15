@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__.'/postgres_temporal.php';
 if(PHP_SAPI!=='cli'){http_response_code(404);exit;}
 require __DIR__.'/../php/cliente_util.php';
 require __DIR__.'/../php/factura_util.php';
@@ -8,7 +9,7 @@ function verificar_privacidad($valor,$mensaje){if(!$valor)throw new RuntimeExcep
 if(!isset($argv[1])){echo "Se requiere un PostgreSQL temporal local vacio y su puerto (55000-55999).\n";exit;}
 $puerto=filter_var($argv[1],FILTER_VALIDATE_INT);
 if($puerto<55000||$puerto>55999)throw new RuntimeException('Puerto de pruebas invalido');
-$db=new PDO('pgsql:host=127.0.0.1;port='.$puerto.';dbname=postgres','postgres','',[
+$db=conexion_postgres_prueba($puerto,[
  PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>true]);
 if((int)$db->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public'")->fetchColumn()!==0)throw new RuntimeException('Base temporal no vacia');
 $db->exec(<<<'SQL'
