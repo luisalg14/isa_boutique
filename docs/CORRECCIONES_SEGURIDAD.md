@@ -281,3 +281,33 @@ El helper construia una cadena con prefijo http:// solo para parse_url y obtener
 Pasaron `python tests/formularios_accesibles.py` (incluye casos negativos de IDs/nombres/referencias rotos), `php tests/usuarios_iniciales.php` sin puerto (politica de cookies, incluidos IPv4/IPv6 con puerto y rechazo de HTTP publico), captcha/auditoria, pruebas de envio del carrito y catalogo, y regresion XSS del panel. Se verifico sintaxis de cookie_segura.php; la comprobacion del panel analiza tambien sus scripts reales. En HTTP local el captcha respondio 200; la misma ruta con Host publico respondio 426, sin acceder a cuentas ni enviar correos.
 
 No se probo visualmente el foco al pulsar cada label, ni HTTPS/proxy de produccion, ni la impresion de codigos en navegador. No se modifico Neon, no hubo migraciones ni operaciones comerciales y no se publicaron cambios en GitHub. Las correcciones estan locales para el siguiente commit y analisis del usuario.
+
+## Decimotercer bloque: siete grupos de confiabilidad del analisis b08f9fa
+
+Preparado el 15 de octubre de 2026 sobre el listado publicado a las 14:45 (Bogota), revision b08f9faa94cd272ae6ca699f49d810ffde915c14. Ese analisis tenia 64 incidencias con impacto de confiabilidad: 27 php:S2003, 26 javascript:S7773, seis javascript:S9383, dos javascript:S7723 y una de cada regla plsql:NullComparison, javascript:S6638 y javascript:S7781. Este bloque aborda esos siete grupos; no es un resultado nuevo de Sonar ni garantiza por si solo la calificacion A.
+
+### Inclusiones y configuracion
+
+Los helpers y archivos de prueba del listado ahora usan require_once para evitar redefiniciones. En configuracion no se hizo una sustitucion directa del valor de retorno: una inclusion ya realizada puede devolver true, como explica [PHP sobre inclusiones unicas](https://www.php.net/manual/en/function.include-once.php). `php/configuracion_util.php` centraliza `cargar_configuracion()`, conserva el arreglo completo en memoria durante la ejecucion y carga el archivo privado una vez, validando su tipo. El archivo `configuracion.php` mantiene el contrato de devolver el arreglo al incluirlo. Conexion, captcha y politica de cookies obtienen los datos mediante la funcion, independientemente de quien haya cargado antes el archivo.
+
+No se modificaron los valores privados ni las credenciales. Las pruebas aisladas de configuracion cubren lectura local unica, arreglo estable tras inclusiones repetidas, datos anidados, variables de entorno y rechazo de un archivo que no devuelve un arreglo. No leen la configuracion real. Ademas se verifico una conexion real con SELECT 1 en transaccion de solo lectura y la igualdad de configuracion antes/despues, sin imprimir campos privados. El captcha local respondio HTTP 200.
+
+### JavaScript
+
+- Se usan Number.parseInt y Number.parseFloat en las llamadas del listado. Se usa Number.isNaN solo sobre resultados numericos ya convertidos; no se elimino implicitamente una conversion necesaria de strings. La diferencia de coercion esta documentada por [MDN](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number/isNaN). No se cambio el criterio historico de truncamiento de parseInt ni se acredita una validacion nueva de todas las cantidades.
+- El login espera a completar la renovacion del captcha tras un rechazo. El vendedor espera a abrir la factura antes de continuar el refresco, y la inicializacion espera las tres cargas del panel con Promise.all y captura de errores. La busqueda del historial espera su consulta. No se agrego void para silenciar promesas. Las funciones ya tienen sus manejadores de fallos de transporte; la captura de inicializacion cubre tambien fallos previos a las solicitudes.
+- Se detecto y corrigio una inconsistencia de acceso: auth.js recortaba espacios de la contrasena aunque el backend ya los conservaba. Ahora se envia el valor exacto; el correo y la respuesta del captcha conservan su normalizacion independiente.
+- Los dos errores simulados del carrito usan new Error. El historial del administrador ya no conserva una rama false && inalcanzable; renderiza directamente los mismos botones que antes seleccionaba siempre la rama restante. La categoria reemplaza guiones bajos mediante replaceAll, conservando la conversion posterior de mayusculas.
+- Se actualizaron las versiones de los scripts de ambos paneles y la importacion de auth.js para evitar usar codigo anterior desde cache.
+
+### SQL
+
+En `database/migracion_variantes_producto.sql`, el filtro de imagen ahora expresa NULLIF(p.imagen, '') IS NOT NULL. El original era valido para PostgreSQL: sus strings vacios no equivalen a NULL como en Oracle/PLSQL. La nueva expresion conserva el resultado en PostgreSQL y evita la comparacion directa con cadena vacia que marcaba el analizador PL/SQL. Se probo en PostgreSQL temporal con NULL, cadena vacia, espacio, imagen valida e imagen ya registrada, incluida repeticion de la migracion. No se normalizaron espacios ni se alteraron rutas existentes. No se aplico esta migracion a Neon; el cambio es para la fuente y futuras instalaciones.
+
+### Verificacion
+
+Pasaron las nueve integraciones temporales autenticadas: inventario/devoluciones, finanzas/reportes e indices, clientes/facturas, notificaciones con transporte simulado, pedido/carrito, limites concurrentes, endpoints de acceso/recuperacion, usuarios iniciales y variantes/imagenes. El ejecutor detuvo y retiro el cluster y sus archivos.
+
+`tests/promesas_panel.cjs` carga los archivos reales mediante require/import de rutas fijas, sin vm ni evaluacion de strings. Usa DOM y transporte simulados para comprobar que el panel espera sus tres consultas, que la busqueda devuelve su trabajo asincrono, que el formulario espera la factura y que el login espera al captcha nuevo y conserva espacios de la clave. Se ejercitan fallos controlados; no sustituye el recorrido visual ni la impresion real de facturas. `tests/configuracion.php` se ejecuta en sus tres modos con archivos de fixture separados.
+
+Tambien pasaron las regresiones de carrito, catalogo y XSS del panel, los 115 controles estaticos de formularios, captcha/auditoria y politica TLS sin envios. Se verificaron los 94 archivos PHP y la sintaxis de auth.js, script.js y vendedor.js. No se enviaron correos, no se hicieron operaciones comerciales ni cambios de datos en Neon y no se ejecutaron migraciones reales. No se publico en GitHub ni se ejecuto SonarCloud. Permanecen las seis revisiones de seguridad previamente identificadas (cinco cargas vm y la excepcion local de cookies), ademas de mantenimiento; no se alteraron exclusiones, reglas ni estados para ocultarlas.

@@ -1,8 +1,8 @@
 <?php
 require_once __DIR__.'/postgres_temporal.php';
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
-require __DIR__.'/../php/limite_acceso.php';
-require __DIR__.'/../php/app_url.php';
+require_once __DIR__.'/../php/limite_acceso.php';
+require_once __DIR__.'/../php/app_url.php';
 function verificar_limite($ok, $mensaje) { if (!$ok) throw new RuntimeException($mensaje); }
 $servidor=['REMOTE_ADDR'=>'192.0.2.1'];
 $r=reglas_limite_acceso('login',' Persona@example.test ', $servidor);

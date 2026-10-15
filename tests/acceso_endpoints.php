@@ -10,11 +10,11 @@ if(($argv[2]??'')==='worker') {
     if(realpath(stream_resolve_include_path('conexion.php'))!==realpath($directorio.'/conexion.php')) throw new RuntimeException('Conexion de prueba no resuelta');
     session_set_save_handler(fn()=>true,fn()=>true,fn()=>'',fn()=>true,fn()=>true,fn()=>0);
     $_SERVER=['REQUEST_METHOD'=>$datos['metodo']??'POST','REMOTE_ADDR'=>$datos['ip']??'192.0.2.201','HTTP_HOST'=>'atacante.example'];
-    require 'auth_guard.php';require 'captcha_util.php';
+    require_once 'auth_guard.php';require_once 'captcha_util.php';
     $_POST=$datos['post'];
     if($datos['endpoint']==='login') {$_POST['captcha_token']=crear_captcha_token('4');$_POST['captcha_respuesta']=$datos['captcha']??'4';}
     ob_start();register_shutdown_function(function(){ $cuerpo=ob_get_clean();echo json_encode(['estado'=>http_response_code()?:200,'respuesta'=>json_decode($cuerpo,true)]); });
-    require __DIR__.'/../php/'.$datos['endpoint'].'.php';exit;
+    require_once __DIR__.'/../php/'.$datos['endpoint'].'.php';exit;
 }
 $db=conexion_postgres_prueba($puerto,$opciones);
 if($db->query("SELECT to_regclass('public.usuario_sistema')")->fetchColumn()!==null) throw new RuntimeException('La fixture requiere ausencia de usuarios');

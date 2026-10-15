@@ -1,8 +1,8 @@
 <?php
 require_once __DIR__.'/postgres_temporal.php';
 if(PHP_SAPI!=='cli'){http_response_code(404);exit;}
-require __DIR__.'/../php/notificaciones_util.php';
-require __DIR__.'/../php/mailer_brevo.php';
+require_once __DIR__.'/../php/notificaciones_util.php';
+require_once __DIR__.'/../php/mailer_brevo.php';
 function comprobar_correo($valor,$mensaje){if(!$valor)throw new RuntimeException($mensaje);}
 comprobar_correo(brevo_validar_respuesta(201,'{"messageId":"prueba"}')===true,'Confirmacion valida rechazada');
 foreach([401,403,400,429] as $codigo){

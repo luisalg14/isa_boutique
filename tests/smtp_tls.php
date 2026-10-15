@@ -1,6 +1,6 @@
 <?php
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
-require __DIR__.'/../php/mailer_smtp.php';
+require_once __DIR__.'/../php/mailer_smtp.php';
 function comprobar_tls($condicion,$mensaje) { if (!$condicion) throw new RuntimeException($mensaje); }
 $opciones=opciones_tls_smtp('correo.example.test');
 comprobar_tls($opciones['crypto_method']===(STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT|STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT),'Protocolos TLS no restringidos');

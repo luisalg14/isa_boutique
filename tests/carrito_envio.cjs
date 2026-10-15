@@ -30,7 +30,7 @@ const exito={ok:true,json:async()=>({error:false,mensaje:'Pedido #17 registrado'
   assert.equal(JSON.parse(opciones.body.get('items')).length,2);
   primeraClave=opciones.body.get('clave_pedido');
   empezo();await new Promise(resolve=>{liberar=resolve;});
-  throw Error('Respuesta perdida');
+  throw new Error('Respuesta perdida');
  });
  const envio=primera.confirmar();await inicio;
  await primera.confirmar();assert.equal(llamadas,1,'Doble clic genera dos solicitudes');
@@ -60,7 +60,7 @@ const exito={ok:true,json:async()=>({error:false,mensaje:'Pedido #17 registrado'
  console.log('PASS rechazo confirmado permite corregir el pedido sin perder el carrito');
 
  almacen.set('isa_carrito',JSON.stringify(original));
- const incierta=pagina(almacen,async()=>{throw Error('Sin conexion');});
+ const incierta=pagina(almacen,async()=>{throw new Error('Sin conexion');});
  await incierta.confirmar();let nuevosEnvios=0;
  incierta.ctx.carrito[0].cantidad=2;
  incierta.ctx.guardarCarrito();

@@ -131,7 +131,7 @@ export async function iniciarSesion(correo, contrasena, loginBox, contenido, men
     const captchaInput = document.getElementById("captchaRespuesta");
     const datos = new FormData();
     datos.append("correo", correo.trim());
-    datos.append("contrasena", contrasena.trim());
+    datos.append("contrasena", contrasena);
     datos.append("captcha_respuesta", captchaInput ? captchaInput.value.trim() : "");
     datos.append("captcha_token", captchaLoginToken);
 
@@ -146,7 +146,7 @@ export async function iniciarSesion(correo, contrasena, loginBox, contenido, men
 
         if (resultado.error) {
             mensaje.textContent = resultado.mensaje;
-            cargarCaptchaLogin();
+            await cargarCaptchaLogin();
             return;
         }
 

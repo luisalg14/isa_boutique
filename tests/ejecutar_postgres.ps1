@@ -1,6 +1,6 @@
 param(
-    [ValidateSet('inventario_devoluciones','finanzas_reportes','clientes_facturas','notificaciones','pedido_carrito','limites_acceso','acceso_endpoints','usuarios_iniciales')]
-    [string[]]$Pruebas = @('inventario_devoluciones','finanzas_reportes','clientes_facturas','notificaciones','pedido_carrito','limites_acceso','acceso_endpoints','usuarios_iniciales'),
+    [ValidateSet('inventario_devoluciones','finanzas_reportes','clientes_facturas','notificaciones','pedido_carrito','limites_acceso','acceso_endpoints','usuarios_iniciales','variantes_imagenes')]
+    [string[]]$Pruebas = @('inventario_devoluciones','finanzas_reportes','clientes_facturas','notificaciones','pedido_carrito','limites_acceso','acceso_endpoints','usuarios_iniciales','variantes_imagenes'),
     [ValidateRange(55000,55999)][int]$Puerto = 55439,
     [string]$PgBin = 'C:\Program Files\PostgreSQL\18\bin',
     [string]$Php = 'C:\xampp\php\php.exe'

@@ -2,9 +2,9 @@
 require_once __DIR__.'/postgres_temporal.php';
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 date_default_timezone_set('America/Bogota');
-require __DIR__.'/../php/finanzas_resumen_util.php';
-require __DIR__.'/../php/reportes_util.php';
-require __DIR__.'/../php/nomina_util.php';
+require_once __DIR__.'/../php/finanzas_resumen_util.php';
+require_once __DIR__.'/../php/reportes_util.php';
+require_once __DIR__.'/../php/nomina_util.php';
 function verificar_finanzas($condicion, $mensaje) { if (!$condicion) throw new RuntimeException($mensaje); }
 function igual_importe($actual,$esperado,$mensaje) { verificar_finanzas(abs((float)$actual-$esperado)<0.005,$mensaje.' ('.$actual.' frente a '.$esperado.')'); }
 $privados=['error'=>false,'ventas_hoy'=>119,'devoluciones_hoy'=>0,'neto_hoy'=>119,'ventas_mes'=>119,'neto_mes'=>119,'producto_top'=>'Blusa',

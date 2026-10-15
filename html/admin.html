@@ -1639,7 +1639,7 @@
 
 
   <!-- SCRIPTS -->
-<script type="module" src="../js/script.js?v=20261014-captcha"></script>
+<script type="module" src="../js/script.js?v=20261015-confiabilidad"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js" integrity="sha384-Kk5SjBOKprEnGfyBWfD2zROFd1Cu8kwOXxG2GIhYPcoDL2rBJS9P8Ud1ZMy4412a" crossorigin="anonymous"></script>
 
 
@@ -1990,7 +1990,7 @@
     }
 
     function agregarTallaSeleccionada() {
-        const cantidad = parseInt(document.getElementById("selectedSizeQty").value);
+        const cantidad = Number.parseInt(document.getElementById("selectedSizeQty").value);
 
         if (!colorSeleccionadoAdmin) {
             alert("Selecciona primero el color de la prenda.");
@@ -2002,7 +2002,7 @@
             return;
         }
 
-        if (isNaN(cantidad) || cantidad <= 0) {
+        if (Number.isNaN(cantidad) || cantidad <= 0) {
             alert("Ingresa una cantidad válida mayor a cero.");
             return;
         }
@@ -2853,20 +2853,20 @@
             const nuevoCostoTexto = prompt("Costo de compra:", producto.costo_unitario || 0);
             if (nuevoCostoTexto === null) return;
             
-            const nuevaCantidad = parseInt(nuevaCantidadTexto);
-            const nuevoPrecio = parseFloat(nuevoPrecioTexto);
-            const nuevoCosto = parseFloat(nuevoCostoTexto);
+            const nuevaCantidad = Number.parseInt(nuevaCantidadTexto);
+            const nuevoPrecio = Number.parseFloat(nuevoPrecioTexto);
+            const nuevoCosto = Number.parseFloat(nuevoCostoTexto);
             
             if (
                 nuevoCodigo.trim() === "" ||
                 nuevoNombre.trim() === "" ||
                 nuevaMarca.trim() === "" ||
                 nuevaCategoria.trim() === "" ||
-                isNaN(nuevaCantidad) ||
+                Number.isNaN(nuevaCantidad) ||
                 nuevaCantidad < 0 ||
-                isNaN(nuevoPrecio) ||
+                Number.isNaN(nuevoPrecio) ||
                 nuevoPrecio <= 0 ||
-                isNaN(nuevoCosto) ||
+                Number.isNaN(nuevoCosto) ||
                 nuevoCosto < 0
             ) {
                 alert("Datos inválidos. Revisa la información ingresada.");
@@ -3049,11 +3049,7 @@
                     <td>${etiquetaEstadoVenta(venta.estado)}</td>
                     <td>${new Date(venta.fecha).toLocaleString()}</td>
                     <td class="historial-actions-cell">
-                      ${
-                        false && venta.tipo === "Venta"
-                        ? `<button onclick="registrarDevolucionBD(${Number(venta.id_venta)}, ${Number(venta.id_producto)}, ${Number(venta.id_detalle_venta)})">Devolución</button>`
-                        : botonFactura + accion
-                        }
+                      ${botonFactura + accion}
                     </td>
                 </tr>
                 `;
@@ -4805,14 +4801,14 @@
         const inputCantidad = document.getElementById("compraCantidadTalla");
         const tipoItem = document.getElementById("compraTipoItem")?.value || "mercancia_nueva";
         const talla = selectorTalla ? selectorTalla.value.trim().toUpperCase() : "";
-        const cantidad = parseInt(inputCantidad ? inputCantidad.value : 0);
+        const cantidad = Number.parseInt(inputCantidad ? inputCantidad.value : 0);
 
         if (!talla) {
             alert("Selecciona una talla para agregar.");
             return;
         }
 
-        if (isNaN(cantidad) || cantidad <= 0) {
+        if (Number.isNaN(cantidad) || cantidad <= 0) {
             alert("Ingresa una cantidad válida para la talla.");
             return;
         }
@@ -4891,23 +4887,23 @@
 
     function agregarColorActualCompraMercancia() {
         const color = colorCompraMercancia || document.getElementById("compraColor")?.value.trim() || "Unico";
-        const cantidadSinTalla = parseInt(document.getElementById("compraCantidad")?.value || 0);
+        const cantidadSinTalla = Number.parseInt(document.getElementById("compraCantidad")?.value || 0);
         const selectorTalla = document.getElementById("compraTalla");
         const inputCantidadTalla = document.getElementById("compraCantidadTalla");
         const tallaActiva = selectorTalla ? selectorTalla.value.trim().toUpperCase() : "";
-        const cantidadTallaActiva = parseInt(inputCantidadTalla ? inputCantidadTalla.value : 0);
+        const cantidadTallaActiva = Number.parseInt(inputCantidadTalla ? inputCantidadTalla.value : 0);
         const tallasActuales = {};
 
         tallasCompraMercancia.forEach(function(item) {
             tallasActuales[item.talla] = Number(tallasActuales[item.talla] || 0) + Number(item.cantidad || 0);
         });
 
-        if (tallaActiva && !isNaN(cantidadTallaActiva) && cantidadTallaActiva > 0) {
+        if (tallaActiva && !Number.isNaN(cantidadTallaActiva) && cantidadTallaActiva > 0) {
             tallasActuales[tallaActiva] = Number(tallasActuales[tallaActiva] || 0) + cantidadTallaActiva;
         }
 
         if (Object.keys(tallasActuales).length === 0) {
-            if (isNaN(cantidadSinTalla) || cantidadSinTalla <= 0) {
+            if (Number.isNaN(cantidadSinTalla) || cantidadSinTalla <= 0) {
                 alert("Agrega al menos una talla o una cantidad sin talla para este color.");
                 return false;
             }
@@ -5070,8 +5066,8 @@
         const categoria = document.getElementById("compraCategoria").value;
         const descripcion = document.getElementById("compraDescripcion").value.trim();
         const color = document.getElementById("compraColor").value.trim();
-        const cantidad = parseInt(document.getElementById("compraCantidad").value);
-        const costoUnitario = parseFloat(document.getElementById("compraCostoUnitario").value);
+        const cantidad = Number.parseInt(document.getElementById("compraCantidad").value);
+        const costoUnitario = Number.parseFloat(document.getElementById("compraCostoUnitario").value);
         const tallasSeleccionadas = tallasCompraMercancia.slice();
         const variantesSeleccionadas = variantesCompraMercancia.slice();
 
@@ -5085,7 +5081,7 @@
             return;
         }
 
-        if (isNaN(costoUnitario) || costoUnitario < 0) {
+        if (Number.isNaN(costoUnitario) || costoUnitario < 0) {
             alert("Ingresa un costo unitario válido.");
             return;
         }
@@ -5096,7 +5092,7 @@
 
         const variantesFinales = variantesCompraMercancia.slice();
 
-        if (tipoItem === "reposicion" && tallasSeleccionadas.length === 0 && (isNaN(cantidad) || cantidad <= 0)) {
+        if (tipoItem === "reposicion" && tallasSeleccionadas.length === 0 && (Number.isNaN(cantidad) || cantidad <= 0)) {
             alert("Ingresa cantidad y costo unitario válidos.");
             return;
         }
@@ -6158,9 +6154,9 @@
 
         if (cantidadTexto === null) return;
 
-        const cantidad = parseInt(cantidadTexto);
+        const cantidad = Number.parseInt(cantidadTexto);
 
-        if (isNaN(cantidad) || cantidad <= 0) {
+        if (Number.isNaN(cantidad) || cantidad <= 0) {
             alert("Ingresa una cantidad válida.");
             return;
         }

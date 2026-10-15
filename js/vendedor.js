@@ -678,7 +678,7 @@ async function registrarVentaVendedor(evento) {
         alert(resultado.mensaje + "\nTotal: " + formatoPrecioVendedor(resultado.total) + textoFactura);
 
         if (resultado.factura) {
-            abrirFacturaVendedor(resultado.id_venta);
+            await abrirFacturaVendedor(resultado.id_venta);
         } else {
             mensaje.textContent = "Pedido registrado como pendiente. La factura se emite cuando se confirme el pago.";
         }
@@ -1215,9 +1215,9 @@ async function registrarDevolucionVendedor(idVenta, idProducto, idDetalle) {
     const cantidadTexto = prompt("Cuantas unidades deseas devolver?");
     if (cantidadTexto === null) return;
 
-    const cantidad = parseInt(cantidadTexto);
+    const cantidad = Number.parseInt(cantidadTexto);
 
-    if (isNaN(cantidad) || cantidad <= 0) {
+    if (Number.isNaN(cantidad) || cantidad <= 0) {
         alert("Ingresa una cantidad valida.");
         return;
     }
@@ -1260,18 +1260,28 @@ async function registrarDevolucionVendedor(idVenta, idProducto, idDetalle) {
     }
 }
 
-function iniciarPanelVendedor() {
-    const panelInicial = window.location.hash ? window.location.hash.substring(1) : "";
+async function iniciarPanelVendedor() {
+    try {
+        const panelInicial = window.location.hash ? window.location.hash.substring(1) : "";
 
-    if (panelInicial && document.getElementById(panelInicial)) {
-        activarPanelVendedor(panelInicial, { omitirHistorial: true });
-    } else {
-        guardarRegresoInternoVendedor(panelActivoVendedor() || "panel-venta");
+        if (panelInicial && document.getElementById(panelInicial)) {
+            activarPanelVendedor(panelInicial, { omitirHistorial: true });
+        } else {
+            guardarRegresoInternoVendedor(panelActivoVendedor() || "panel-venta");
+        }
+
+        await Promise.all([
+            cargarInventarioVendedor(),
+            cargarHistorialVendedor(),
+            cargarReportesVendedor()
+        ]);
+    } catch (error) {
+        console.error("No se pudo completar la carga del panel", error);
+        const mensaje = document.getElementById("mensajeVenta");
+        if (mensaje) {
+            mensaje.textContent = "No se pudo actualizar todo el panel. Recarga la pagina para reintentar.";
+        }
     }
-
-    cargarInventarioVendedor();
-    cargarHistorialVendedor();
-    cargarReportesVendedor();
 }
 
 document.querySelectorAll(".admin-tab").forEach(function(tab) {
@@ -1283,9 +1293,9 @@ document.querySelectorAll(".admin-tab").forEach(function(tab) {
 window.addEventListener("sesion-lista", iniciarPanelVendedor);
 
 document.getElementById("buscadorVendedor")?.addEventListener("input", cargarInventarioVendedor);
-document.getElementById("buscadorHistorialVendedor")?.addEventListener("input", function() {
+document.getElementById("buscadorHistorialVendedor")?.addEventListener("input", async function() {
     paginacionVendedor["historial-vendedor"] = 1;
-    cargarHistorialVendedor();
+    await cargarHistorialVendedor();
 });
 document.getElementById("ventaProducto")?.addEventListener("change", llenarSelectorColores);
 document.getElementById("ventaColor")?.addEventListener("change", llenarSelectorTallas);

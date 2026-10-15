@@ -2,8 +2,8 @@
 require_once __DIR__.'/postgres_temporal.php';
 // Solo admite un PostgreSQL temporal en localhost, nunca la configuracion del proyecto.
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
-require __DIR__ . '/../php/devolucion_util.php';
-require __DIR__ . '/../php/inventario_util.php';
+require_once __DIR__ . '/../php/devolucion_util.php';
+require_once __DIR__ . '/../php/inventario_util.php';
 function verificar_negocio($condicion, $mensaje) {
     if (!$condicion) throw new RuntimeException($mensaje);
 }

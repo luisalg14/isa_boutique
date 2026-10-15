@@ -54,8 +54,7 @@ WHERE NOT EXISTS (
 INSERT INTO producto_imagen (id_producto, ruta, es_principal, orden)
 SELECT p.id_producto, p.imagen, TRUE, 0
 FROM producto p
-WHERE p.imagen IS NOT NULL
-AND p.imagen <> ''
+WHERE NULLIF(p.imagen, '') IS NOT NULL
 AND NOT EXISTS (
     SELECT 1
     FROM producto_imagen pi

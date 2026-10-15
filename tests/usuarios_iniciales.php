@@ -1,8 +1,8 @@
 <?php
 if(PHP_SAPI!=='cli'){http_response_code(404);exit;}
-require __DIR__.'/postgres_temporal.php';
-require __DIR__.'/../php/usuario_inicial_util.php';
-require __DIR__.'/../php/cookie_segura.php';
+require_once __DIR__.'/postgres_temporal.php';
+require_once __DIR__.'/../php/usuario_inicial_util.php';
+require_once __DIR__.'/../php/cookie_segura.php';
 function comprobar_inicial($ok,$mensaje){if(!$ok)throw new RuntimeException($mensaje);}
 $local=['HTTP_HOST'=>'localhost','REMOTE_ADDR'=>'127.0.0.1'];
 comprobar_inicial(opciones_cookie_sesion($local,false,'local')['secure']===false,'HTTP local no funciona');

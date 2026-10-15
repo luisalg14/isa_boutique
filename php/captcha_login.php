@@ -1,6 +1,7 @@
 <?php
 
-$config = require __DIR__ . "/configuracion.php";
+require_once __DIR__ . "/configuracion.php";
+$config = cargar_configuracion();
 require_once "auth_guard.php";
 require_once "captcha_util.php";
 

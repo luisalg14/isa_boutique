@@ -1,10 +1,10 @@
 <?php
 require_once __DIR__.'/postgres_temporal.php';
 if(PHP_SAPI!=='cli'){http_response_code(404);exit;}
-require __DIR__.'/../php/cliente_util.php';
-require __DIR__.'/../php/factura_util.php';
-require __DIR__.'/../php/catalogo_util.php';
-require __DIR__.'/../php/finanzas_util.php';
+require_once __DIR__.'/../php/cliente_util.php';
+require_once __DIR__.'/../php/factura_util.php';
+require_once __DIR__.'/../php/catalogo_util.php';
+require_once __DIR__.'/../php/finanzas_util.php';
 function verificar_privacidad($valor,$mensaje){if(!$valor)throw new RuntimeException($mensaje);}
 if(!isset($argv[1])){echo "Se requiere un PostgreSQL temporal local vacio y su puerto (55000-55999).\n";exit;}
 $puerto=filter_var($argv[1],FILTER_VALIDATE_INT);

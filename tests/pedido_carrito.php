@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__.'/postgres_temporal.php';
 if(PHP_SAPI!=='cli'){http_response_code(404);exit;}
-require __DIR__.'/../php/pedido_util.php';
+require_once __DIR__.'/../php/pedido_util.php';
 function verificar_pedido($valor,$mensaje){if(!$valor)throw new RuntimeException($mensaje);}
 function rechazar_pedido(callable $fn,$mensaje){try{$fn();}catch(DomainException $e){return;}throw new RuntimeException($mensaje);}
 $datos=['cliente'=>'Cliente','telefono'=>'3001234567','correo'=>'cliente@example.test','medio_pago'=>'efectivo','tipo_entrega'=>'recoger_tienda',

@@ -10,7 +10,8 @@ if (PHP_SAPI !== "cli" && !headers_sent()) {
     header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 }
 
-$config = require __DIR__ . "/configuracion.php";
+require_once __DIR__ . "/configuracion.php";
+$config = cargar_configuracion();
 
 if (
     empty($config["database"]) ||

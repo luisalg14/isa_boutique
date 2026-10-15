@@ -306,7 +306,7 @@
         function agregarProductoAlCarrito() {
             if (!productoSeleccionado) return;
 
-            const cantidad = parseInt(document.getElementById("compraCantidad").value);
+            const cantidad = Number.parseInt(document.getElementById("compraCantidad").value);
             const talla = document.getElementById("compraTalla").value;
             const colorSeleccionado = obtenerColorCompra(productoSeleccionado);
             const mensaje = document.getElementById("mensajeCompra");
@@ -316,7 +316,7 @@
                 return;
             }
 
-            if (isNaN(cantidad) || cantidad <= 0) {
+            if (Number.isNaN(cantidad) || cantidad <= 0) {
                 mensaje.textContent = "Ingresa una cantidad valida.";
                 return;
             }
