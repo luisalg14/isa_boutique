@@ -4,6 +4,7 @@ require_once "conexion.php";
 require_once "auth_guard.php";
 require_once "notificaciones_seguridad.php";
 require_once "captcha_util.php";
+require_once "limite_acceso.php";
 
 header("Content-Type: application/json; charset=UTF-8");
 
@@ -19,21 +20,12 @@ try {
 
     exigir_origen_mismo_sitio();
 
-    $bloqueadoHasta = intval($_SESSION["login_bloqueado_hasta"] ?? 0);
-
-    if ($bloqueadoHasta > time()) {
-        http_response_code(429);
-        echo json_encode([
-            "error" => true,
-            "mensaje" => "Demasiados intentos. Espera unos minutos e intenta de nuevo."
-        ], JSON_UNESCAPED_UNICODE);
-        exit;
-    }
-
-    $correo = strtolower(trim($_POST["correo"] ?? ""));
-    $contrasena = trim($_POST["contrasena"] ?? "");
-    $captchaRespuesta = trim($_POST["captcha_respuesta"] ?? "");
-    $captchaToken = trim($_POST["captcha_token"] ?? "");
+    $correoEntrada = $_POST["correo"] ?? "";
+    $correo = is_string($correoEntrada) ? strtolower(trim($correoEntrada)) : "";
+    limitar_solicitud_acceso($conexion, 'login', substr($correo, 0, 254));
+    $contrasena = is_string($_POST["contrasena"] ?? null) ? $_POST["contrasena"] : "";
+    $captchaRespuesta = is_string($_POST["captcha_respuesta"] ?? null) ? trim($_POST["captcha_respuesta"]) : "";
+    $captchaToken = is_string($_POST["captcha_token"] ?? null) ? trim($_POST["captcha_token"]) : "";
 
     if ($correo === "" || $contrasena === "") {
         echo json_encode([
@@ -67,13 +59,9 @@ try {
     $consulta->execute([":correo" => $correo]);
     $usuario = $consulta->fetch();
 
-    if (!$usuario || !password_verify($contrasena, $usuario["contrasena"])) {
-        $_SESSION["login_intentos"] = intval($_SESSION["login_intentos"] ?? 0) + 1;
-
-        if ($_SESSION["login_intentos"] >= 5) {
-            $_SESSION["login_bloqueado_hasta"] = time() + 300;
-        }
-
+    $hashComprobacion = $usuario["contrasena"] ?? '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi';
+    $passwordCorrecto = password_verify($contrasena, $hashComprobacion);
+    if (!$usuario || !$passwordCorrecto) {
         echo json_encode([
             "error" => true,
             "mensaje" => "Correo o contraseña incorrectos"
@@ -112,8 +100,6 @@ try {
     }
 
     session_regenerate_id(true);
-    $_SESSION["login_intentos"] = 0;
-    unset($_SESSION["login_bloqueado_hasta"]);
 
     $tokenSesion = bin2hex(random_bytes(32));
     $_SESSION["csrf_token"] = bin2hex(random_bytes(32));

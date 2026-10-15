@@ -2272,7 +2272,7 @@
         if (resumen) {
             resumen.innerHTML = `
                 <strong>${limpiarTextoBD(mercanciaPendienteSeleccionada.descripcion)}</strong>
-                <span>${limpiarTextoBD(mercanciaPendienteSeleccionada.proveedor)} | ${tallasTexto} | Compra #${mercanciaPendienteSeleccionada.id_compra}</span>
+                <span>${limpiarTextoBD(mercanciaPendienteSeleccionada.proveedor)} | ${tallasTexto} | Compra #${Number(mercanciaPendienteSeleccionada.id_compra)}</span>
             `;
         }
         renderizarResumenMercanciaSeleccionada(mercanciaPendienteSeleccionada);
@@ -2948,7 +2948,7 @@
             if (ventas.error) {
                 tabla.innerHTML = `
                 <tr>
-                    <td colspan="7">${ventas.mensaje}</td>
+                    <td colspan="7">${limpiarTextoBD(ventas.mensaje)}</td>
                 </tr>
                 `;
                 return;
@@ -3006,15 +3006,15 @@
 
                 if (venta.tipo === "Venta" && venta.estado === "pendiente") {
                     accion = `
-                        <button onclick="actualizarEstadoVentaBD(${venta.id_venta}, 'pagada')">Confirmar pago</button>
-                        <button onclick="actualizarEstadoVentaBD(${venta.id_venta}, 'cancelada')">Cancelar</button>
+                        <button onclick="actualizarEstadoVentaBD(${Number(venta.id_venta)}, 'pagada')">Confirmar pago</button>
+                        <button onclick="actualizarEstadoVentaBD(${Number(venta.id_venta)}, 'cancelada')">Cancelar</button>
                     `;
                 } else if (venta.tipo === "Venta" && venta.estado === "pagada") {
                     accion = `<button onclick="registrarDevolucionBD(${Number(venta.id_venta)}, ${Number(venta.id_producto)}, ${Number(venta.id_detalle_venta)})">Devolución</button>`;
                 }
 
                 if (venta.tipo === "Venta" && (venta.estado === "pagada" || venta.estado === "devuelta")) {
-                    botonFactura = `<button onclick="abrirFacturaBD(${venta.id_venta})">${venta.numero_factura || "Factura"}</button>`;
+                    botonFactura = `<button onclick="abrirFacturaBD(${Number(venta.id_venta)})">${limpiarTextoBD(venta.numero_factura || "Factura")}</button>`;
                 }
 
                 tabla.innerHTML += `
@@ -3252,7 +3252,7 @@
             const textoBusqueda = buscador ? buscador.value.toLowerCase() : "";
 
             if (facturas.error) {
-                tabla.innerHTML = `<tr><td colspan="10">${facturas.mensaje}</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="10">${limpiarTextoBD(facturas.mensaje)}</td></tr>`;
                 return;
             }
 
@@ -3300,7 +3300,7 @@
                             <span>${limpiarTextoBD(factura.estado_factura || "-")}</span>
                         </td>
                         <td>${new Date(factura.fecha).toLocaleString()}</td>
-                        <td><button onclick="abrirFacturaBD(${factura.id_venta})">Abrir</button></td>
+                        <td><button onclick="abrirFacturaBD(${Number(factura.id_venta)})">Abrir</button></td>
                     </tr>
                 `;
             });
@@ -3419,7 +3419,7 @@
                         </div>
                         <div class="factura-box">
                             <strong>${limpiarTextoBD(factura.numero_factura)}</strong>
-                            <p>Venta: ${factura.id_venta}</p>
+                            <p>Venta: ${Number(factura.id_venta)}</p>
                             <p>Fecha: ${new Date(factura.fecha_factura).toLocaleString()}</p>
                             <p>Estado: ${limpiarTextoBD(factura.estado_factura)}</p>
                             <p>IVA incluido: ${factura.precio_incluye_iva ? "Sí" : "No"}</p>
@@ -3547,7 +3547,7 @@
                 <tr>
                     <td>${limpiarTextoBD(producto.codigo || "-")}</td>
                     <td>${limpiarTextoBD(producto.producto)}</td>
-                    <td>${producto.cantidad}</td>
+                    <td>${limpiarTextoBD(producto.cantidad)}</td>
                     <td>${formatoPrecioBD(producto.ventas)}</td>
                     <td>${formatoPrecioBD(producto.utilidad)}</td>
                 </tr>
@@ -3572,7 +3572,7 @@
                 <tr>
                     <td>${limpiarTextoBD(producto.codigo || "-")}</td>
                     <td>${limpiarTextoBD(producto.producto)}</td>
-                    <td>${producto.cantidad}</td>
+                    <td>${limpiarTextoBD(producto.cantidad)}</td>
                     <td>${formatoPrecioBD(producto.ventas)}</td>
                 </tr>
             `;
@@ -3737,7 +3737,7 @@
             if (movimientos.error) {
                 tabla.innerHTML = `
                 <tr>
-                    <td colspan="7">${movimientos.mensaje}</td>
+                    <td colspan="7">${limpiarTextoBD(movimientos.mensaje)}</td>
                 </tr>
                 `;
                 return;
@@ -3786,12 +3786,12 @@
                 tabla.innerHTML += `
                 <tr>
                     <td>${new Date(movimiento.fecha).toLocaleString()}</td>
-                    <td>${movimiento.tipo}</td>
-                    <td>${movimiento.codigo || "Sin código"}</td>
-                    <td>${movimiento.producto}</td>
-                    <td>${movimiento.marca || "Sin marca"}</td>
-                    <td>${movimiento.cantidad}</td>
-                    <td>${movimiento.detalle || "Sin detalle"}</td>
+                    <td>${limpiarTextoBD(movimiento.tipo)}</td>
+                    <td>${limpiarTextoBD(movimiento.codigo || "Sin código")}</td>
+                    <td>${limpiarTextoBD(movimiento.producto)}</td>
+                    <td>${limpiarTextoBD(movimiento.marca || "Sin marca")}</td>
+                    <td>${limpiarTextoBD(movimiento.cantidad)}</td>
+                    <td>${limpiarTextoBD(movimiento.detalle || "Sin detalle")}</td>
                 </tr>
                 `;
             });
@@ -3823,7 +3823,7 @@
             if (productos.error) {
                 tabla.innerHTML = `
                 <tr>
-                    <td colspan="13">${productos.mensaje}</td>
+                    <td colspan="13">${limpiarTextoBD(productos.mensaje)}</td>
                 </tr>
                 `;
                 return;
@@ -3863,14 +3863,13 @@
             
             prepararPaginaAdmin(productosFiltrados, "inventario", 20, tabla, cargarInventarioBD).forEach(function(producto) {
                 let claseEstado = "stock-alto";
-                const nombreSeguro = String(producto.nombre || "").replace(/'/g, "\\'");
                 const variantesCodigo = codigosBarrasVariantesBD(producto);
                 const accionesAdmin = usuarioEsAdmin()
                     ? `
-                        <button onclick="editarProductoBD(${producto.id_producto})">Editar</button>
-                        <button onclick="cambiarEstadoProductoBD(${producto.id_producto}, '${producto.estado}')">
+                        <button type="button" data-inventario="editar">Editar</button>
+                        <button type="button" data-inventario="estado">
                             ${producto.estado === "inactivo" ? "Activar" : "Desactivar"}</button>
-                        <button class="btn-eliminar" onclick="eliminarProductoBD(${producto.id_producto}, '${nombreSeguro}')">Eliminar</button>
+                        <button type="button" class="btn-eliminar" data-inventario="eliminar">Eliminar</button>
                     `
                     : `<span>Solo lectura</span>`;
                 
@@ -3882,32 +3881,40 @@
                     claseEstado = "stock-medio";
                 }
                 
-                tabla.innerHTML += `
-                <tr>
+                const fila = document.createElement("tr");
+                fila.innerHTML = `
                     <td>
                         <div class="inventory-product-cell">
-                            <img src="${rutaImagenAdmin(producto)}" alt="${limpiarTextoBD(producto.nombre)}">
+                            <img src="${limpiarTextoBD(rutaImagenAdmin(producto))}" alt="${limpiarTextoBD(producto.nombre)}">
                             <div>
                                 <strong>${limpiarTextoBD(producto.nombre)}</strong>
                                 <span>Código: ${limpiarTextoBD(producto.codigo)}</span>
                                 <span>Marca: ${limpiarTextoBD(producto.marca || "-")}</span>
-                                <span>Color: ${textoColoresBD(producto) || "-"}</span>
+                                <span>Color: ${limpiarTextoBD(textoColoresBD(producto) || "-")}</span>
                             </div>
                         </div>
                     </td>
-                    <td>${producto.categoria}</td>
+                    <td>${limpiarTextoBD(producto.categoria)}</td>
                     <td>${formatoPrecioBD(producto.precio)}</td>
                     <td>${formatoPrecioBD(producto.costo_unitario || 0)}</td>
                     <td>${formatoPrecioBD(Number(producto.precio) - Number(producto.costo_unitario || 0))}</td>
-                    <td>${producto.cantidad}</td>
-                    <td>${textoTallasBD(producto.tallas) || "-"}</td>
-                    <td class="${claseEstado}">${producto.estado}</td>
+                    <td>${limpiarTextoBD(producto.cantidad)}</td>
+                    <td>${limpiarTextoBD(textoTallasBD(producto.tallas) || "-")}</td>
+                    <td class="${claseEstado}">${limpiarTextoBD(producto.estado)}</td>
                     <td>
-                        <button type="button" class="btn-barcode-producto" onclick='abrirCodigosBarrasVariantesProducto(${JSON.stringify(variantesCodigo)}, ${JSON.stringify(producto.nombre || "Producto")})'>Variantes</button>
+                        <button type="button" class="btn-barcode-producto" data-inventario="variantes">Variantes</button>
                     </td>
                     <td>${accionesAdmin}</td>
-                </tr>
                 `;
+                fila.querySelector('[data-inventario="variantes"]').addEventListener("click", function() {
+                    abrirCodigosBarrasVariantesProducto(variantesCodigo, producto.nombre || "Producto");
+                });
+                if (usuarioEsAdmin()) {
+                    fila.querySelector('[data-inventario="editar"]').addEventListener("click", function() { editarProductoBD(Number(producto.id_producto)); });
+                    fila.querySelector('[data-inventario="estado"]').addEventListener("click", function() { cambiarEstadoProductoBD(Number(producto.id_producto), producto.estado); });
+                    fila.querySelector('[data-inventario="eliminar"]').addEventListener("click", function() { eliminarProductoBD(Number(producto.id_producto), producto.nombre || ""); });
+                }
+                tabla.appendChild(fila);
             });
         
         } catch (error) {
@@ -4214,7 +4221,7 @@
 
             if (categorias.error) {
                 if (tabla) {
-                    tabla.innerHTML = `<tr><td colspan="5">${categorias.mensaje}</td></tr>`;
+                    tabla.innerHTML = `<tr><td colspan="5">${limpiarTextoBD(categorias.mensaje)}</td></tr>`;
                 }
                 return;
             }
@@ -4278,9 +4285,9 @@
                         <td>${categoria.total_productos}</td>
                         <td class="${categoria.estado ? "stock-alto" : "stock-bajo"}">${categoria.estado ? "Activa" : "Inactiva"}</td>
                         <td>
-                            <button onclick="editarCategoriaBD(${categoria.id_categoria})">Editar</button>
-                            <button onclick="cambiarEstadoCategoriaBD(${categoria.id_categoria}, '${nuevoEstado}')">${textoEstado}</button>
-                            <button class="btn-eliminar" onclick="eliminarCategoriaBD(${categoria.id_categoria})">Eliminar</button>
+                            <button onclick="editarCategoriaBD(${Number(categoria.id_categoria)})">Editar</button>
+                            <button onclick="cambiarEstadoCategoriaBD(${Number(categoria.id_categoria)}, '${nuevoEstado}')">${textoEstado}</button>
+                            <button class="btn-eliminar" onclick="eliminarCategoriaBD(${Number(categoria.id_categoria)})">Eliminar</button>
                         </td>
                     </tr>
                 `;
@@ -4402,7 +4409,7 @@
             tabla.innerHTML = "";
 
             if (movimientos.error) {
-                tabla.innerHTML = `<tr><td colspan="7">${movimientos.mensaje}</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="7">${limpiarTextoBD(movimientos.mensaje)}</td></tr>`;
                 return;
             }
 
@@ -4419,11 +4426,11 @@
                     <tr>
                         <td>${formatoFechaBD(movimiento.fecha)}</td>
                         <td>${movimiento.clase}</td>
-                        <td>${movimiento.tipo}</td>
+                        <td>${limpiarTextoBD(movimiento.tipo)}</td>
                         <td>${movimiento.concepto}</td>
                         <td class="${claseValor}">${formatoPrecioBD(movimiento.valor)}</td>
                         <td>${movimiento.usuario || "Sin usuario"}</td>
-                        <td>${movimiento.detalle || "Sin detalle"}</td>
+                        <td>${limpiarTextoBD(movimiento.detalle || "Sin detalle")}</td>
                     </tr>
                 `;
             });
@@ -4548,7 +4555,7 @@
             selector.innerHTML = '<option value="">Seleccionar trabajador</option>';
 
             if (trabajadores.error) {
-                tabla.innerHTML = `<tr><td colspan="7">${trabajadores.mensaje}</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="7">${limpiarTextoBD(trabajadores.mensaje)}</td></tr>`;
                 return;
             }
 
@@ -4570,10 +4577,10 @@
             prepararPaginaAdmin(trabajadores, "trabajadores", 20, tabla, cargarTrabajadoresBD).forEach(function(trabajador) {
                 tabla.innerHTML += `
                     <tr>
-                        <td>${trabajador.nombre}</td>
-                        <td>${trabajador.documento || "-"}</td>
-                        <td>${trabajador.telefono || "-"}</td>
-                        <td>${trabajador.cargo}</td>
+                        <td>${limpiarTextoBD(trabajador.nombre)}</td>
+                        <td>${limpiarTextoBD(trabajador.documento || "-")}</td>
+                        <td>${limpiarTextoBD(trabajador.telefono || "-")}</td>
+                        <td>${limpiarTextoBD(trabajador.cargo)}</td>
                         <td>${formatoPrecioBD(trabajador.salario_base)}</td>
                         <td>${new Date(trabajador.fecha_ingreso + "T00:00:00").toLocaleDateString()}</td>
                         <td class="${trabajador.estado ? "stock-alto" : "stock-bajo"}">${trabajador.estado ? "Activo" : "Inactivo"}</td>
@@ -4598,7 +4605,7 @@
             tabla.innerHTML = "";
 
             if (pagos.error) {
-                tabla.innerHTML = `<tr><td colspan="7">${pagos.mensaje}</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="7">${limpiarTextoBD(pagos.mensaje)}</td></tr>`;
                 return;
             }
 
@@ -4612,12 +4619,12 @@
                 tabla.innerHTML += `
                     <tr>
                         <td>${new Date(pago.fecha + "T00:00:00").toLocaleDateString()}</td>
-                        <td>${pago.trabajador}</td>
-                        <td>${pago.cargo}</td>
-                        <td>${pago.tipo_pago}</td>
+                        <td>${limpiarTextoBD(pago.trabajador)}</td>
+                        <td>${limpiarTextoBD(pago.cargo)}</td>
+                        <td>${limpiarTextoBD(pago.tipo_pago)}</td>
                         <td class="stock-bajo">${formatoPrecioBD(pago.valor)}</td>
-                        <td>${pago.usuario || "Sin usuario"}</td>
-                        <td>${pago.detalle || "Sin detalle"}</td>
+                        <td>${limpiarTextoBD(pago.usuario || "Sin usuario")}</td>
+                        <td>${limpiarTextoBD(pago.detalle || "Sin detalle")}</td>
                     </tr>
                 `;
             });
@@ -4674,7 +4681,7 @@
             proveedoresCompraMercancia = [];
 
             if (proveedores.error) {
-                tabla.innerHTML = `<tr><td colspan="5">${proveedores.mensaje}</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="5">${limpiarTextoBD(proveedores.mensaje)}</td></tr>`;
                 return;
             }
 
@@ -5222,7 +5229,7 @@
             tabla.innerHTML = "";
 
             if (compras.error) {
-                tabla.innerHTML = `<tr><td colspan="15">${compras.mensaje}</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="15">${limpiarTextoBD(compras.mensaje)}</td></tr>`;
                 return;
             }
 
@@ -5589,7 +5596,7 @@
             return `
                 <article>
                     <div>
-                        <strong>Venta #${venta.id_venta}</strong>
+                        <strong>Venta #${Number(venta.id_venta)}</strong>
                         <span>${formatoPrecioBD(total)}</span>
                     </div>
                     <p>IVA ${formatoPrecioBD(iva)} · Mercancía ${formatoPrecioBD(costo)} · Utilidad bruta ${formatoPrecioBD(utilidad)}</p>
@@ -5865,7 +5872,7 @@
         });
         const ruta = (principal && principal.ruta) || (imagenes[0] && imagenes[0].ruta) || (producto ? producto.imagen : "");
 
-        if (!ruta) return "../img/logo.png.png";
+        if (typeof ruta !== "string" || !ruta || /^(?:javascript|data|vbscript):/i.test(ruta.trim())) return "../img/logo.png.png";
         if (ruta.startsWith("http") || ruta.startsWith("../")) return ruta;
         if (ruta.startsWith("img/")) return "../" + ruta;
         return ruta;
@@ -6436,7 +6443,7 @@
                     contenedorPedidos.innerHTML = "";
                     pendientes.forEach(function(venta) {
                         contenedorPedidos.innerHTML += `
-                            <div class="pending-order-card" data-pending-id="${venta.id_venta}">
+                            <div class="pending-order-card" data-pending-id="${Number(venta.id_venta)}">
                                 <div>
                                     <strong>${limpiarTextoBD(venta.cliente || "Cliente sin nombre")}</strong>
                                     <span>${limpiarTextoBD(venta.producto || "Producto")} | ${limpiarTextoBD(venta.color || "Sin color")} | Talla ${limpiarTextoBD(venta.talla || "-")}</span>
@@ -6445,11 +6452,11 @@
                                 </div>
                                 <p>${formatoPrecioBD(venta.total || venta.subtotal || 0)}</p>
                                 <div class="pending-order-actions">
-                                    <button type="button" onclick="alternarDetallePedidoAdmin(${venta.id_venta})">Ver detalle</button>
-                                    <button type="button" onclick="actualizarEstadoVentaBD(${venta.id_venta}, 'pagada')">Confirmar</button>
-                                    <button type="button" onclick="actualizarEstadoVentaBD(${venta.id_venta}, 'cancelada')">Cancelar</button>
+                                    <button type="button" onclick="alternarDetallePedidoAdmin(${Number(venta.id_venta)})">Ver detalle</button>
+                                    <button type="button" onclick="actualizarEstadoVentaBD(${Number(venta.id_venta)}, 'pagada')">Confirmar</button>
+                                    <button type="button" onclick="actualizarEstadoVentaBD(${Number(venta.id_venta)}, 'cancelada')">Cancelar</button>
                                 </div>
-                                <div class="pending-order-detail" id="detallePedidoAdmin${venta.id_venta}">
+                                <div class="pending-order-detail" id="detallePedidoAdmin${Number(venta.id_venta)}">
                                     ${detallePedidoPendienteAdmin(venta)}
                                 </div>
                             </div>
@@ -6477,7 +6484,7 @@
                                     <strong>${limpiarTextoBD(movimiento.producto)}</strong>
                                     <span>${limpiarTextoBD(movimiento.tipo)} | ${limpiarTextoBD(movimiento.codigo || "Sin codigo")}</span>
                                 </div>
-                                <p>${movimiento.cantidad}</p>
+                                <p>${limpiarTextoBD(movimiento.cantidad)}</p>
                             </div>
                         `;
                     });
@@ -6522,7 +6529,7 @@
                     <strong>${limpiarTextoBD(venta.cliente || "Cliente sin nombre")}</strong>
                     <span>${limpiarTextoBD(venta.producto || "Producto")} | ${limpiarTextoBD(venta.color || "Sin color")} | Talla ${limpiarTextoBD(venta.talla || "-")}</span>
                     <small>${formatoPrecioBD(venta.total || venta.subtotal || 0)} | ${new Date(venta.fecha).toLocaleString()}</small>
-                    <button type="button" onclick="verPedidoPendienteAdmin(${venta.id_venta})">Revisar pedido</button>
+                    <button type="button" onclick="verPedidoPendienteAdmin(${Number(venta.id_venta)})">Revisar pedido</button>
                 </div>
             `;
         });
@@ -6943,7 +6950,7 @@
             if (cambios.error) {
                 tabla.innerHTML = `
                 <tr>
-                    <td colspan="7">${cambios.mensaje}</td>
+                    <td colspan="7">${limpiarTextoBD(cambios.mensaje)}</td>
                 </tr>
                 `;
                 return;

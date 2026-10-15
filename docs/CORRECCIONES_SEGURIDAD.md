@@ -35,7 +35,7 @@ Tambien se reviso la sintaxis PHP y JavaScript, el escape HTML del vendedor y la
 
 No se considera terminada la auditoria ni superada la puerta de calidad. Falta consultar el listado de incidencias y bloques duplicados de SonarCloud; el detalle no fue accesible desde la herramienta de consulta. No se agregaron configuraciones ni extensiones de Sonar.
 
-Siguen pendientes la paginacion de listas en el servidor, el esquema de instalacion y la duplicacion restante, incluidas plantillas de facturas. La correccion del carrito y su migracion estan aplicadas en la base configurada; sus limites de verificacion se detallan en el septimo bloque. Faltan la valoracion posterior de mercancia nueva y precisar la conciliacion de aportes e inversiones. La proteccion frente a intentos de acceso sigue dependiendo de la sesion; falta un limite compartido que no pueda evitarse cambiando cookies. Tambien quedan la configuracion del enlace de recuperacion, revision de otros puntos de interpolacion HTML del panel y configuracion de permisos/TLS del despliegue.
+Siguen pendientes la paginacion de listas en el servidor, el esquema de instalacion y la duplicacion restante, incluidas plantillas de facturas. La correccion del carrito y su migracion estan aplicadas en la base configurada; sus limites de verificacion se detallan en el septimo bloque. Faltan la valoracion posterior de mercancia nueva y precisar la conciliacion de aportes e inversiones. El limite compartido de acceso y su migracion estan aplicados en la base configurada, con los limites de verificacion descritos en el octavo bloque. El enlace de recuperacion ya usa una base configurada, que debe apuntar al dominio HTTPS definitivo al publicar. Tambien quedan otros puntos de interpolacion HTML del panel y la configuracion de permisos/TLS del despliegue.
 
 ## Segundo bloque: devoluciones e inventario
 
@@ -131,3 +131,47 @@ Respaldo previo: `database/backups/antes_pedido_carrito_20261015_020826.dump` (1
 Verificacion: `tests/pedido_carrito.php` paso en PostgreSQL 18 temporal separado. Comprueba una venta con dos productos, precios del servidor, agrupacion de variantes, reintentos con orden distinto, conflicto de contenido, bloqueo con dos conexiones, rollback del cliente/stock/movimientos al fallar el segundo detalle, recuperacion posterior y limites de stock agregado y por variante. La migracion se aplico dos veces solo en esa base temporal. No se crearon pedidos ni clientes reales.
 
 `node tests/carrito_envio.cjs` paso con transporte y DOM simulados: un solo POST con varios productos, doble clic, respuesta perdida, recarga y reutilizacion de clave, cabecera CSRF, rechazo comercial y bloqueo de cambios tras un resultado desconocido. Tambien paso `tests/catalogo_comun.cjs`; el endpoint local responde GET 405. Pasaron las revisiones de sintaxis PHP/JavaScript. No se probo el recorrido completo en navegador, la confirmacion/cancelacion de un pedido real de varias lineas, ni solicitudes simultaneas con claves distintas. La simulacion de dos conexiones verifica el bloqueo, no una prueba de carga. El navegador necesita crypto.subtle (HTTPS o localhost). No se enviaron correos ni se ejecuto SonarCloud y no se publicaron cambios en GitHub.
+
+## Octavo bloque: limites de acceso, enlace de recuperacion y XSS del panel
+
+Preparado y aplicado el 15 de octubre de 2026 con autorizacion del usuario: `database/migracion_limites_acceso.sql`. Los endpoints locales disponen de la tabla requerida. En otra base de despliegue debe aplicarse primero la migracion; sin ella, los POST de acceso y recuperacion responderan 503. El ultimo estado recibido del repositorio estaba limpio en `5bd97ce`; este bloque nuevo permanece sin commit ni publicacion.
+
+Respaldo previo: `database/backups/antes_limites_acceso_20261015_154427.dump` (162599 bytes, nombre en UTC), legible con `pg_restore --list`. SHA-256: `23d4aa737eeb989a54cf57103f496af5f59b8f8d717593094c8d7a1147bb5118`. No se probo una restauracion completa. El respaldo esta excluido de Git y su acceso HTTP devuelve 403.
+
+Se aplico la migracion dentro de una transaccion con limites de bloqueo y ejecucion. Se verificaron las tres columnas no nulas y sus tipos, la clave primaria unica, el indice de vencimiento y ambos CHECK validados. Se comprobo el rechazo de una clave invalida y un contador cero mediante SAVEPOINT con rollback, sin conservar filas. Se compararon cantidades y huellas de usuario_sistema y password_reset_token antes y despues, bloqueando escrituras durante la comprobacion: se conservaron los dos usuarios y los ocho registros de recuperacion, incluidas contrasenas y sesiones. La tabla de limites quedo con cero contadores. Los tres endpoints locales respondieron GET 405; no se iniciaron sesiones ni se enviaron solicitudes reales de recuperacion como prueba.
+
+### Proteccion de acceso
+
+`php/limite_acceso.php` comparte cuotas entre sesiones y procesos mediante una fila por accion e identidad con INSERT/ON CONFLICT atomico. Se comprueban cuenta e IP antes de validar captcha, contrasena o token. La cuota no depende de que el correo exista. Se cuenta toda solicitud admitida, incluidas las validas; iniciar sesion correctamente no borra los contadores.
+
+| Accion | Por cuenta | Por IP | Ventana |
+| --- | --- | --- | --- |
+| Login | 5 | 30 | 5 minutos |
+| Solicitar recuperacion | 3 | 10 | 15 minutos |
+| Confirmar recuperacion | No aplica | 30 | 15 minutos |
+
+Se mantiene la respuesta 429 y se incluye Retry-After con el tiempo restante. Una ventana empieza con la primera solicitud y no se prolonga por intentos bloqueados. Cambiar correo no evita el limite IP; cambiar IP no evita el de cuenta. La IP proviene de REMOTE_ADDR; no se acepta X-Forwarded-For arbitrario. Detras de un proxy debe configurarse la direccion real en el servidor. Redes compartidas pueden alcanzar la cuota IP entre varios usuarios. Un atacante puede consumir temporalmente la cuota de una cuenta conocida; no se implemento MFA ni una defensa completa contra ataques distribuidos. Las ventanas fijas permiten rafagas alrededor de su vencimiento.
+
+Las claves almacenadas son SHA-256 de accion y cuenta/IP normalizadas; no se guardan esos identificadores en texto plano en la tabla. No son anonimizacion irreversible frente a un diccionario de valores conocidos. Se limpian hasta 100 filas vencidas hace mas de un dia por solicitud, sin bloquear filas que ya estan en uso. La limpieza depende del trafico y no constituye una cota absoluta del tamano de la tabla. Fallos de base o bloqueos impiden el acceso con 503; no se permite continuar con un limite solo en cookies.
+
+Se eliminaron los contadores de sesion sustituidos y se validan entradas escalares. Login y confirmacion de recuperacion conservan los espacios de la contrasena. Para correos inexistentes se realiza una comprobacion bcrypt contra un hash auxiliar, sin crear una cuenta ni aceptar esa contrasena; esto no equivale a haber probado ausencia de enumeracion por tiempos en todas las respuestas.
+
+### URL de recuperacion
+
+`php/app_url.php` obtiene la base de `app_url` en configuracion o `ISA_APP_URL`, con respaldo explicito `http://localhost/isa_boutique` para este entorno. No utiliza Host, Origin ni cabeceras de proxy para construir el correo. Rechaza credenciales, query, fragmento, espacios, barras inversas y HTTP fuera de localhost/loopback. En produccion debe configurarse la URL HTTPS definitiva; no se publico ni se cambio configuracion externa del correo. La consulta real de solo lectura confirmo el respaldo localhost; la tabla nueva se creo posteriormente con autorizacion.
+
+### Panel
+
+- Inventario: se reemplazan los eventos que interpolaban nombre, estado y JSON de variantes por addEventListener y cierres sobre el objeto. Las filas se agregan como nodos para conservar sus eventos. Editar, activar/desactivar, eliminar y mostrar variantes mantienen sus argumentos sin convertir nombres en codigo.
+- Se escapan atributos de imagen y textos de categoria, colores, tallas y estado del inventario. El selector de imagen rechaza esquemas ejecutables. Tambien se escapan textos de movimientos, trabajadores, pagos y mensajes de error que se insertaban como HTML en ambos paneles.
+- Los identificadores dinamicos interpolados en acciones y atributos se convierten a Number. Se escapa el numero de factura en el boton del historial. Esto no convierte todos los innerHTML restantes del panel en seguros: quedan otros constructores de vistas y la revision global sigue pendiente.
+
+### Verificacion y limites
+
+`tests/limites_acceso.php` paso en PostgreSQL 18 temporal: cuotas de cuenta/IP, nueva sesion e IP, normalizacion de correo/IPv6, expiracion, limpieza acotada, ocho procesos concurrentes (exactamente cinco permitidos y tres bloqueados), bloqueo de fila y rollback. Se aplico dos veces la migracion en esa base temporal, sin error.
+
+`tests/acceso_endpoints.php` ejecuto los archivos reales de login y recuperacion en procesos CLI separados, sustituyendo solo conexion y transporte/notificaciones por una base temporal y dobles de prueba. Comprobo que los captchas incorrectos consumen cuota, que cambiar sesion/IP no libera la cuenta, login valido con espacios, tres correos simulados y bloqueo del cuarto, Host malicioso excluido del enlace, confirmacion de contrasena, revocacion de sesion, token de un uso y respuesta 503 si falta la tabla. No se contactaron servidores de correo ni se utilizaron cuentas reales.
+
+`node tests/panel_xss.cjs` paso con funciones reales extraidas de admin.html y DOM simulado: nombres con apostrofes, comillas y etiquetas, datos de variantes, atributos de imagen, acciones de dos filas conservadas, textos de movimientos/trabajadores/pagos y mensajes de error. No reemplaza la comprobacion visual en navegador ni una prueba de explotacion en todos los modulos. La verificacion de endpoints es CLI; no se probo el proxy/HTTPS de un despliegue publico ni una carga sostenida. Se retiraron las bases y archivos temporales. No se modificaron usuarios, contrasenas, tokens ni contadores en la base real; no se envio correo real. No se ejecuto SonarCloud ni se publicaron cambios en GitHub.
+
+Referencias: [OWASP, autenticacion y limites de intentos](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html) y [OWASP, prevencion de XSS y contextos de atributos](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html).

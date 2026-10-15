@@ -580,7 +580,7 @@ async function cargarInventarioVendedor() {
 
         if (productos.error) {
             if (tabla) {
-                tabla.innerHTML = `<tr><td colspan="9">${productos.mensaje}</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="9">${limpiarTextoVendedor(productos.mensaje)}</td></tr>`;
             }
             return;
         }
@@ -707,8 +707,8 @@ async function cargarHistorialVendedor() {
         const historial = await respuesta.json();
 
         if (historial.error) {
-            if (tabla) tabla.innerHTML = `<tr><td colspan="8">${historial.mensaje}</td></tr>`;
-            if (panelPendientes) panelPendientes.innerHTML = `<p class="empty-dashboard">${historial.mensaje}</p>`;
+            if (tabla) tabla.innerHTML = `<tr><td colspan="8">${limpiarTextoVendedor(historial.mensaje)}</td></tr>`;
+            if (panelPendientes) panelPendientes.innerHTML = `<p class="empty-dashboard">${limpiarTextoVendedor(historial.mensaje)}</p>`;
             return;
         }
 
@@ -753,8 +753,8 @@ async function cargarHistorialVendedor() {
 
             if (registro.tipo === "Venta" && registro.estado === "pendiente") {
                 accion = `
-                    <button onclick="actualizarEstadoVentaVendedor(${registro.id_venta}, 'pagada')">Confirmar pago</button>
-                    <button onclick="actualizarEstadoVentaVendedor(${registro.id_venta}, 'cancelada')">Cancelar</button>
+                    <button onclick="actualizarEstadoVentaVendedor(${Number(registro.id_venta)}, 'pagada')">Confirmar pago</button>
+                    <button onclick="actualizarEstadoVentaVendedor(${Number(registro.id_venta)}, 'cancelada')">Cancelar</button>
                 `;
             } else if (registro.tipo === "Venta" && registro.estado === "pagada") {
                 accion = `<button onclick="registrarDevolucionVendedor(${Number(registro.id_venta)}, ${Number(registro.id_producto)}, ${Number(registro.id_detalle_venta)})">Devolución</button>`;
@@ -856,11 +856,11 @@ function renderizarPedidosPendientesVendedor(historial) {
                 </div>
                 <p>${formatoPrecioVendedor(registro.total || registro.subtotal || 0)}</p>
                 <div class="pending-order-actions">
-                    <button type="button" onclick="alternarDetallePedidoVendedor(${registro.id_venta})">Ver detalle</button>
-                    <button type="button" onclick="actualizarEstadoVentaVendedor(${registro.id_venta}, 'pagada')">Confirmar</button>
-                    <button type="button" onclick="actualizarEstadoVentaVendedor(${registro.id_venta}, 'cancelada')">Cancelar</button>
+                    <button type="button" onclick="alternarDetallePedidoVendedor(${Number(registro.id_venta)})">Ver detalle</button>
+                    <button type="button" onclick="actualizarEstadoVentaVendedor(${Number(registro.id_venta)}, 'pagada')">Confirmar</button>
+                    <button type="button" onclick="actualizarEstadoVentaVendedor(${Number(registro.id_venta)}, 'cancelada')">Cancelar</button>
                 </div>
-                <div class="pending-order-detail" id="detallePedidoVendedor${registro.id_venta}">
+                <div class="pending-order-detail" id="detallePedidoVendedor${Number(registro.id_venta)}">
                     ${detallePedidoPendienteVendedor(registro)}
                 </div>
             </div>
@@ -889,7 +889,7 @@ function renderizarNotificacionesVendedor(pedidos) {
                 <strong>${limpiarTextoVendedor(registro.cliente || "Cliente sin nombre")}</strong>
                 <span>${limpiarTextoVendedor(registro.producto || "Producto")} | ${limpiarTextoVendedor(registro.color || "Sin color")} | Talla ${limpiarTextoVendedor(registro.talla || "-")}</span>
                 <small>${formatoPrecioVendedor(registro.total || registro.subtotal || 0)} | ${new Date(registro.fecha).toLocaleString()}</small>
-                <button type="button" onclick="revisarPedidoPendienteVendedor(${registro.id_venta})">Revisar pedido</button>
+                <button type="button" onclick="revisarPedidoPendienteVendedor(${Number(registro.id_venta)})">Revisar pedido</button>
             </div>
         `;
     });
@@ -1101,7 +1101,7 @@ function imprimirFacturaVendedor(factura, detalles, empresa) {
                     </div>
                     <div class="factura-box">
                         <strong>${limpiarTextoVendedor(factura.numero_factura)}</strong>
-                        <p>Venta: ${factura.id_venta}</p>
+                        <p>Venta: ${Number(factura.id_venta)}</p>
                         <p>Fecha: ${new Date(factura.fecha_factura).toLocaleString()}</p>
                         <p>Estado: ${limpiarTextoVendedor(factura.estado_factura)}</p>
                         <p>IVA incluido: ${factura.precio_incluye_iva ? "Sí" : "No"}</p>

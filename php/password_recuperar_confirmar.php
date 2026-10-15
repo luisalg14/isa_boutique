@@ -3,6 +3,7 @@
 require_once "conexion.php";
 require_once "auth_guard.php";
 require_once "password_util.php";
+require_once "limite_acceso.php";
 
 header("Content-Type: application/json; charset=UTF-8");
 
@@ -13,9 +14,10 @@ try {
 
     exigir_origen_mismo_sitio();
 
-    $token = trim($_POST["token"] ?? "");
-    $passwordNueva = trim($_POST["password_nueva"] ?? "");
-    $passwordConfirmar = trim($_POST["password_confirmar"] ?? "");
+    limitar_solicitud_acceso($conexion, 'confirmar', '');
+    $token = is_string($_POST["token"] ?? null) ? trim($_POST["token"]) : "";
+    $passwordNueva = (is_string($_POST["password_nueva"] ?? null) ? $_POST["password_nueva"] : "");
+    $passwordConfirmar = (is_string($_POST["password_confirmar"] ?? null) ? $_POST["password_confirmar"] : "");
 
     if ($token === "" || !preg_match("/^[a-f0-9]{64}$/", $token)) {
         responder_json_error("El enlace de recuperacion no es valido o ya vencio.", 400);

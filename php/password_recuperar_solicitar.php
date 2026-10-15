@@ -3,21 +3,10 @@
 require_once "conexion.php";
 require_once "auth_guard.php";
 require_once "mailer_smtp.php";
+require_once "limite_acceso.php";
+require_once "app_url.php";
 
 header("Content-Type: application/json; charset=UTF-8");
-
-function url_base_app() {
-    $esHttps = (
-        (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") ||
-        (($_SERVER["SERVER_PORT"] ?? "") === "443")
-    );
-    $protocolo = $esHttps ? "https://" : "http://";
-    $host = $_SERVER["HTTP_HOST"] ?? "localhost";
-    $ruta = str_replace("\\", "/", dirname($_SERVER["SCRIPT_NAME"] ?? "/php"));
-    $base = preg_replace("#/php$#", "", $ruta);
-
-    return rtrim($protocolo . $host . $base, "/");
-}
 
 function responder_recuperacion_generica() {
     echo json_encode([
@@ -34,15 +23,9 @@ try {
 
     exigir_origen_mismo_sitio();
 
-    $ultimoIntento = intval($_SESSION["password_reset_ultimo_intento"] ?? 0);
-
-    if ($ultimoIntento > 0 && (time() - $ultimoIntento) < 60) {
-        responder_recuperacion_generica();
-    }
-
-    $_SESSION["password_reset_ultimo_intento"] = time();
-
-    $correo = strtolower(trim($_POST["correo"] ?? ""));
+    $entradaCorreo = $_POST["correo"] ?? "";
+    $correo = is_string($entradaCorreo) ? strtolower(trim($entradaCorreo)) : "";
+    limitar_solicitud_acceso($conexion, 'recuperar', substr($correo, 0, 254));
 
     if ($correo === "" || !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
         responder_recuperacion_generica();
@@ -61,6 +44,7 @@ try {
         responder_recuperacion_generica();
     }
 
+    $baseApp = url_base_configurada($config);
     $token = bin2hex(random_bytes(32));
     $tokenHash = hash("sha256", $token);
     $ip = substr($_SERVER["REMOTE_ADDR"] ?? "", 0, 64);
@@ -98,7 +82,7 @@ try {
 
     $conexion->commit();
 
-    $enlace = url_base_app() . "/html/restablecer_password.html?token=" . urlencode($token);
+    $enlace = $baseApp . "/html/restablecer_password.html?token=" . urlencode($token);
     $nombre = htmlspecialchars($usuario["nombre"], ENT_QUOTES, "UTF-8");
     $enlaceHtml = htmlspecialchars($enlace, ENT_QUOTES, "UTF-8");
     $asunto = "Restablecer contrasena - Isa Boutique";
@@ -121,7 +105,7 @@ try {
 
     responder_recuperacion_generica();
 
-} catch (PDOException $e) {
+} catch (Throwable $e) {
     if ($conexion->inTransaction()) {
         $conexion->rollBack();
     }
