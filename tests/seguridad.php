@@ -29,6 +29,12 @@ function comprobar($condicion, $mensaje) {
     }
 }
 
+$cookieSesion = session_get_cookie_params();
+comprobar($cookieSesion['secure'] === true, 'La sesion no exige cookie Secure');
+comprobar($cookieSesion['httponly'] === true, 'La sesion pierde HttpOnly');
+comprobar($cookieSesion['samesite'] === 'Lax', 'La sesion pierde SameSite=Lax');
+comprobar($cookieSesion['lifetime'] === 0 && $cookieSesion['path'] === '/' && $cookieSesion['domain'] === '', 'Cambio inesperado de alcance o duracion de la cookie');
+
 $modo = $argv[1] ?? 'captcha-auditoria';
 if (strpos($modo, 'sesion-') === 0) {
     $_SERVER['REQUEST_METHOD'] = 'GET';

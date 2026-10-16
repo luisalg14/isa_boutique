@@ -339,3 +339,13 @@ Pasaron las tres regresiones Node de catalogo/carrito/XSS y la de promesas del v
 El captcha real de XAMPP devolvio HTTP 200 y Set-Cookie con Secure, HttpOnly y SameSite=Lax. La misma ruta con Host publico por HTTP devolvio 426. La persistencia de cookie en navegador se probo en el servidor simulado, no mediante un ingreso real de usuario. Las integraciones de usuarios iniciales y endpoints reales con conexion/correo simulados pasaron en PostgreSQL temporal autenticado SCRAM; el ejecutor detuvo y retiro ese cluster.
 
 No hubo migraciones, cambios comerciales o de cuentas en Neon ni envios de correo. No se publico el codigo ni se ejecuto Sonar. Subir juntos los HTML, los seis archivos JavaScript del bloque y los cambios PHP; un despliegue parcial deja importaciones o dependencias ausentes. La revision anterior en REVISION_SEGURIDAD_SONAR.md queda como antecedente historico, no como peticion de aceptar los seis avisos de la version nueva.
+
+## Decimoquinto bloque: firma explicita de la cookie de sesion
+
+El analisis de 018b4fd0848eb1de5862ef3eff4283d1dd6b5e5c, del 15 de octubre a las 20:03 de Bogota, cerro los cinco javascript:S1523: quedo una php:S2092, con seguridad B, confiabilidad A y duplicacion 2,3 %. La cookie ya tenia Secure=true y se habia comprobado su cabecera real.
+
+Se consulto la [implementacion oficial CookiesSecureCheck](https://github.com/SonarSource/sonar-php/blob/master/php-checks/src/main/java/org/sonar/php/checks/CookiesSecureCheck.java): busca el argumento secure por nombre o posicion 3 en session_set_cookie_params. Su tratamiento de un argumento unico no inspecciona el arreglo de opciones. Esto explica el aviso sobre la firma usada, sin demostrar un envio inseguro real.
+
+Se usa ahora session_set_cookie_params(0, '/', '', true, true), una [firma documentada por PHP](https://www.php.net/manual/en/function.session-set-cookie-params.php). SameSite=Lax se configura antes mediante session.cookie_samesite. Se conservan duracion, alcance, Secure y HttpOnly; la validacion de transporte previa y la cookie CSRF no cambian. No se desactiva ni se suprime la regla.
+
+La regresion de seguridad comprueba los parametros efectivos de PHP mediante session_get_cookie_params, incluidos Secure, HttpOnly y SameSite=Lax. Se verifican tambien la sintaxis y la cabecera real del captcha en XAMPP, sin conexiones a Neon ni envios de correo. El siguiente analisis publicado debe confirmar si cierra el ultimo aviso; no se ejecuta un analisis desde este bloque.
