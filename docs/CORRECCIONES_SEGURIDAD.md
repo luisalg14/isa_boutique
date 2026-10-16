@@ -311,3 +311,31 @@ Pasaron las nueve integraciones temporales autenticadas: inventario/devoluciones
 `tests/promesas_panel.cjs` carga los archivos reales mediante require/import de rutas fijas, sin vm ni evaluacion de strings. Usa DOM y transporte simulados para comprobar que el panel espera sus tres consultas, que la busqueda devuelve su trabajo asincrono, que el formulario espera la factura y que el login espera al captcha nuevo y conserva espacios de la clave. Se ejercitan fallos controlados; no sustituye el recorrido visual ni la impresion real de facturas. `tests/configuracion.php` se ejecuta en sus tres modos con archivos de fixture separados.
 
 Tambien pasaron las regresiones de carrito, catalogo y XSS del panel, los 115 controles estaticos de formularios, captcha/auditoria y politica TLS sin envios. Se verificaron los 94 archivos PHP y la sintaxis de auth.js, script.js y vendedor.js. No se enviaron correos, no se hicieron operaciones comerciales ni cambios de datos en Neon y no se ejecutaron migraciones reales. No se publico en GitHub ni se ejecuto SonarCloud. Permanecen las seis revisiones de seguridad previamente identificadas (cinco cargas vm y la excepcion local de cookies), ademas de mantenimiento; no se alteraron exclusiones, reglas ni estados para ocultarlas.
+
+## Decimocuarto bloque: eliminar ejecucion dinamica y conservar Secure siempre
+
+Preparado tras el analisis de a56437a30d611607aab125dd101d7d0f09f4b11e del 15 de octubre, 19:50 de Bogota. Seguian abiertas cinco javascript:S1523 y una php:S2092. Este bloque cambia los patrones de codigo, sin decisiones de cierre manual, exclusiones, NOSONAR ni cambios de reglas. El cierre efectivo de las incidencias requiere el siguiente analisis publicado por el usuario.
+
+### Modulos de catalogo y panel
+
+`catalogo-comun.js` exporta crearCatalogo con entorno, estado y acciones explicitos. Las dos paginas tienen ahora modulos propios (`catalogo-productos.js`, `catalogo-categoria.js`) y entradas de navegador. El carrito, producto seleccionado e indice/imagenes del carrusel se comparten mediante accesores al estado de cada pagina. Las funciones y eventos originales siguen usando ese mismo estado, y el bloqueo de envio permanece separado por instancia. Los HTML cargan las nuevas entradas como modulos desde el mismo servidor. Las importaciones y entradas incluyen version nueva para cache.
+
+Las trece funciones probadas del panel se trasladaron sin cambiar sus cuerpos a `admin-tablas.js`. El panel las obtiene de crearTablasAdmin con DOM, transporte y callbacks explicitos. Se mantiene el resto de su script clasico y sus nombres accesibles a manejadores existentes. El transporte delegado permite conservar el wrapper fetch/CSRF que instala auth.js posteriormente. La misma fabrica se carga en Node mediante require; los modulos del catalogo mediante import de rutas locales fijas.
+
+`tests/catalogo_comun.cjs`, `tests/carrito_envio.cjs` y `tests/panel_xss.cjs` ya no importan vm, extraen funciones para ejecutarlas ni evaluan strings. Conservan las comprobaciones de datos maliciosos, dependencias de ambas paginas, stock, doble clic, respuesta perdida y clave de reintento. El panel conserva ademas el analisis de sintaxis de sus scripts inline mediante node --check, que no los ejecuta. No se sustituyo vm por otra API de evaluacion ni se borraron las pruebas.
+
+### Cookies
+
+Se retiro la asignacion Secure=false del helper. Sesion, CSRF y borrado de sesion establecen Secure=true explicitamente. HttpOnly y SameSite=Lax de la sesion se conservan; la cookie CSRF sigue accesible para su cabecera explicita. La validacion de transporte se ejecuta antes de crear cookies: HTTP de produccion se rechaza con 426; HTTP local requiere entorno local, Host local e IP de conexion loopback, sin confiar en X-Forwarded-Proto o X-Forwarded-For.
+
+Chrome permite las cookies Secure por HTTP en localhost. Se comprobo su continuidad en un perfil temporal y que HttpOnly impide leerlas con document.cookie. Esta excepcion del navegador [esta documentada por MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies); no equivale a cifrar HTTP. Safari y otros entornos que no admitan esa excepcion requieren HTTPS tambien en desarrollo. No se cambiaron certificados, configuracion global de Apache ni credenciales para forzar compatibilidad.
+
+### Verificacion
+
+Pasaron las tres regresiones Node de catalogo/carrito/XSS y la de promesas del vendedor/acceso; los 115 controles de formularios; usuarios iniciales sin base; captcha/auditoria; sintaxis PHP de los archivos modificados y JavaScript de los seis modulos/entradas. La comparacion con HEAD confirmo que los cuerpos de las trece funciones extraidas del panel se conservaron.
+
+`tests/navegador_modulos.py` sirve los HTML/JS reales con una API simulada en loopback y Chrome sin ventana con perfiles temporales. Pasaron Producto.html, categoria.html?tipo=blusas y admin.html: carga nativa de modulos, nombres escapados, eventos, estado del carrito, stock limitado a dos unidades, carrusel, confirmacion de pedido simulada, inventario con acciones y tablas del panel. El CDN de codigos de barras se omite solo en la fixture; no se probo impresion de etiquetas. La primera comprobacion del carrusel suponia una imagen principal distinta y la primera insercion del verificador entraba tambien en una plantilla de impresion; se corrigieron ambas fixtures antes del resultado final, sin cambiar la logica del producto para acomodar las pruebas.
+
+El captcha real de XAMPP devolvio HTTP 200 y Set-Cookie con Secure, HttpOnly y SameSite=Lax. La misma ruta con Host publico por HTTP devolvio 426. La persistencia de cookie en navegador se probo en el servidor simulado, no mediante un ingreso real de usuario. Las integraciones de usuarios iniciales y endpoints reales con conexion/correo simulados pasaron en PostgreSQL temporal autenticado SCRAM; el ejecutor detuvo y retiro ese cluster.
+
+No hubo migraciones, cambios comerciales o de cuentas en Neon ni envios de correo. No se publico el codigo ni se ejecuto Sonar. Subir juntos los HTML, los seis archivos JavaScript del bloque y los cambios PHP; un despliegue parcial deja importaciones o dependencias ausentes. La revision anterior en REVISION_SEGURIDAD_SONAR.md queda como antecedente historico, no como peticion de aceptar los seis avisos de la version nueva.

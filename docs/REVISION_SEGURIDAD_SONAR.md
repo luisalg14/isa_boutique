@@ -1,5 +1,7 @@
 # Revision de las seis incidencias de seguridad
 
+**Estado posterior:** esta es la revision historica del commit indicado abajo. El siguiente bloque de codigo elimina las cinco llamadas vm y mantiene Secure tambien en desarrollo. Sus pruebas ahora usan modulos nativos y el navegador; ver el decimocuarto bloque de `CORRECCIONES_SEGURIDAD.md`. Las conclusiones sobre excepciones y cierre manual de este documento describen el codigo anterior, no una accion pendiente para la nueva version. El cierre efectivo requiere verificar el siguiente analisis de Sonar.
+
 Revision del 15 de octubre de 2026 sobre el commit `1576bd2a39626429e16808782ff3c554bce76d18`, analizado a las 15:09 de Bogota. El resultado publicado es confiabilidad A (cero incidencias abiertas), seguridad D (seis abiertas). Este documento no cambia esos estados ni acredita una puerta aprobada.
 
 ## Resultado de la revision del codigo

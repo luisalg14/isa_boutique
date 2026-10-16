@@ -10,8 +10,8 @@ function opciones_cookie_sesion(array $servidor, bool $esCli=false, string $ento
     $local=in_array($servidor['REMOTE_ADDR']??'', ['127.0.0.1','::1'],true)
         && in_array(strtolower((string)$host),['localhost','127.0.0.1','[::1]'],true);
     if (!$esCli && !($entorno==='local' && $local)) throw new DomainException('El acceso requiere HTTPS fuera del desarrollo local autorizado');
-    // Excepcion acotada al desarrollo local y pruebas CLI; no depende solo del Host.
-    $opciones['secure']=false;
+    // Se conserva Secure tambien en local. Navegadores compatibles permiten
+    // cookies Secure en localhost; otros entornos de desarrollo requieren HTTPS.
     return $opciones;
 }
 

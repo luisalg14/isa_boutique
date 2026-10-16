@@ -5,7 +5,7 @@ require_once __DIR__.'/../php/usuario_inicial_util.php';
 require_once __DIR__.'/../php/cookie_segura.php';
 function comprobar_inicial($ok,$mensaje){if(!$ok)throw new RuntimeException($mensaje);}
 $local=['HTTP_HOST'=>'localhost','REMOTE_ADDR'=>'127.0.0.1'];
-comprobar_inicial(opciones_cookie_sesion($local,false,'local')['secure']===false,'HTTP local no funciona');
+comprobar_inicial(opciones_cookie_sesion($local,false,'local')['secure']===true,'Local pierde el atributo Secure');
 comprobar_inicial(opciones_cookie_sesion($local+['HTTPS'=>'on'],false,'production')['secure']===true,'HTTPS no exige cookie segura');
 foreach([
     ['HTTPS'=>'on','REMOTE_ADDR'=>'192.0.2.1','HTTP_HOST'=>'tienda.example'],
@@ -16,7 +16,7 @@ foreach([
 }
 foreach(['localhost:8080','127.0.0.1:8080','[::1]:8080'] as $hostLocal){
     $servidorLocal=['HTTP_HOST'=>$hostLocal,'REMOTE_ADDR'=>$hostLocal==='[::1]:8080'?'::1':'127.0.0.1'];
-    comprobar_inicial(opciones_cookie_sesion($servidorLocal,false,'local')['secure']===false,'Analisis de host local con puerto incorrecto');
+    comprobar_inicial(opciones_cookie_sesion($servidorLocal,false,'local')['secure']===true,'Local con puerto pierde Secure');
 }
 foreach([
     [$local,'production'],

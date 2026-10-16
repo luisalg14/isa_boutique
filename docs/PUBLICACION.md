@@ -88,7 +88,9 @@ try {
 
 El script usa la base configurada: ejecutarlo es una operacion de escritura deliberada. No imprime claves ni hashes. Si la cuenta ya existe, cambiar su clave mediante el panel o recuperacion. Las cuentas ya configuradas en Neon no necesitan ejecutar estos datos iniciales otra vez.
 
-Las cookies requieren HTTPS en produccion. HTTP solo se permite si `app_env`/`ISA_APP_ENV` es `local` y tanto la conexion como el nombre del servidor son loopback. Un reverse proxy debe configurar correctamente HTTPS y el host canonico en el servidor; no se confia automaticamente en cabeceras reenviadas. Al publicar, no conservar `app_env=local`.
+Las cookies de sesion y CSRF llevan siempre Secure. Produccion requiere HTTPS; HTTP solo se admite si `app_env`/`ISA_APP_ENV` es `local` y tanto la conexion como el nombre del servidor son loopback. Chrome permite cookies Secure por HTTP en localhost y se comprobo con un perfil temporal. Otros navegadores, incluidos Safari, pueden necesitar HTTPS tambien en desarrollo; no se quita Secure para hacerlos funcionar. Un reverse proxy debe configurar correctamente HTTPS y el host canonico en el servidor; no se confia automaticamente en cabeceras reenviadas. Al publicar, no conservar `app_env=local`.
+
+El catalogo carga modulos JavaScript desde el mismo origen. Publicar juntos `catalogo-comun.js`, `catalogo-productos.js`, `catalogo-categoria.js` y sus dos entradas `*-inicio.js`, junto con los HTML actualizados. El panel necesita ademas `admin-tablas.js`, cargado antes de su script clasico. El servidor debe servir los archivos .js con tipo JavaScript. Abrir las paginas desde el servidor web, no mediante file://.
 
 ## Archivos sensibles
 

@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const vm = require('node:vm');
+const {crearTablasAdmin} = require('../js/admin-tablas.js');
 const path = require('node:path');
 const {spawnSync} = require('node:child_process');
 const html = fs.readFileSync(path.join(__dirname,'../html/admin.html'),'utf8');
@@ -10,14 +10,6 @@ for (const fuente of scripts) {
     const revision = spawnSync(process.execPath,['--check'],{input:fuente,encoding:'utf8',timeout:5000,windowsHide:true});
     assert.ifError(revision.error);
     assert.equal(revision.status,0,revision.stderr);
-}
-const script = scripts.join('\n');
-function funcion(nombre) {
-    const inicio = script.search(new RegExp('^    (?:async )?function '+nombre+'\\(', 'm'));
-    assert.ok(inicio>=0,nombre);
-    const resto=script.slice(inicio);
-    const siguiente=resto.slice(1).search(/^    (?:async )?function /m);
-    return siguiente<0?resto:resto.slice(0,siguiente+1);
 }
 function nodo() {
     return {value:'',innerHTML:'',textContent:'',children:[],eventos:{},botones:new Map(),
@@ -37,14 +29,10 @@ const productos=[1,2].map(id=>({id_producto:id,nombre:ataque,codigo:ataque,marca
     tallas:[{talla:ataque,cantidad:3}],colores:[{color:ataque,tallas:[{talla:ataque,cantidad:3,codigo_barras:ataque}]}]}));
 const elementos=new Map();const llamadas=[];let respuesta=productos;
 const document={getElementById(id){if(!elementos.has(id))elementos.set(id,nodo());return elementos.get(id);},createElement(){return nodo();}};
-const contexto=vm.createContext({document,console,fetch:async()=>({json:async()=>respuesta}),
+const contexto=crearTablasAdmin({document,console,fetch:async()=>({json:async()=>respuesta})}, {
     prepararPaginaAdmin:datos=>datos,ocultarPaginacionAdmin(){},usuarioEsAdmin:()=>true,
     editarProductoBD:id=>llamadas.push(['editar',id]),cambiarEstadoProductoBD:(...datos)=>llamadas.push(['estado',...datos]),
-    eliminarProductoBD:(...datos)=>llamadas.push(['eliminar',...datos]),abrirCodigosBarrasVariantesProducto:(...datos)=>llamadas.push(['variantes',...datos])},
-    {codeGeneration:{strings:false,wasm:false}});
-// Solo funciones con nombres literales previstos, extraidas del admin.html local fijo.
-for(const nombre of ['limpiarTextoBD','formatoPrecioBD','leerTallasBD','leerColoresBD','textoColoresBD','leerImagenesBD','rutaImagenAdmin','textoTallasBD','codigosBarrasVariantesBD',
-    'cargarInventarioBD','cargarMovimientosBD','cargarTrabajadoresBD','cargarPagosTrabajadoresBD']) vm.runInContext(funcion(nombre),contexto,{filename:'html/admin.html:'+nombre,timeout:1000});
+    eliminarProductoBD:(...datos)=>llamadas.push(['eliminar',...datos]),abrirCodigosBarrasVariantesProducto:(...datos)=>llamadas.push(['variantes',...datos])});
 function verificarHtml(texto){
     assert.ok(!texto.includes('<img src=x'),texto);
     assert.ok(!texto.includes(' onerror="ataque()'),texto);
@@ -64,7 +52,7 @@ function verificarHtml(texto){
     assert.equal(llamadas[3][2],ataque);
     assert.equal(llamadas[3][1][0].codigo,ataque);
     assert.equal(contexto.rutaImagenAdmin({imagen:'javascript:alert(1)'}),'../img/logo.png.png');
-    assert.equal(contexto.atacado,undefined);
+    assert.equal(globalThis.atacado,undefined);
     console.log('PASS inventario: texto escapado y acciones conservadas para nombres y variantes con comillas/HTML');
     for(const [nombre,tabla,datos] of [
         ['cargarMovimientosBD','tablaMovimientos',{fecha:'2026-10-15',tipo:ataque,codigo:ataque,producto:ataque,marca:ataque,detalle:ataque,cantidad:2}],

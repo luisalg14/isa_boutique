@@ -6,11 +6,18 @@ if (session_status() === PHP_SESSION_NONE) {
     ini_set("session.cookie_httponly", "1");
 
     try {
-        $opcionesCookie=opciones_cookie_actuales();
+        opciones_cookie_actuales();
     } catch (DomainException $e) {
         responder_json_error($e->getMessage(),426);
     }
-    session_set_cookie_params($opcionesCookie);
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '',
+        'secure' => true,
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
 
     session_start();
 }
@@ -47,13 +54,13 @@ function csrf_token_actual() {
         $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
     }
 
-    $opcionesCookie=opciones_cookie_actuales();
+    opciones_cookie_actuales();
 
     setcookie("isa_csrf_token", $_SESSION["csrf_token"], [
         "expires" => 0,
         "path" => "/",
         "domain" => "",
-        "secure" => $opcionesCookie["secure"],
+        "secure" => true,
         "httponly" => false,
         "samesite" => "Lax"
     ]);
@@ -98,7 +105,7 @@ function cerrar_sesion_local() {
 
     if (ini_get("session.use_cookies")) {
         $params = session_get_cookie_params();
-        setcookie(session_name(), "", time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
+        setcookie(session_name(), "", time() - 42000, $params["path"], $params["domain"], true, $params["httponly"]);
     }
 
     session_destroy();
